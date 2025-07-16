@@ -1,8 +1,30 @@
+// ignore_for_file: avoid_classes_with_only_static_members
+
 class AppConstants {
   // API Configuration
-  static const String apiBaseUrl = 'http://10.13.65.37:8001/api/';
+  static const String apiBaseUrl = 'http://10.13.65.37:8001/api';
   static const String apiVersion = 'v1';
+  // Endpoints da API
+  static const String loginEndpoint = '/auth/login/';
+  static const String userEndpoint = '/auth/user/';
+  static const String logoutEndpoint = '/auth/logout/';
   
+  // Timeouts
+  static const int apiTimeout = 30000; // 30 segundos
+  static const int connectTimeout = 10000; // 10 segundos
+  // CHAVES DE ARMAZENAMENTO
+  static const String tokenKey = 'auth_token';
+  static const String userKey = 'user_data';
+  
+   static const bool isDevelopment = true;
+  static const bool enableDebugLogs = true;
+  
+  // URLs de teste
+  static const String testApiUrl = 'http://localhost:8001';
+  static const String prodApiUrl = 'https://api.cadastrounificado.com';
+  
+  // Obter URL da API baseada no ambiente
+  static String get currentApiUrl => isDevelopment ? testApiUrl : prodApiUrl;
   // App Info
   static const String appName = 'Cadastro Unificado';
   static const String appVersion = '1.0.0';
@@ -99,6 +121,30 @@ class AppConstants {
   static const String cepPattern = r'^\d{8}$';
   static const String emailPattern = r'^[^@]+@[^@]+\.[^@]+$';
   
+  // Validation Messages
+  static const String invalidCpfMessage = 'CPF inválido';
+  static const String invalidTelefoneMessage = 'Telefone inválido';
+  static const String invalidCepMessage = 'CEP inválido';
+  static const String invalidEmailMessage = 'E-mail inválido';
+  static const String passwordTooShortMessage = 'A senha deve ter pelo menos $minPasswordLength caracteres';
+  static const String passwordTooLongMessage = 'A senha deve ter no máximo $maxPasswordLength caracteres';
+  static const String requiredFieldMessage = 'Este campo é obrigatório';
+  static const String invalidFieldMessage = 'Campo inválido';
+  static const String invalidDateMessage = 'Data inválida';
+  static const String invalidTimeMessage = 'Hora inválida';
+  static const String invalidDateTimeMessage = 'Data e hora inválidas';
+  static const String invalidNumberMessage = 'Número inválido';
+  static const String invalidUrlMessage = 'URL inválida';
+  static const String usernameRequired =  'Nome de usuário é obrigatório';
+  static const String passwordRequired = 'Senha é obrigatória';
+  static const String confirmPasswordRequired = 'Confirmação de senha é obrigatória';
+  // Confirmation Messages
+  static const String confirmDelete = 'Você tem certeza que deseja excluir este item?';
+  static const String confirmLogout = 'Você tem certeza que deseja sair?';
+  static const String confirmDiscardChanges = 'Você tem certeza que deseja descartar as alterações?';
+  static const String confirmExit = 'Você tem certeza que deseja sair do aplicativo?';
+  // Info Messages
+   
   // Error Messages
   static const String errorGeneral = 'Ocorreu um erro inesperado';
   static const String errorNetwork = 'Erro de conexão com o servidor';
@@ -128,38 +174,3 @@ class AppConstants {
   static const double tabletBreakpoint = 900;
   static const double desktopBreakpoint = 1200;
 }
-
-// Helper class for responsive design
-// class Responsive {
-//   static bool isMobile(double width) => width < AppConstants.mobileBreakpoint;
-//   static bool isTablet(double width) => width >= AppConstants.mobileBreakpoint && width < AppConstants.desktopBreakpoint;
-//   static bool isDesktop(double width) => width >= AppConstants.desktopBreakpoint;
-// }
-
-// // Helper functions
-// class AppUtils {
-//   static String formatCpf(String cpf) {
-//     if (cpf.length != 11) return cpf;
-//     return '${cpf.substring(0, 3)}.${cpf.substring(3, 6)}.${cpf.substring(6, 9)}-${cpf.substring(9)}';
-//   }
-  
-//   static String formatTelefone(String telefone) {
-//     if (telefone.length == 10) {
-//       return '(${telefone.substring(0, 2)}) ${telefone.substring(2, 6)}-${telefone.substring(6)}';
-//     } else if (telefone.length == 11) {
-//       return '(${telefone.substring(0, 2)}) ${telefone.substring(2, 7)}-${telefone.substring(7)}';
-//     }
-//     return telefone;
-//   }
-  
-//   static String formatCep(String cep) {
-//     if (cep.length != 8) return cep;
-//     return '${cep.substring(0, 5)}-${cep.substring(5)}';
-//   }
-  
-//   static String cleanCpf(String cpf) => cpf.replaceAll(RegExp(r'[^\d]'), '');
-  
-//   static String cleanTelefone(String telefone) => telefone.replaceAll(RegExp(r'[^\d]'), '');
-  
-//   static String cleanCep(String cep) => cep.replaceAll(RegExp(r'[^\d]'), '');
-// }

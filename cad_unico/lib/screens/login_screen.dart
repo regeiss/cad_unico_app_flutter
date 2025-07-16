@@ -1,11 +1,10 @@
-// lib/screens/login_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-
 import '../providers/auth_provider.dart';
+import '../utils/constants.dart';
 import '../utils/responsive.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -20,7 +19,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
-  bool _rememberMe = false;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -32,485 +31,336 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    
-    final success = await authProvider.login(
-      _usernameController.text.trim(),
-      _passwordController.text,
-    );
+    setState(() {
+      _isLoading = true;
+    });
 
-    if (success) {
-      Fluttertoast.showToast(
-        msg: 'Login realizado com sucesso!',
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.TOP,
-        backgroundColor: Colors.green,
-        textColor: Colors.white,
-      );
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
       
-      if (mounted) {
-        context.go('/');
-      }
-    } else {
-      Fluttertoast.showToast(
-        msg: 'Usuário ou senha inválidos',
-        toastLength: Toast.LENGTH_LONG,
-        gravity: ToastGravity.TOP,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
+      final success = await authProvider.login(
+        _usernameController.text.trim(),
+        _passwordController.text,
       );
+
+      if (success) {
+        if (mounted) {
+          context.go('/');
+          Fluttertoast.showToast(
+            msg: AppConstants.successLogin,
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            backgroundColor: Colors.green,
+            textColor: Colors.white,
+          );
+        }
+      } else {
+        if (mounted) {
+          Fluttertoast.showToast(
+            msg: AppConstants.errorAuth,
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        Fluttertoast.showToast(
+          msg: 'Erro inesperado: $e',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
   @override
-  Widget build(BuildContext context) => LayoutBuilder(
-      builder: (context, constraints) {
-        final width = constraints.maxWidth;
-        
-        // Usando sua classe Responsive
-        if (Responsive.isDesktop(width)) {
-          return _buildDesktopLayout();
-        } else if (Responsive.isTablet(width)) {
-          return _buildTabletLayout();
-        } else {
-          return _buildMobileLayout();
-        }
-      },
-    );
-
-  Widget _buildMobileLayout() => Scaffold(
-    body: Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Theme.of(context).colorScheme.primary.withOpacity(0.1),
-            Theme.of(context).colorScheme.surface,
-          ],
-        ),
-      ),
-      child: SafeArea(
-        child: SingleChildScrollView(
-          // Padding responsivo baseado no tamanho da tela
-          padding: EdgeInsets.symmetric(
-            horizontal: MediaQuery.of(context).size.width < 350 ? 16.0 : 24.0,
-            vertical: 24.0,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SizedBox(height: 50),
-              _buildLogo(),
-              const SizedBox(height: 40),
-              _buildLoginForm(),
-            ],
-          ),
-        ),
-      ),
-    ),
-  );
-
-  Widget _buildTabletLayout() => Scaffold(
+  Widget build(BuildContext context) => Scaffold(
       body: Container(
-        decoration: BoxDecoration(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Theme.of(context).colorScheme.primary.withOpacity(0.1),
-              Theme.of(context).colorScheme.surface,
+              Color(0xFF1976D2),
+              Color(0xFF42A5F5),
             ],
           ),
         ),
-        child: Center(
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 400),
-            padding: const EdgeInsets.all(32.0),
-            child: Card(
-              elevation: 8,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(32.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _buildLogo(),
-                    const SizedBox(height: 32),
-                    _buildLoginForm(),
-                  ],
-                ),
-              ),
-            ),
-          ),
+        child: SafeArea(
+          child: Responsive.isMobile(MediaQuery.of(context).size.width)
+              ? _buildMobileLayout()
+              : _buildDesktopLayout(),
         ),
       ),
     );
 
-  Widget _buildDesktopLayout() => Scaffold(
-      body: Row(
+  Widget _buildMobileLayout() => SingleChildScrollView(
+      padding: const EdgeInsets.all(24.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Lado esquerdo - Imagem/Branding
-          Expanded(
-            flex: 1,
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Theme.of(context).colorScheme.primary,
-                    Theme.of(context).colorScheme.primary.withOpacity(0.8),
-                  ],
-                ),
-              ),
-              child: const Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.people,
-                      size: 120,
-                      color: Colors.white,
-                    ),
-                    SizedBox(height: 24),
-                    Text(
-                      'Cadastro Unificado',
-                      style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    SizedBox(height: 16),
-                    Text(
-                      'Sistema de gestão de cadastros\ne demandas sociais',
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.white70,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          // Lado direito - Formulário de login
-          Expanded(
-            flex: 1,
-            child: Container(
-              color: Theme.of(context).colorScheme.surface,
-              child: Center(
-                child: Container(
-                  constraints: const BoxConstraints(maxWidth: 400),
-                  padding: const EdgeInsets.all(48.0),
-                  child: Card(
-                    elevation: 4,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(32.0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          _buildLogo(showTitle: false),
-                          const SizedBox(height: 32),
-                          Text(
-                            'Bem-vindo!',
-                            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Faça login para continuar',
-                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              color: Theme.of(context).textTheme.bodyMedium?.color,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 32),
-                          _buildLoginForm(),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
+          const SizedBox(height: 40),
+          _buildLogo(),
+          const SizedBox(height: 40),
+          _buildLoginForm(),
+          const SizedBox(height: 40),
         ],
       ),
     );
-   
-  Widget _buildLogo({bool showTitle = true}) => LayoutBuilder(
-    builder: (context, constraints) {
-      final screenWidth = MediaQuery.of(context).size.width;
-      final logoSize = screenWidth < 350 ? 60.0 : 80.0;
-      final iconSize = screenWidth < 350 ? 30.0 : 40.0;
-      
-      return Column(
-        children: [
-          Hero(
-            tag: 'app_logo',
-            child: Container(
-              width: logoSize,
-              height: logoSize,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Theme.of(context).colorScheme.primary,
-                    Theme.of(context).colorScheme.primary.withOpacity(0.8),
+
+  Widget _buildDesktopLayout() => Center(
+      child: SingleChildScrollView(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Left side - Logo and welcome message
+            Expanded(
+              flex: 1,
+              child: Container(
+                padding: const EdgeInsets.all(48.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    _buildLogo(),
+                    const SizedBox(height: 24),
+                    const Text(
+                      'Bem-vindo ao Sistema de\nCadastro Unificado',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        height: 1.3,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Gerencie cadastros e demandas sociais\nde forma integrada e eficiente',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.white70,
+                        height: 1.4,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
                   ],
                 ),
-                borderRadius: BorderRadius.circular(logoSize / 2),
-                boxShadow: [
-                  BoxShadow(
-                    color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Icon(
-                Icons.people,
-                size: iconSize,
-                color: Colors.white,
               ),
             ),
-          ),
-          if (showTitle) ...[
-            const SizedBox(height: 16),
-            Text(
-              'Cadastro Unificado',
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.primary,
-                fontSize: screenWidth < 350 ? 20 : null,
+            
+            // Right side - Login form
+            Expanded(
+              flex: 1,
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 400),
+                padding: const EdgeInsets.all(48.0),
+                child: _buildLoginForm(),
               ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Faça login para continuar',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: Theme.of(context).textTheme.bodyMedium?.color,
-                fontSize: screenWidth < 350 ? 14 : null,
-              ),
-              textAlign: TextAlign.center,
             ),
           ],
-        ],
-      );
-    },
-  );
+        ),
+      ),
+    );
 
-  Widget _buildLoginForm() => Consumer<AuthProvider>(
-      builder: (context, authProvider, child) => Form(
-        key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Campo de usuário
-            TextFormField(
-              controller: _usernameController,
-              decoration: InputDecoration(
-                labelText: 'Usuário',
-                hintText: 'Digite seu usuário',
-                prefixIcon: const Icon(Icons.person),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                filled: true,
-                fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+  Widget _buildLogo() => Column(
+      children: [
+        Container(
+          width: 80,
+          height: 80,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
               ),
-              textInputAction: TextInputAction.next,
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Digite seu usuário';
-                }
-                if (value.trim().length < 3) {
-                  return 'Usuário deve ter pelo menos 3 caracteres';
-                }
-                return null;
-              },
-              onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
-            ),
-            
-            const SizedBox(height: 16),
-            
-            // Campo de senha
-            TextFormField(
-              controller: _passwordController,
-              decoration: InputDecoration(
-                labelText: 'Senha',
-                hintText: 'Digite sua senha',
-                prefixIcon: const Icon(Icons.lock),
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    _obscurePassword ? Icons.visibility : Icons.visibility_off,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      _obscurePassword = !_obscurePassword;
-                    });
-                  },
+            ],
+          ),
+          child: const Icon(
+            Icons.people,
+            size: 40,
+            color: Color(0xFF1976D2),
+          ),
+        ),
+        const SizedBox(height: 16),
+        const Text(
+          AppConstants.appName,
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+      ],
+    );
+
+  Widget _buildLoginForm() => Card(
+      elevation: 8,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(32.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Fazer Login',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF1976D2),
                 ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                filled: true,
-                fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                textAlign: TextAlign.center,
               ),
-              obscureText: _obscurePassword,
-              textInputAction: TextInputAction.done,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Digite sua senha';
-                }
-                if (value.length < 6) {
-                  return 'Senha deve ter pelo menos 6 caracteres';
-                }
-                return null;
-              },
-              onFieldSubmitted: (_) => _handleLogin(),
-            ),
-            
-            const SizedBox(height: 16),
-            
-            // Opções
-            Row(
-              children: [
-                Checkbox(
-                  value: _rememberMe,
-                  onChanged: (value) {
-                    setState(() {
-                      _rememberMe = value ?? false;
-                    });
-                  },
+              const SizedBox(height: 8),
+              Text(
+                'Entre com suas credenciais para acessar o sistema',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Colors.grey[600],
                 ),
-                const Text('Lembrar-me'),
-                const Spacer(),
-                TextButton(
-                  onPressed: () {
-                    Fluttertoast.showToast(
-                      msg: 'Funcionalidade em desenvolvimento',
-                      toastLength: Toast.LENGTH_SHORT,
-                      gravity: ToastGravity.BOTTOM,
-                    );
-                  },
-                  child: const Text('Esqueci minha senha'),
-                ),
-              ],
-            ),
-            
-            const SizedBox(height: 24),
-            
-            // Botão de login
-            SizedBox(
-              height: 48,
-              child: ElevatedButton(
-                onPressed: authProvider.isLoading ? null : _handleLogin,
-                style: ElevatedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 32),
+              
+              // Username field
+              TextFormField(
+                controller: _usernameController,
+                decoration: InputDecoration(
+                  labelText: 'Usuário',
+                  hintText: 'Digite seu usuário',
+                  prefixIcon: const Icon(Icons.person_outline),
+                  border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  elevation: 2,
-                ),
-                child: authProvider.isLoading
-                    ? const SpinKitThreeBounce(
-                        color: Colors.white,
-                        size: 20,
-                      )
-                    : const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.login),
-                          SizedBox(width: 8),
-                          Text('Entrar'),
-                        ],
-                      ),
-              ),
-            ),
-            
-            const SizedBox(height: 16),
-            
-            // Divider
-            Row(
-              children: [
-                const Expanded(child: Divider()),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Text(
-                    'ou',
-                    style: Theme.of(context).textTheme.bodySmall,
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.grey[300]!),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Color(0xFF1976D2)),
                   ),
                 ),
-                const Expanded(child: Divider()),
-              ],
-            ),
-            
-            const SizedBox(height: 16),
-            
-            // Link para solicitar acesso
-            OutlinedButton(
-              onPressed: () {
-                Fluttertoast.showToast(
-                  msg: 'Entre em contato com o administrador',
-                  toastLength: Toast.LENGTH_LONG,
-                  gravity: ToastGravity.BOTTOM,
-                );
-              },
-              style: OutlinedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                padding: const EdgeInsets.symmetric(vertical: 12),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return AppConstants.usernameRequired;
+                  }
+                  return null;
+                },
+                textInputAction: TextInputAction.next,
+                enabled: !_isLoading,
               ),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.person_add),
-                  SizedBox(width: 8),
-                  Text('Solicitar Acesso'),
-                ],
-              ),
-            ),
-            
-            const SizedBox(height: 32),
-            
-            // Informações do sistema
-            Center(
-              child: Column(
-                children: [
-                  Text(
-                    'Versão 1.0.0',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7),
+              const SizedBox(height: 16),
+              
+              // Password field
+              TextFormField(
+                controller: _passwordController,
+                obscureText: _obscurePassword,
+                decoration: InputDecoration(
+                  labelText: 'Senha',
+                  hintText: 'Digite sua senha',
+                  prefixIcon: const Icon(Icons.lock_outline),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscurePassword ? Icons.visibility_off : Icons.visibility,
                     ),
+                    onPressed: () {
+                      setState(() {
+                        _obscurePassword = !_obscurePassword;
+                      });
+                    },
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '© 2025 Sistema de Cadastro Unificado',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7),
-                    ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                ],
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.grey[300]!),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Color(0xFF1976D2)),
+                  ),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return AppConstants.passwordRequired;
+                  }
+                  return null;
+                },
+                textInputAction: TextInputAction.done,
+                onFieldSubmitted: (_) => _handleLogin(),
+                enabled: !_isLoading,
               ),
-            ),
-          ],
+              const SizedBox(height: 24),
+              
+              // Login button
+              SizedBox(
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: _isLoading ? null : _handleLogin,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF1976D2),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 2,
+                  ),
+                  child: _isLoading
+                      ? const SpinKitThreeBounce(
+                          color: Colors.white,
+                          size: 20,
+                        )
+                      : const Text(
+                          'Entrar',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              
+              // Forgot password link
+              TextButton(
+                onPressed: _isLoading ? null : () {
+                  // TODO: Implement forgot password functionality
+                  Fluttertoast.showToast(
+                    msg: 'Funcionalidade em desenvolvimento',
+                    toastLength: Toast.LENGTH_SHORT,
+                    gravity: ToastGravity.BOTTOM,
+                  );
+                },
+                child: const Text(
+                  'Esqueceu sua senha?',
+                  style: TextStyle(
+                    color: Color(0xFF1976D2),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

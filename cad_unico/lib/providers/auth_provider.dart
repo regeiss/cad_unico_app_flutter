@@ -1,7 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../services/api_service.dart';
+
 import '../models/user_model.dart';
+import '../services/api_service.dart';
 
 class AuthProvider with ChangeNotifier {
   UserModel? _user;
@@ -36,7 +37,7 @@ class AuthProvider with ChangeNotifier {
           await _clearAuth();
         }
       }
-    } catch (e) {
+    } on Exception catch (e) {
       debugPrint('Erro ao carregar autenticação: $e');
     }
     notifyListeners();
@@ -69,7 +70,7 @@ class AuthProvider with ChangeNotifier {
         notifyListeners();
         return false;
       }
-    } catch (e) {
+    } on Exception catch (e) {
       _isLoading = false;
       notifyListeners();
       debugPrint('Erro no login: $e');

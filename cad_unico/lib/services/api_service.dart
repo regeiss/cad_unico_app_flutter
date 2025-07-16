@@ -1,4 +1,6 @@
 // import 'dart:convert';
+// ignore_for_file: use_setters_to_change_properties
+
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import '../utils/constants.dart';
