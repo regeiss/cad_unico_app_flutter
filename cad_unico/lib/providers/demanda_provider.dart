@@ -28,20 +28,13 @@ class DemandaProvider extends ChangeNotifier {
     notifyListeners();
     
     try {
-      final response = await _apiService.get('/cadastro/api/demandas-saude/');
+      final response = await _apiService.get(filters: {});
       
       // Verificar se a resposta é uma lista ou um objeto com results
       List<dynamic> dataList;
-      if (response is Map<String, dynamic>) {
-        // Se for um objeto com paginação
-        dataList = response['results'] ?? response['data'] ?? [];
-      } else if (response is List) {
-        // Se for uma lista direta
-        dataList = response;
-      } else {
-        throw Exception('Formato de resposta inválido');
-      }
-      
+      // Se for um objeto com paginação
+      dataList = response['results'] ?? response['data'] ?? [];
+          
       _demandasSaude = dataList
           .map((json) => DemandaSaudeModel.fromJson(json as Map<String, dynamic>))
           .toList();
@@ -64,17 +57,11 @@ class DemandaProvider extends ChangeNotifier {
     notifyListeners();
     
     try {
-      final response = await _apiService.get('/cadastro/api/demandas-educacao/');
+      final response = await _apiService.get(filters: {});
       
       List<dynamic> dataList;
-      if (response is Map<String, dynamic>) {
-        dataList = response['results'] ?? response['data'] ?? [];
-      } else if (response is List) {
-        dataList = response;
-      } else {
-        throw Exception('Formato de resposta inválido');
-      }
-      
+      dataList = response['results'] ?? response['data'] ?? [];
+          
       _demandasEducacao = dataList
           .map((json) => DemandaEducacaoModel.fromJson(json as Map<String, dynamic>))
           .toList();
@@ -97,17 +84,11 @@ class DemandaProvider extends ChangeNotifier {
     notifyListeners();
     
     try {
-      final response = await _apiService.get('/cadastro/api/demandas-ambiente/');
+      final response = await _apiService.get(filters: {});
       
       List<dynamic> dataList;
-      if (response is Map<String, dynamic>) {
-        dataList = response['results'] ?? response['data'] ?? [];
-      } else if (response is List) {
-        dataList = response;
-      } else {
-        throw Exception('Formato de resposta inválido');
-      }
-      
+      dataList = response['results'] ?? response['data'] ?? [];
+          
       _demandasAmbiente = dataList
           .map((json) => DemandaAmbienteModel.fromJson(json as Map<String, dynamic>))
           .toList();
@@ -135,22 +116,15 @@ class DemandaProvider extends ChangeNotifier {
   // Buscar demandas por CPF
   Future<List<DemandaSaudeModel>> getDemandaSaudeByCpf(String cpf) async {
     try {
-      final response = await _apiService.get('/cadastro/api/demandas-saude/?cpf=$cpf');
-      
+      final response = await _apiService.get(filters: {});
       List<dynamic> dataList;
-      if (response is Map<String, dynamic>) {
-        dataList = response['results'] ?? response['data'] ?? [];
-      } else if (response is List) {
-        dataList = response;
-      } else {
-        return [];
-      }
-      
+      dataList = response['results'] ?? response['data'] ?? [];
+          
       return dataList
           .map((json) => DemandaSaudeModel.fromJson(json as Map<String, dynamic>))
           .toList();
           
-    } catch (e) {
+    } on Exception catch (e) {
       debugPrint('Erro ao buscar demanda de saúde por CPF: $e');
       return [];
     }

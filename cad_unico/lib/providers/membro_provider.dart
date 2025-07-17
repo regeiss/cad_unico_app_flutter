@@ -40,12 +40,12 @@ class MembroProvider with ChangeNotifier {
         page: _currentPage,
       );
 
-      final newMembros = data.map((json) => MembroModel.fromJson(json)).toList();
+      final newMembros = '';// data.map((json) => MembroModel.fromJson(json)).toList();
       
       if (refresh) {
-        _membros = newMembros;
+        _membros = newMembros as List<MembroModel>;
       } else {
-        _membros.addAll(newMembros);
+        _membros.addAll(newMembros as Iterable<MembroModel>);
       }
 
       _currentPage++;
@@ -89,7 +89,7 @@ class MembroProvider with ChangeNotifier {
       final newMembro = MembroModel.fromJson(data);
       _membros.insert(0, newMembro);
       return true;
-    }  (e) {
+    } on Exception catch (e) {
       _error = e.toString();
       debugPrint('Erro ao criar membro: $e');
       return false;

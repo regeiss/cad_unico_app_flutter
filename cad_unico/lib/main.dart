@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -116,11 +115,11 @@ class CadastroApp extends StatelessWidget {
             previous ?? AuthProvider(apiService),
         ),
         ChangeNotifierProxyProvider<ApiService, ResponsavelProvider>(
-          create: (context) => ResponsavelProvider(apiService),
+          create: (context) => ResponsavelProvider(),
           update: (context, apiService, previous) => 
-            previous ?? ResponsavelProvider(apiService),
+            previous ?? ResponsavelProvider(),
         ),
-        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => AuthProvider(apiService)),
         ChangeNotifierProvider(create: (_) => ResponsavelProvider()),
         ChangeNotifierProvider(create: (_) => MembroProvider()),
         ChangeNotifierProvider(create: (_) => DemandaProvider()),

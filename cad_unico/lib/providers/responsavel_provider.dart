@@ -1,13 +1,14 @@
-// ===== RESPONSAVEL PROVIDER =====
-// lib/providers/responsavel_provider.dart
+// ignore_for_file: unused_field
 
-import 'package:cadastro_app/models/responsavel_model.dart';
 import 'package:flutter/foundation.dart';
+
+import '../models/responsavel_model.dart';
 import '../services/api_service.dart';
 
 class ResponsavelProvider with ChangeNotifier {
   final ApiService _apiService = ApiService();
   
+  Map<String, dynamic>? _responsavelAtual;
   List<ResponsavelModel> _responsaveis = [];
   ResponsavelModel? _selectedResponsavel;
   bool _isLoading = false;
@@ -49,18 +50,18 @@ class ResponsavelProvider with ChangeNotifier {
         page: _currentPage,
       );
 
-      final newResponsaveis = data.map((json) => ResponsavelModel.fromJson(json)).toList();
+      final newResponsaveis = await _apiService.getResponsaveis(filters: {});// data.map((json) => ResponsavelModel.fromJson(json as Map<String, dynamic>));
       
       if (refresh) {
-        _responsaveis = newResponsaveis;
+        _responsaveis = newResponsaveis as List<ResponsavelModel>;
       } else {
-        _responsaveis.addAll(newResponsaveis);
+        _responsaveis.addAll(newResponsaveis as Iterable<ResponsavelModel>);
       }
 
       _currentPage++;
       _hasNextPage = newResponsaveis.length == 20; // Assuming page size is 20
 
-    } catch (e) {
+    } on Exception catch (e) {
       _error = e.toString();
       debugPrint('Erro ao carregar responsáveis: $e');
     } finally {
@@ -146,7 +147,7 @@ class ResponsavelProvider with ChangeNotifier {
     loadResponsaveis(refresh: true);
   }
 
-  // Limpar filtros
+  // // Limpar filtros
   void clearFilters() {
     _filters.clear();
     loadResponsaveis(refresh: true);
@@ -172,5 +173,41 @@ class ResponsavelProvider with ChangeNotifier {
   void selectResponsavel(ResponsavelModel? responsavel) {
     _selectedResponsavel = responsavel;
     notifyListeners();
+  }
+
+  /// Busca um responsável com seus membros
+  Future<void> buscarResponsavelComMembros(String cpf) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+    
+    try {
+      _responsavelAtual = await _apiService.getResponsavelComMembros(cpf);
+      _error = null;
+    } on Exception catch (e) {
+      _error = e.toString();
+      _responsavelAtual = null;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+  
+  /// Busca um responsável com todas as demandas
+  Future<void> buscarResponsavelCompleto(String cpf) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+    
+    try {
+      _responsavelAtual = await _apiService.getResponsavelComDemandas(cpf);
+      _error = null;
+    } on Exception catch (e) {
+      _error = e.toString();
+      _responsavelAtual = null;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 }
