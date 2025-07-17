@@ -79,7 +79,7 @@ class ResponsavelProvider with ChangeNotifier {
       final data = await _apiService.getResponsavel(cpf);
       _selectedResponsavel = ResponsavelModel.fromJson(data);
       return _selectedResponsavel;
-    } catch (e) {
+    } on Exception catch (e) {
       _error = e.toString();
       debugPrint('Erro ao buscar responsável: $e');
       return null;
@@ -100,7 +100,7 @@ class ResponsavelProvider with ChangeNotifier {
       final newResponsavel = ResponsavelModel.fromJson(data);
       _responsaveis.insert(0, newResponsavel);
       return true;
-    } catch (e) {
+    } on Exception catch  (e) {
       _error = e.toString();
       debugPrint('Erro ao criar responsável: $e');
       return false;
@@ -130,7 +130,7 @@ class ResponsavelProvider with ChangeNotifier {
       }
       
       return true;
-    } catch (e) {
+    } on Exception catch  (e) {
       _error = e.toString();
       debugPrint('Erro ao atualizar responsável: $e');
       return false;

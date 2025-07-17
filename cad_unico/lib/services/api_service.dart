@@ -137,7 +137,7 @@ class ApiService {
         
         return true;
       }
-    } catch (e) {
+    }on Exception catch (e) {
       debugPrint('Erro ao renovar token: $e');
     }
     
@@ -209,7 +209,7 @@ class ApiService {
       }
     } on DioException catch (e) {
       return _handleDioError(e);
-    } catch (e) {
+    } on Exception catch (e) {
       return {
         'success': false,
         'message': 'Erro ao criar conta',
@@ -236,7 +236,7 @@ class ApiService {
       }
     } on DioException catch (e) {
       return _handleDioError(e);
-    } catch (e) {
+    } on Exception catch (e) {
       return {
         'success': false,
         'message': 'Erro ao verificar token',
@@ -266,7 +266,7 @@ class ApiService {
       }
     } on DioException catch (e) {
       return _handleDioError(e);
-    } catch (e) {
+    } on Exception catch (e) {
       return {
         'success': false,
         'message': 'Erro ao renovar token',
@@ -345,7 +345,7 @@ class ApiService {
           data: {'refresh': _refreshToken},
         );
       }
-    } catch (e) {
+    } on Exception catch (e) {
       debugPrint('Erro no logout: $e');
     } finally {
       await _clearAuthData();

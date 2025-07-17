@@ -48,7 +48,7 @@ class DemandaProvider extends ChangeNotifier {
           
       debugPrint('Carregadas ${_demandasSaude.length} demandas de saúde');
       
-    } catch (e) {
+    } on Exception catch (e) {
       _error = e.toString();
       debugPrint('Erro ao carregar demandas de saúde: $e');
     } finally {
