@@ -1,6 +1,6 @@
 import 'package:cadastro_app/models/responsavel_model.dart';
 import 'package:cadastro_app/providers/responsavel_provider.dart';
-import 'package:cadastro_app/utils/constants.dart';
+import 'package:cadastro_app/contants/constants.dart';
 import 'package:cadastro_app/utils/responsive.dart';
 import 'package:flutter/material.dart';
 // import 'package:flutter/services.dart';

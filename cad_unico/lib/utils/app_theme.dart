@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'constants.dart';
+import '../contants/constants.dart';
 
 class AppTheme {
   // Colors

@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 import '../providers/auth_provider.dart';
-import '../utils/constants.dart';
+import '../contants/constants.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

@@ -1,34 +1,34 @@
-import 'package:cadastro_app/screens/responsavel/responsaveis_screen.dart';
-import 'package:cadastro_app/screens/responsavel/responsavel_detail_screen.dart';
-import 'package:cadastro_app/screens/responsavel/responsavel_screen.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:go_router/go_router.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 // Providers
 import 'providers/auth_provider.dart';
-import 'providers/responsavel_provider.dart';
-import 'providers/membro_provider.dart';
 import 'providers/demanda_provider.dart';
-
+import 'providers/membro_provider.dart';
+import 'providers/responsavel_provider.dart';
+import 'screens/demandas/demandas_screen.dart';
+import 'screens/home_screen.dart';
 // Screens
 import 'screens/login_screen.dart';
-import 'screens/home_screen.dart';
-
 import 'screens/membros/membros_screen.dart';
-import 'screens/demandas/demandas_screen.dart';
+import 'screens/responsavel/responsaveis_screen.dart';
+import 'screens/responsavel/responsavel_detail_screen.dart';
+import 'screens/responsavel/responsavel_screen.dart';
 import 'screens/splash_screen.dart';
-
 // Utils
+import 'services/api_service.dart';
 import 'utils/app_theme.dart';
 // import 'utils/constants.dart';
 
-void main() {
-  // Configurações para web
-  if (kIsWeb) {
-    // Configurações específicas para web podem ir aqui
-  }
+Future<void> main() async {
+  
+  WidgetsFlutterBinding.ensureInitialized();
+  final apiService = ApiService();
+  apiService.init();
+  await apiService.loadSavedTokens();
+
   
   runApp(CadastroApp());
 }
@@ -105,8 +105,7 @@ class CadastroApp extends StatelessWidget {
   );
 
   @override
-  Widget build(BuildContext context) {
-    return MultiProvider(
+  Widget build(BuildContext context) => MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => ResponsavelProvider()),
@@ -122,5 +121,4 @@ class CadastroApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
       ),
     );
-  }
 }

@@ -1,324 +1,595 @@
 // import 'dart:convert';
 // ignore_for_file: use_setters_to_change_properties
 
+// lib/services/api_service.dart
+import 'dart:convert';
+import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import '../utils/constants.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../contants/constants.dart';
+
+import '../models/responsavel_model.dart';
+import '../models/membro_model.dart';
+import '../models/demanda_saude_model.dart';
+import '../models/demanda_educacao_model.dart';
+import '../models/user_model.dart';
 
 class ApiService {
-  late Dio _dio;
-  String? _token;
+  static final ApiService _instance = ApiService._internal();
+  factory ApiService() => _instance;
+  ApiService._internal();
 
-  ApiService() {
+  late Dio _dio;
+  String? _authToken;
+  String? _refreshToken;
+
+  // ==========================================================================
+  // INICIALIZAÇÃO
+  // ==========================================================================
+
+  void init() {
     _dio = Dio(BaseOptions(
       baseUrl: AppConstants.apiBaseUrl,
-      connectTimeout: const Duration(seconds: 30),
-      receiveTimeout: const Duration(seconds: 30),
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
+      connectTimeout: Duration(seconds: AppConstants.timeoutDuration),
+      receiveTimeout: Duration(seconds: AppConstants.timeoutDuration),
+      sendTimeout: Duration(seconds: AppConstants.timeoutDuration),
+      headers: AppConstants.defaultHeaders,
     ));
 
+    _setupInterceptors();
+  }
+
+  void _setupInterceptors() {
     // Interceptor para adicionar token automaticamente
-    _dio.interceptors.add(InterceptorsWrapper(
-      onRequest: (options, handler) {
-        if (_token != null) {
-          options.headers['Authorization'] = 'Bearer $_token';
-        }
-        debugPrint('🌐 ${options.method} ${options.path}');
-        handler.next(options);
-      },
-      onResponse: (response, handler) {
-        debugPrint('✅ ${response.statusCode} ${response.requestOptions.path}');
-        handler.next(response);
-      },
-      onError: (error, handler) {
-        debugPrint('❌ Erro API: ${error.message}');
-        handler.next(error);
-      },
-    ));
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) async {
+          // Adicionar token se disponível
+          if (_authToken != null) {
+            options.headers['Authorization'] = 'Bearer $_authToken';
+          }
+
+          // Log da requisição em modo debug
+          if (AppConstants.enableLogRequests && kDebugMode) {
+            debugPrint('🚀 REQUEST: ${options.method} ${options.uri}');
+            debugPrint('🚀 HEADERS: ${options.headers}');
+            if (options.data != null) {
+              debugPrint('🚀 DATA: ${options.data}');
+            }
+          }
+
+          handler.next(options);
+        },
+        onResponse: (response, handler) {
+          // Log da resposta em modo debug
+          if (AppConstants.enableLogResponses && kDebugMode) {
+            debugPrint('✅ RESPONSE: ${response.statusCode} ${response.requestOptions.uri}');
+            debugPrint('✅ DATA: ${response.data}');
+          }
+          handler.next(response);
+        },
+        onError: (error, handler) async {
+          debugPrint('❌ ERROR: ${error.requestOptions.uri}');
+          debugPrint('❌ MESSAGE: ${error.message}');
+          debugPrint('❌ RESPONSE: ${error.response?.data}');
+
+          // Tentar renovar token se erro 401
+          if (error.response?.statusCode == 401 && _refreshToken != null) {
+            final success = await _refreshAuthToken();
+            if (success) {
+              // Repetir a requisição original com novo token
+              final originalRequest = error.requestOptions;
+              originalRequest.headers['Authorization'] = 'Bearer $_authToken';
+              
+              try {
+                final response = await _dio.request(
+                  originalRequest.path,
+                  options: Options(
+                    method: originalRequest.method,
+                    headers: originalRequest.headers,
+                  ),
+                  data: originalRequest.data,
+                  queryParameters: originalRequest.queryParameters,
+                );
+                handler.resolve(response);
+                return;
+              } catch (e) {
+                // Se falhar novamente, prosseguir com o erro original
+              }
+            } else {
+              // Se não conseguir renovar, limpar tokens e redirecionar para login
+              await _clearAuthData();
+            }
+          }
+
+          handler.next(error);
+        },
+      ),
+    );
   }
 
-  void setToken(String token) {
-    _token = token;
+  // ==========================================================================
+  // GESTÃO DE AUTENTICAÇÃO
+  // ==========================================================================
+
+  Future<void> setAuthToken(String token, String refreshToken) async {
+    _authToken = token;
+    _refreshToken = refreshToken;
+    
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(AppConstants.tokenKey, token);
+    await prefs.setString(AppConstants.refreshTokenKey, refreshToken);
   }
 
-  // ===== AUTENTICAÇÃO =====
+  Future<void> loadSavedTokens() async {
+    final prefs = await SharedPreferences.getInstance();
+    _authToken = prefs.getString(AppConstants.tokenKey);
+    _refreshToken = prefs.getString(AppConstants.refreshTokenKey);
+  }
+
+  Future<bool> _refreshAuthToken() async {
+    if (_refreshToken == null) return false;
+
+    try {
+      final response = await _dio.post(
+        AppConstants.authRefresh.replaceFirst(AppConstants.apiBaseUrl, ''),
+        data: {'refresh': _refreshToken},
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        _authToken = data['access'];
+        
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString(AppConstants.tokenKey, _authToken!);
+        
+        return true;
+      }
+    } catch (e) {
+      debugPrint('Erro ao renovar token: $e');
+    }
+    
+    return false;
+  }
+
+  Future<void> _clearAuthData() async {
+    _authToken = null;
+    _refreshToken = null;
+    
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(AppConstants.tokenKey);
+    await prefs.remove(AppConstants.refreshTokenKey);
+    await prefs.remove(AppConstants.userDataKey);
+  }
+
+  bool get isAuthenticated => _authToken != null;
+
+  // ==========================================================================
+  // MÉTODOS DE AUTENTICAÇÃO
+  // ==========================================================================
 
   Future<Map<String, dynamic>> login(String username, String password) async {
     try {
-      final response = await _dio.post('/auth/login/', data: {
-        'username': username,
-        'password': password,
-      });
-      
+      final response = await _dio.post(
+        AppConstants.authLogin.replaceFirst(AppConstants.apiBaseUrl, ''),
+        data: {
+          'username': username,
+          'password': password,
+        },
+      );
+
       if (response.statusCode == 200) {
-        final token = response.data['token'];
-        setToken(token);
-        return {'success': true, 'token': token};
+        final data = response.data;
+        
+        // Salvar tokens
+        await setAuthToken(data['access'], data['refresh']);
+        
+        // Salvar dados do usuário
+        if (data['user'] != null) {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString(AppConstants.userDataKey, jsonEncode(data['user']));
+        }
+
+        return {'success': true, 'data': data};
       }
-      return {'success': false, 'message': 'Credenciais inválidas'};
     } on DioException catch (e) {
-      return _handleError(e);
+      return _handleDioError(e);
+    } catch (e) {
+      return {
+        'success': false,
+        'message': AppConstants.networkError,
+        'error': e.toString(),
+      };
     }
-  }
 
-  Future<Map<String, dynamic>> register(String username, String email, String password) async {
-    try {
-      final response = await _dio.post('/auth/register/', data: {
-        'username': username,
-        'email': email,
-        'password': password,
-      });
-      
-      return {'success': response.statusCode == 201};
-    } on DioException catch (e) {
-      return _handleError(e);
-    }
-  }
-
-  Future<bool> validateToken(String token) async {
-    try {
-      setToken(token);
-      final response = await _dio.get('/auth/user/');
-      return response.statusCode == 200;
-    } on Exception {
-      return false;
-    }
+    return {'success': false, 'message': AppConstants.loginError};
   }
 
   Future<Map<String, dynamic>> getUserProfile() async {
     try {
-      final response = await _dio.get('/auth/user/');
-      return response.data;
+      final response = await _dio.get(
+        AppConstants.authProfile.replaceFirst(AppConstants.apiBaseUrl, ''),
+      );
+
+      if (response.statusCode == 200) {
+        return {'success': true, 'data': response.data};
+      }
     } on DioException catch (e) {
-      throw Exception('Erro ao carregar perfil: ${e.message}');
+      return _handleDioError(e);
     }
+
+    return {'success': false, 'message': 'Erro ao carregar perfil'};
   }
 
-  Future<Map<String, dynamic>> updateUserProfile(Map<String, dynamic> userData) async {
+  Future<Map<String, dynamic>> logout() async {
     try {
-      final response = await _dio.patch('/auth/user/', data: userData);
-      return {'success': response.statusCode == 200, 'data': response.data};
-    } on DioException catch (e) {
-      return _handleError(e);
+      if (_refreshToken != null) {
+        await _dio.post(
+          AppConstants.authLogout.replaceFirst(AppConstants.apiBaseUrl, ''),
+          data: {'refresh': _refreshToken},
+        );
+      }
+    } catch (e) {
+      debugPrint('Erro no logout: $e');
+    } finally {
+      await _clearAuthData();
     }
+
+    return {'success': true, 'message': AppConstants.logoutSuccess};
   }
 
-  Future<Map<String, dynamic>> changePassword(String currentPassword, String newPassword) async {
-    try {
-      final response = await _dio.post('/auth/change-password/', data: {
-        'current_password': currentPassword,
-        'new_password': newPassword,
-      });
-      return {'success': response.statusCode == 200};
-    } on DioException catch (e) {
-      return _handleError(e);
-    }
-  }
+  // ==========================================================================
+  // MÉTODOS PARA RESPONSÁVEIS
+  // ==========================================================================
 
-  // ===== RESPONSÁVEIS =====
-
-  Future<List<Map<String, dynamic>>> getResponsaveis({
-    Map<String, dynamic>? filters,
+  Future<Map<String, dynamic>> getResponsaveis({
     int page = 1,
-    int pageSize = 20,
+    String? search,
+    String? status,
+    String? ordering,
   }) async {
     try {
-      final queryParams = {
+      final queryParameters = <String, dynamic>{
         'page': page,
-        'page_size': pageSize,
-        ...?filters,
+        'page_size': AppConstants.pageSize,
       };
-      
-      final response = await _dio.get('/cadastro/api/responsaveis/', 
-        queryParameters: queryParams);
-      
-      return List<Map<String, dynamic>>.from(response.data['results'] ?? response.data);
+
+      if (search != null && search.isNotEmpty) {
+        queryParameters['search'] = search;
+      }
+      if (status != null && status.isNotEmpty) {
+        queryParameters['status'] = status;
+      }
+      if (ordering != null && ordering.isNotEmpty) {
+        queryParameters['ordering'] = ordering;
+      }
+
+      final response = await _dio.get(
+        AppConstants.responsaveisEndpoint.replaceFirst(AppConstants.apiBaseUrl, ''),
+        queryParameters: queryParameters,
+      );
+
+      if (response.statusCode == 200) {
+        return {'success': true, 'data': response.data};
+      }
     } on DioException catch (e) {
-      throw Exception('Erro ao carregar responsáveis: ${e.message}');
+      return _handleDioError(e);
     }
+
+    return {'success': false, 'message': 'Erro ao carregar responsáveis'};
   }
 
-  Future<Map<String, dynamic>> getResponsavel(String cpf) async {
+  Future<Map<String, dynamic>> getResponsavelByCpf(String cpf) async {
     try {
-      final response = await _dio.get('/cadastro/api/responsaveis/$cpf/');
-      return response.data;
-    } on DioException catch (e) {
-      throw Exception('Erro ao carregar responsável: ${e.message}');
-    }
-  }
+      final response = await _dio.get(
+        AppConstants.getResponsavelByCpfUrl(cpf).replaceFirst(AppConstants.apiBaseUrl, ''),
+      );
 
-  Future<Map<String, dynamic>> createResponsavel(Map<String, dynamic> data) async {
-    try {
-      final response = await _dio.post('/cadastro/api/responsaveis/', data: data);
-      return response.data;
+      if (response.statusCode == 200) {
+        return {'success': true, 'data': response.data};
+      }
     } on DioException catch (e) {
-      throw Exception('Erro ao criar responsável: ${e.message}');
+      return _handleDioError(e);
     }
-  }
 
-  Future<Map<String, dynamic>> updateResponsavel(String cpf, Map<String, dynamic> data) async {
-    try {
-      final response = await _dio.put('/cadastro/api/responsaveis/$cpf/', data: data);
-      return response.data;
-    } on DioException catch (e) {
-      throw Exception('Erro ao atualizar responsável: ${e.message}');
-    }
-  }
-
-  Future<void> deleteResponsavel(String cpf) async {
-    try {
-      await _dio.delete('/cadastro/api/responsaveis/$cpf/');
-    } on DioException catch (e) {
-      throw Exception('Erro ao excluir responsável: ${e.message}');
-    }
+    return {'success': false, 'message': 'Responsável não encontrado'};
   }
 
   Future<Map<String, dynamic>> getResponsavelComMembros(String cpf) async {
     try {
-      final response = await _dio.get('/cadastro/api/responsaveis/$cpf/com_membros/');
-      return response.data;
+      final response = await _dio.get(
+        AppConstants.getResponsavelComMembrosUrl(cpf).replaceFirst(AppConstants.apiBaseUrl, ''),
+      );
+
+      if (response.statusCode == 200) {
+        return {'success': true, 'data': response.data};
+      }
     } on DioException catch (e) {
-      throw Exception('Erro ao carregar responsável com membros: ${e.message}');
+      return _handleDioError(e);
     }
+
+    return {'success': false, 'message': 'Erro ao carregar dados do responsável'};
   }
 
-  // ===== MEMBROS =====
+  Future<Map<String, dynamic>> createResponsavel(Map<String, dynamic> data) async {
+    try {
+      final response = await _dio.post(
+        AppConstants.responsaveisEndpoint.replaceFirst(AppConstants.apiBaseUrl, ''),
+        data: data,
+      );
 
-  Future<List<Map<String, dynamic>>> getMembros({
-    Map<String, dynamic>? filters,
+      if (response.statusCode == 201) {
+        return {
+          'success': true,
+          'data': response.data,
+          'message': AppConstants.responsavelCreatedSuccess,
+        };
+      }
+    } on DioException catch (e) {
+      return _handleDioError(e);
+    }
+
+    return {'success': false, 'message': 'Erro ao criar responsável'};
+  }
+
+  Future<Map<String, dynamic>> updateResponsavel(String cpf, Map<String, dynamic> data) async {
+    try {
+      final response = await _dio.put(
+        AppConstants.getResponsavelByCpfUrl(cpf).replaceFirst(AppConstants.apiBaseUrl, ''),
+        data: data,
+      );
+
+      if (response.statusCode == 200) {
+        return {
+          'success': true,
+          'data': response.data,
+          'message': AppConstants.responsavelUpdatedSuccess,
+        };
+      }
+    } on DioException catch (e) {
+      return _handleDioError(e);
+    }
+
+    return {'success': false, 'message': 'Erro ao atualizar responsável'};
+  }
+
+  // ==========================================================================
+  // MÉTODOS PARA MEMBROS
+  // ==========================================================================
+
+  Future<Map<String, dynamic>> getMembros({
     int page = 1,
-    int pageSize = 20,
+    String? search,
+    String? status,
+    String? cpfResponsavel,
   }) async {
     try {
-      final queryParams = {
+      final queryParameters = <String, dynamic>{
         'page': page,
-        'page_size': pageSize,
-        ...?filters,
+        'page_size': AppConstants.pageSize,
       };
-      
-      final response = await _dio.get('/cadastro/api/membros/', 
-        queryParameters: queryParams);
-      
-      return List<Map<String, dynamic>>.from(response.data['results'] ?? response.data);
+
+      if (search != null && search.isNotEmpty) {
+        queryParameters['search'] = search;
+      }
+      if (status != null && status.isNotEmpty) {
+        queryParameters['status'] = status;
+      }
+      if (cpfResponsavel != null && cpfResponsavel.isNotEmpty) {
+        queryParameters['cpf_responsavel'] = cpfResponsavel;
+      }
+
+      final response = await _dio.get(
+        AppConstants.membrosEndpoint.replaceFirst(AppConstants.apiBaseUrl, ''),
+        queryParameters: queryParameters,
+      );
+
+      if (response.statusCode == 200) {
+        return {'success': true, 'data': response.data};
+      }
     } on DioException catch (e) {
-      throw Exception('Erro ao carregar membros: ${e.message}');
+      return _handleDioError(e);
     }
+
+    return {'success': false, 'message': 'Erro ao carregar membros'};
   }
 
   Future<Map<String, dynamic>> createMembro(Map<String, dynamic> data) async {
     try {
-      final response = await _dio.post('/cadastro/api/membros/', data: data);
-      return response.data;
-    } on DioException catch (e) {
-      throw Exception('Erro ao criar membro: ${e.message}');
-    }
-  }
+      final response = await _dio.post(
+        AppConstants.membrosEndpoint.replaceFirst(AppConstants.apiBaseUrl, ''),
+        data: data,
+      );
 
-  // ===== DEMANDAS =====
-
-  Future<List<Map<String, dynamic>>> getDemandasSaude({
-    Map<String, dynamic>? filters,
-    int page = 1,
-    int pageSize = 20,
-  }) async {
-    try {
-      final queryParams = {
-        'page': page,
-        'page_size': pageSize,
-        ...?filters,
-      };
-      
-      final response = await _dio.get('/cadastro/api/demandas-saude/', 
-        queryParameters: queryParams);
-      
-      return List<Map<String, dynamic>>.from(response.data['results'] ?? response.data);
-    } on DioException catch (e) {
-      throw Exception('Erro ao carregar demandas de saúde: ${e.message}');
-    }
-  }
-
-  Future<List<Map<String, dynamic>>> getDemandasEducacao({
-    Map<String, dynamic>? filters,
-    int page = 1,
-    int pageSize = 20,
-  }) async {
-    try {
-      final queryParams = {
-        'page': page,
-        'page_size': pageSize,
-        ...?filters,
-      };
-      
-      final response = await _dio.get('/cadastro/api/demandas-educacao/', 
-        queryParameters: queryParams);
-      
-      return List<Map<String, dynamic>>.from(response.data['results'] ?? response.data);
-    } on DioException catch (e) {
-      throw Exception('Erro ao carregar demandas de educação: ${e.message}');
-    }
-  }
-
-  // ===== UTILITÁRIOS =====
-
-  Future<List<Map<String, dynamic>>> getCepsAtingidos() async {
-    try {
-      final response = await _dio.get('/cadastro/api/ceps-atingidos/');
-      return List<Map<String, dynamic>>.from(response.data['results'] ?? response.data);
-    } on DioException catch (e) {
-      throw Exception('Erro ao carregar CEPs: ${e.message}');
-    }
-  }
-
-  Future<List<Map<String, dynamic>>> getAlojamentos() async {
-    try {
-      final response = await _dio.get('/cadastro/api/alojamentos/');
-      return List<Map<String, dynamic>>.from(response.data['results'] ?? response.data);
-    } on DioException catch (e) {
-      throw Exception('Erro ao carregar alojamentos: ${e.message}');
-    }
-  }
-
-  // Tratamento de erros
-  Map<String, dynamic> _handleError(DioException e) {
-    String message = 'Erro desconhecido';
-    
-    if (e.response != null) {
-      switch (e.response!.statusCode) {
-        case 400:
-          message = 'Dados inválidos';
-          break;
-        case 401:
-          message = 'Não autorizado';
-          break;
-        case 403:
-          message = 'Acesso negado';
-          break;
-        case 404:
-          message = 'Não encontrado';
-          break;
-        case 500:
-          message = 'Erro interno do servidor';
-          break;
-        default:
-          message = 'Erro de conexão';
+      if (response.statusCode == 201) {
+        return {
+          'success': true,
+          'data': response.data,
+          'message': AppConstants.membroCreatedSuccess,
+        };
       }
+    } on DioException catch (e) {
+      return _handleDioError(e);
+    }
+
+    return {'success': false, 'message': 'Erro ao criar membro'};
+  }
+
+  // ==========================================================================
+  // MÉTODOS PARA DEMANDAS DE SAÚDE
+  // ==========================================================================
+
+  Future<Map<String, dynamic>> getDemandasSaude({
+    int page = 1,
+    String? search,
+    String? genero,
+  }) async {
+    try {
+      final queryParameters = <String, dynamic>{
+        'page': page,
+        'page_size': AppConstants.pageSize,
+      };
+
+      if (search != null && search.isNotEmpty) {
+        queryParameters['search'] = search;
+      }
+      if (genero != null && genero.isNotEmpty) {
+        queryParameters['genero'] = genero;
+      }
+
+      final response = await _dio.get(
+        AppConstants.demandasSaudeEndpoint.replaceFirst(AppConstants.apiBaseUrl, ''),
+        queryParameters: queryParameters,
+      );
+
+      if (response.statusCode == 200) {
+        return {'success': true, 'data': response.data};
+      }
+    } on DioException catch (e) {
+      return _handleDioError(e);
+    }
+
+    return {'success': false, 'message': 'Erro ao carregar demandas de saúde'};
+  }
+
+  Future<Map<String, dynamic>> getGruposPrioritarios() async {
+    try {
+      final response = await _dio.get(
+        '${AppConstants.demandasSaudeEndpoint.replaceFirst(AppConstants.apiBaseUrl, '')}grupos_prioritarios/',
+      );
+
+      if (response.statusCode == 200) {
+        return {'success': true, 'data': response.data};
+      }
+    } on DioException catch (e) {
+      return _handleDioError(e);
+    }
+
+    return {'success': false, 'message': 'Erro ao carregar grupos prioritários'};
+  }
+
+  // ==========================================================================
+  // MÉTODOS PARA DEMANDAS DE EDUCAÇÃO
+  // ==========================================================================
+
+  Future<Map<String, dynamic>> getDemandasEducacao({
+    int page = 1,
+    String? search,
+    String? turno,
+  }) async {
+    try {
+      final queryParameters = <String, dynamic>{
+        'page': page,
+        'page_size': AppConstants.pageSize,
+      };
+
+      if (search != null && search.isNotEmpty) {
+        queryParameters['search'] = search;
+      }
+      if (turno != null && turno.isNotEmpty) {
+        queryParameters['turno'] = turno;
+      }
+
+      final response = await _dio.get(
+        AppConstants.demandasEducacaoEndpoint.replaceFirst(AppConstants.apiBaseUrl, ''),
+        queryParameters: queryParameters,
+      );
+
+      if (response.statusCode == 200) {
+        return {'success': true, 'data': response.data};
+      }
+    } on DioException catch (e) {
+      return _handleDioError(e);
+    }
+
+    return {'success': false, 'message': 'Erro ao carregar demandas de educação'};
+  }
+
+  // ==========================================================================
+  // MÉTODOS AUXILIARES
+  // ==========================================================================
+
+  Future<Map<String, dynamic>> getCepInfo(String cep) async {
+    try {
+      final cleanCep = cep.replaceAll('-', '').replaceAll('.', '');
       
-      // Se houver detalhes específicos do erro
-      if (e.response!.data != null && e.response!.data is Map) {
-        final errorData = e.response!.data as Map<String, dynamic>;
-        if (errorData.containsKey('detail')) {
-          message = errorData['detail'];
-        } else if (errorData.containsKey('message')) {
-          message = errorData['message'];
+      final dio = Dio(); // Instância separada para APIs externas
+      final response = await dio.get(AppConstants.getViaCepUrl(cleanCep));
+
+      if (response.statusCode == 200 && response.data['erro'] == null) {
+        return {'success': true, 'data': response.data};
+      }
+    } catch (e) {
+      debugPrint('Erro ao buscar CEP: $e');
+    }
+
+    return {'success': false, 'message': 'CEP não encontrado'};
+  }
+
+  Map<String, dynamic> _handleDioError(DioException e) {
+    String message = AppConstants.networkError;
+    int? statusCode = e.response?.statusCode;
+
+    switch (e.type) {
+      case DioExceptionType.connectionTimeout:
+      case DioExceptionType.sendTimeout:
+      case DioExceptionType.receiveTimeout:
+        message = AppConstants.timeoutError;
+        break;
+      
+      case DioExceptionType.badResponse:
+        if (statusCode != null) {
+          switch (statusCode) {
+            case 400:
+              message = e.response?.data['message'] ?? 'Requisição inválida';
+              break;
+            case 401:
+              message = AppConstants.accessDeniedError;
+              break;
+            case 403:
+              message = 'Acesso proibido';
+              break;
+            case 404:
+              message = AppConstants.noDataFound;
+              break;
+            case 422:
+              message = e.response?.data['message'] ?? AppConstants.requiredFieldsError;
+              break;
+            case 500:
+              message = AppConstants.serverError;
+              break;
+            default:
+              message = 'Erro HTTP $statusCode';
+          }
         }
-      }
-    } else {
-      message = 'Erro de conexão com o servidor';
+        break;
+      
+      case DioExceptionType.connectionError:
+        if (e.error is SocketException) {
+          message = 'Sem conexão com a internet';
+        } else {
+          message = AppConstants.networkError;
+        }
+        break;
+      
+      default:
+        message = e.message ?? AppConstants.networkError;
     }
-    
-    return {'success': false, 'message': message};
+
+    return {
+      'success': false,
+      'message': message,
+      'statusCode': statusCode,
+      'error': e.toString(),
+    };
+  }
+
+  // ==========================================================================
+  // MÉTODOS DE LIMPEZA
+  // ==========================================================================
+
+  void dispose() {
+    _dio.close();
   }
 }

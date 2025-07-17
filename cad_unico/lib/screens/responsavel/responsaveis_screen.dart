@@ -7,7 +7,7 @@ import '../../models/responsavel_model.dart';
 import '../../providers/responsavel_provider.dart';
 // import '../../models/user_model.dart';
 import '../../utils/app_utils.dart';
-import '../../utils/constants.dart';
+import '../../contants/constants.dart';
 import '../../utils/responsive.dart';
 import '../../widgets/empty_state_widget.dart';
 import '../../widgets/error_widget.dart';

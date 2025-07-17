@@ -3,8 +3,9 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+
+import '../contants/constants.dart';
 import '../providers/auth_provider.dart';
-import '../utils/constants.dart';
 import '../utils/responsive.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -65,7 +66,7 @@ class _LoginScreenState extends State<LoginScreen> {
           );
         }
       }
-    } catch (e) {
+    } on Exception catch (e) {
       if (mounted) {
         Fluttertoast.showToast(
           msg: 'Erro inesperado: $e',

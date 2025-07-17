@@ -1,7 +1,7 @@
 import 'package:cadastro_app/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 
-import '../utils/constants.dart';
+import '../contants/constants.dart';
 
 class SideBar extends StatelessWidget {
   final int selectedIndex;

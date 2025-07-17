@@ -1,4 +1,4 @@
-import 'package:cadastro_app/utils/constants.dart';
+import 'package:cadastro_app/contants/constants.dart';
 import 'package:flutter/material.dart';
 
 class SearchBarWidget extends StatefulWidget {

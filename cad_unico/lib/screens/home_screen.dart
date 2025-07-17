@@ -2,7 +2,7 @@ import 'package:cadastro_app/providers/auth_provider.dart';
 import 'package:cadastro_app/providers/demanda_provider.dart';
 import 'package:cadastro_app/providers/membro_provider.dart';
 import 'package:cadastro_app/providers/responsavel_provider.dart';
-import 'package:cadastro_app/utils/constants.dart';
+import 'package:cadastro_app/contants/constants.dart';
 import 'package:cadastro_app/utils/responsive.dart';
 import 'package:cadastro_app/widgets/dashboard_card.dart';
 //import 'package:cadastro_app/widgets/responsive_layout.dart';
