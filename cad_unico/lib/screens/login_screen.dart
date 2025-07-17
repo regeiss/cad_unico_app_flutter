@@ -48,7 +48,7 @@ class _LoginScreenState extends State<LoginScreen> {
         if (mounted) {
           context.go('/');
           Fluttertoast.showToast(
-            msg: AppConstants.successLogin,
+            msg: AppConstants.loginSucess,
             toastLength: Toast.LENGTH_SHORT,
             gravity: ToastGravity.BOTTOM,
             backgroundColor: Colors.green,
@@ -58,7 +58,7 @@ class _LoginScreenState extends State<LoginScreen> {
       } else {
         if (mounted) {
           Fluttertoast.showToast(
-            msg: AppConstants.errorAuth,
+            msg: AppConstants.loginError,
             toastLength: Toast.LENGTH_SHORT,
             gravity: ToastGravity.BOTTOM,
             backgroundColor: Colors.red,

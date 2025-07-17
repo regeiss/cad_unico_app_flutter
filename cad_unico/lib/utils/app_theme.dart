@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_classes_with_only_static_members
+
 import 'package:flutter/material.dart';
 import '../contants/constants.dart';
 
@@ -22,8 +24,7 @@ class AppTheme {
   static const Color dividerColor = Color(0xFFBDBDBD);
 
   // Light Theme
-  static ThemeData get lightTheme {
-    return ThemeData(
+  static ThemeData get lightTheme => ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
       
@@ -224,9 +225,9 @@ class AppTheme {
         ),
       ),
     );
-  }
 
   // Dark Theme
+  // ignore: prefer_expression_function_bodies
   static ThemeData get darkTheme {
     return ThemeData(
       useMaterial3: true,

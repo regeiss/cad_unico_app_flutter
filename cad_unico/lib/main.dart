@@ -29,12 +29,13 @@ Future<void> main() async {
   apiService.init();
   await apiService.loadSavedTokens();
 
-  
-  runApp(CadastroApp());
+  runApp(CadastroApp(apiService: apiService));
 }
 
 class CadastroApp extends StatelessWidget {
-  CadastroApp({super.key});
+  CadastroApp({super.key, required this.apiService});
+  final ApiService apiService;
+
 
   final GoRouter _router = GoRouter(
     initialLocation: '/splash',
@@ -107,6 +108,18 @@ class CadastroApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) => MultiProvider(
       providers: [
+        // Injetar ApiService nos providers
+        Provider<ApiService>.value(value: apiService),
+        ChangeNotifierProxyProvider<ApiService, AuthProvider>(
+          create: (context) => AuthProvider(apiService),
+          update: (context, apiService, previous) => 
+            previous ?? AuthProvider(apiService),
+        ),
+        ChangeNotifierProxyProvider<ApiService, ResponsavelProvider>(
+          create: (context) => ResponsavelProvider(apiService),
+          update: (context, apiService, previous) => 
+            previous ?? ResponsavelProvider(apiService),
+        ),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => ResponsavelProvider()),
         ChangeNotifierProvider(create: (_) => MembroProvider()),

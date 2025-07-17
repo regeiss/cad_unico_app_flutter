@@ -1,18 +1,8 @@
+// lib/screens/demandas_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
-import '../../models/demanda_educacao_model.dart';
-import '../../models/demanda_saude_model.dart';
-// import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-
 import '../../providers/demanda_provider.dart';
-import '../../utils/app_utils.dart';
-import '../../contants/constants.dart';
-import '../../utils/responsive.dart';
-import '../../widgets/empty_state_widget.dart';
-import '../../widgets/error_widget.dart';
-import '../../widgets/filter_chip_widget.dart';
-import '../../widgets/loading_widget.dart';
+import '../../widgets/dashboard_card.dart';
 
 class DemandasScreen extends StatefulWidget {
   const DemandasScreen({super.key});
@@ -21,372 +11,360 @@ class DemandasScreen extends StatefulWidget {
   State<DemandasScreen> createState() => _DemandasScreenState();
 }
 
-class _DemandasScreenState extends State<DemandasScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-  String _selectedFilter = 'all';
-
+class _DemandasScreenState extends State<DemandasScreen> {
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
-    _loadDemandas();
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
-
-  void _loadDemandas() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<DemandaProvider>(context, listen: false).loadAllDemandas();
+      context.read<DemandaProvider>().loadAllDemandas();
     });
   }
 
   @override
-  Widget build(BuildContext context) => LayoutBuilder(
-      builder: (context, constraints) {
-        final width = constraints.maxWidth;
-        
-        // Usando sua classe Responsive
-        if (Responsive.isDesktop(width)) {
-          return _buildDesktopLayout();
-        } else if (Responsive.isTablet(width)) {
-          return _buildTabletLayout();
-        } else {
-          return _buildMobileLayout();
-        }
-      },
-    );
-
-  Widget _buildMobileLayout() => Scaffold(
+  Widget build(BuildContext context) => Scaffold(
       appBar: AppBar(
         title: const Text('Demandas'),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [
-            Tab(text: 'Saúde', icon: Icon(Icons.favorite)),
-            Tab(text: 'Educação', icon: Icon(Icons.school)),
-            Tab(text: 'Ambiente', icon: Icon(Icons.pets)),
-          ],
-        ),
-      ),
-      body: _buildTabView(),
-    );
-
-  Widget _buildTabletLayout() => Scaffold(
-      appBar: AppBar(
-        title: const Text('Demandas'),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [
-            Tab(text: 'Saúde', icon: Icon(Icons.favorite)),
-            Tab(text: 'Educação', icon: Icon(Icons.school)),
-            Tab(text: 'Ambiente', icon: Icon(Icons.pets)),
-          ],
-        ),
-      ),
-      body: _buildTabView(),
-    );
-
-  Widget _buildDesktopLayout() => Scaffold(
-      body: Column(
-        children: [
-          _buildHeader(),
-          _buildFilters(),
-          Expanded(child: _buildTabView()),
-        ],
-      ),
-    );
-
-  Widget _buildHeader() => Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
+        backgroundColor: Colors.blue[700],
+        foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () {
+              context.read<DemandaProvider>().loadAllDemandas();
+            },
           ),
         ],
       ),
-      child: Row(
-        children: [
-          Expanded(
+      body: Consumer<DemandaProvider>(
+        builder: (context, demandaProvider, child) {
+          if (demandaProvider.isLoading) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+
+          if (demandaProvider.error != null) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    size: 64,
+                    color: Colors.red[300],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Erro ao carregar demandas',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    demandaProvider.error!,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      demandaProvider.loadAllDemandas();
+                    },
+                    child: const Text('Tentar novamente'),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Demandas',
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  'Visualize e gerencie as demandas cadastradas',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).textTheme.bodySmall?.color,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          TabBar(
-            controller: _tabController,
-            isScrollable: true,
-            tabs: const [
-              Tab(text: 'Saúde', icon: Icon(Icons.favorite)),
-              Tab(text: 'Educação', icon: Icon(Icons.school)),
-              Tab(text: 'Ambiente', icon: Icon(Icons.pets)),
-            ],
-          ),
-        ],
-      ),
-    );
-
-  Widget _buildFilters() => Container(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          Text(
-            'Filtros:',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Wrap(
-              spacing: 8,
-              children: [
-                FilterChipWidget(
-                  label: 'Todos',
-                  isSelected: _selectedFilter == 'all',
-                  onPressed: () {
-                    setState(() {
-                      _selectedFilter = 'all';
-                    });
-                  },
-                ),
-                FilterChipWidget(
-                  label: 'Prioritários',
-                  isSelected: _selectedFilter == 'priority',
-                  onPressed: () {
-                    setState(() {
-                      _selectedFilter = 'priority';
-                    });
-                  },
-                ),
-                FilterChipWidget(
-                  label: 'Recentes',
-                  isSelected: _selectedFilter == 'recent',
-                  onPressed: () {
-                    setState(() {
-                      _selectedFilter = 'recent';
-                    });
-                  },
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-
-  Widget _buildTabView() => TabBarView(
-      controller: _tabController,
-      children: [
-        _buildSaudeTab(),
-        _buildEducacaoTab(),
-        _buildAmbienteTab(),
-      ],
-    );
-
-  Widget _buildSaudeTab() => Consumer<DemandaProvider>(
-      builder: (context, provider, child) {
-        if (provider.isLoading) {
-          return const LoadingWidget(message: 'Carregando demandas de saúde...');
-        }
-        
-        if (provider.error != null) {
-          return ErrorDisplayWidget(
-            message: provider.error!,
-            onRetry: _loadDemandas,
-          );
-        }
-        
-        if (provider.demandasSaude.isEmpty) {
-          return const EmptyStateWidget(
-            title: 'Nenhuma demanda de saúde',
-            subtitle: 'Não há demandas de saúde cadastradas',
-            icon: Icons.favorite_border,
-          );
-        }
-        
-        return _buildSaudeList(provider.demandasSaude);
-      },
-    );
-
-  Widget _buildEducacaoTab() => Consumer<DemandaProvider>(
-      builder: (context, provider, child) {
-        if (provider.isLoading) {
-          return const LoadingWidget(message: 'Carregando demandas de educação...');
-        }
-        
-        if (provider.error != null) {
-          return ErrorDisplayWidget(
-            message: provider.error!,
-            onRetry: _loadDemandas,
-          );
-        }
-        
-        if (provider.demandasEducacao.isEmpty) {
-          return const EmptyStateWidget(
-            title: 'Nenhuma demanda de educação',
-            subtitle: 'Não há demandas de educação cadastradas',
-            icon: Icons.school_outlined,
-          );
-        }
-        
-        return _buildEducacaoList(provider.demandasEducacao);
-      },
-    );
-
-  Widget _buildAmbienteTab() => const EmptyStateWidget(
-      title: 'Demandas de Ambiente',
-      subtitle: 'Funcionalidade em desenvolvimento',
-      icon: Icons.pets_outlined,
-    );
-
-  Widget _buildSaudeList(List<DemandaSaudeModel> demandas) => RefreshIndicator(
-      onRefresh: () => Provider.of<DemandaProvider>(context, listen: false)
-          .loadDemandasSaude(),
-      child: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: demandas.length,
-        itemBuilder: (context, index) {
-          final demanda = demandas[index];
-          return _buildDemandaSaudeCard(demanda);
-        },
-      ),
-    );
-
-  Widget _buildEducacaoList(List<DemandaEducacaoModel> demandas) => RefreshIndicator(
-      onRefresh: () => Provider.of<DemandaProvider>(context, listen: false)
-          .loadDemandasEducacao(),
-      child: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: demandas.length,
-        itemBuilder: (context, index) {
-          final demanda = demandas[index];
-          return _buildDemandaEducacaoCard(demanda);
-        },
-      ),
-    );
-
-  Widget _buildDemandaSaudeCard(DemandaSaudeModel demanda) => Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  Icons.favorite,
-                  color: demanda.isGrupoPrioritario ? Colors.red : Colors.blue,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'CPF: ${AppUtils.formatCpf(demanda.cpf)}',
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                ),
-                if (demanda.isGrupoPrioritario)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.red,
-                      borderRadius: BorderRadius.circular(12),
+                // Cards de estatísticas
+                Row(
+                  children: [
+                    Expanded(
+                      child: DashboardCard(
+                        title: 'Demandas de Saúde',
+                        value: demandaProvider.totalDemandasSaude.toString(),
+                        icon: Icons.local_hospital,
+                        color: Colors.red,
+                        onTap: () => _showDemandasSaude(context, demandaProvider),
+                      ),
                     ),
-                    child: const Text(
-                      'Prioritário',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: DashboardCard(
+                        title: 'Demandas de Educação',
+                        value: demandaProvider.totalDemandasEducacao.toString(),
+                        icon: Icons.school,
+                        color: Colors.blue,
+                        onTap: () => _showDemandasEducacao(context, demandaProvider),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: DashboardCard(
+                        title: 'Demandas de Ambiente',
+                        value: demandaProvider.totalDemandasAmbiente.toString(),
+                        icon: Icons.pets,
+                        color: Colors.green,
+                        onTap: () => _showDemandasAmbiente(context, demandaProvider),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: DashboardCard(
+                        title: 'Grupos Prioritários',
+                        value: demandaProvider.totalGruposPrioritarios.toString(),
+                        icon: Icons.priority_high,
+                        color: Colors.orange,
+                        onTap: () => _showGruposPrioritarios(context, demandaProvider),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                
+                // Lista de demandas prioritárias
+                if (demandaProvider.gruposPrioritarios.isNotEmpty) ...[
+                  Text(
+                    'Grupos Prioritários',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                  const SizedBox(height: 16),
+                  ...demandaProvider.gruposPrioritarios.take(5).map(
+                    (demanda) => Card(
+                      child: ListTile(
+                        leading: const Icon(
+                          Icons.priority_high,
+                          color: Colors.orange,
+                        ),
+                        title: Text('CPF: ${demanda.cpf}'),
+                        subtitle: Text(demanda.statusSaude),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () {
+                          // Navegar para detalhes da demanda
+                        },
                       ),
                     ),
                   ),
+                ],
               ],
             ),
-            
-            const SizedBox(height: 8),
-            
-            if (demanda.saudeCid != null)
-              Text('CID: ${demanda.saudeCid}'),
-            
-            if (demanda.genero != null)
-              Text('Gênero: ${AppConstants.generoOptions[demanda.genero] ?? demanda.genero}'),
-            
-            if (demanda.idade != null)
-              Text('Idade: ${demanda.idade} anos'),
-            
-            if (demanda.alergiaIntol != null && demanda.alergiaIntol!.isNotEmpty)
-              Text('Alergias: ${demanda.alergiaIntol}'),
-          ],
-        ),
+          );
+        },
       ),
     );
 
-  Widget _buildDemandaEducacaoCard(DemandaEducacaoModel demanda) => Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Icon(Icons.school, color: Colors.orange),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    demanda.nome,
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                ),
-              ],
-            ),
-            
-            const SizedBox(height: 8),
-            
-            Text('CPF: ${AppUtils.formatCpf(demanda.cpf)}'),
-            
-            if (demanda.genero != null)
-              Text('Gênero: ${AppConstants.generoOptions[demanda.genero] ?? demanda.genero}'),
-            
-            if (demanda.idade != null)
-              Text('Idade: ${demanda.idade} anos'),
-            
-            if (demanda.turno != null)
-              Text('Turno: ${AppConstants.turnoOptions[demanda.turno] ?? demanda.turno}'),
-            
-            if (demanda.demanda != null && demanda.demanda!.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Text(
-                  'Demanda: ${demanda.demanda}',
-                  style: const TextStyle(fontStyle: FontStyle.italic),
+  void _showDemandasSaude(BuildContext context, DemandaProvider provider) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.7,
+        maxChildSize: 0.9,
+        minChildSize: 0.5,
+        expand: false,
+        builder: (context, scrollController) => Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.symmetric(vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
-          ],
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  'Demandas de Saúde',
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
+              ),
+              Expanded(
+                child: ListView.builder(
+                  controller: scrollController,
+                  itemCount: provider.demandasSaude.length,
+                  itemBuilder: (context, index) {
+                    final demanda = provider.demandasSaude[index];
+                    return ListTile(
+                      leading: Icon(
+                        demanda.isGrupoPrioritario 
+                            ? Icons.priority_high 
+                            : Icons.person,
+                        color: demanda.isGrupoPrioritario 
+                            ? Colors.orange 
+                            : Colors.blue,
+                      ),
+                      title: Text('CPF: ${demanda.cpf}'),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (demanda.saudeCid != null)
+                            Text('CID: ${demanda.saudeCid}'),
+                          Text('Status: ${demanda.statusSaude}'),
+                        ],
+                      ),
+                      isThreeLine: demanda.saudeCid != null,
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  void _showDemandasEducacao(BuildContext context, DemandaProvider provider) {
+    // Similar ao _showDemandasSaude, mas para educação
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.7,
+        maxChildSize: 0.9,
+        minChildSize: 0.5,
+        expand: false,
+        builder: (context, scrollController) => Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.symmetric(vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  'Demandas de Educação',
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
+              ),
+              Expanded(
+                child: ListView.builder(
+                  controller: scrollController,
+                  itemCount: provider.demandasEducacao.length,
+                  itemBuilder: (context, index) {
+                    final demanda = provider.demandasEducacao[index];
+                    return ListTile(
+                      leading: const Icon(
+                        Icons.school,
+                        color: Colors.blue,
+                      ),
+                      title: Text(demanda.nome),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('CPF: ${demanda.cpf}'),
+                          Text('Faixa Etária: ${demanda.faixaEtaria}'),
+                          if (demanda.turno != null)
+                            Text('Turno: ${demanda.turno}'),
+                        ],
+                      ),
+                      isThreeLine: true,
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showDemandasAmbiente(BuildContext context, DemandaProvider provider) {
+    // Similar para ambiente
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.7,
+        maxChildSize: 0.9,
+        minChildSize: 0.5,
+        expand: false,
+        builder: (context, scrollController) => Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.symmetric(vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  'Demandas de Ambiente',
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
+              ),
+              Expanded(
+                child: ListView.builder(
+                  controller: scrollController,
+                  itemCount: provider.demandasAmbiente.length,
+                  itemBuilder: (context, index) {
+                    final demanda = provider.demandasAmbiente[index];
+                    return ListTile(
+                      leading: const Icon(
+                        Icons.pets,
+                        color: Colors.green,
+                      ),
+                      title: Text('CPF: ${demanda.cpf}'),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (demanda.especie != null)
+                            Text('Espécie: ${demanda.especie}'),
+                          if (demanda.quantidade != null)
+                            Text('Quantidade: ${demanda.quantidade}'),
+                          Text('Situação: ${demanda.situacaoAnimal}'),
+                        ],
+                      ),
+                      isThreeLine: true,
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showGruposPrioritarios(BuildContext context, DemandaProvider provider) {
+    // Mostrar apenas grupos prioritários
+    _showDemandasSaude(context, provider);
+  }
 }

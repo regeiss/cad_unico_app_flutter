@@ -167,7 +167,7 @@ class _MembrosScreenState extends State<MembrosScreen> {
               }
               
               if (provider.error != null && provider.membros.isEmpty) {
-                return ErrorDisplayWidget(
+                return CustomErrorWidget(
                   message: provider.error!,
                   onRetry: _loadMembros,
                 );
@@ -178,7 +178,7 @@ class _MembrosScreenState extends State<MembrosScreen> {
                   title: 'Nenhum membro encontrado',
                   subtitle: 'Comece adicionando membros familiares',
                   icon: Icons.family_restroom,
-                  actionLabel: 'Novo Membro',
+                  actionText: 'Novo Membro',
                   onAction: _showAddMemberDialog,
                 );
               }

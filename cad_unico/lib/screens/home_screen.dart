@@ -1,16 +1,17 @@
-import 'package:cadastro_app/providers/auth_provider.dart';
-import 'package:cadastro_app/providers/demanda_provider.dart';
-import 'package:cadastro_app/providers/membro_provider.dart';
-import 'package:cadastro_app/providers/responsavel_provider.dart';
-import 'package:cadastro_app/contants/constants.dart';
-import 'package:cadastro_app/utils/responsive.dart';
-import 'package:cadastro_app/widgets/dashboard_card.dart';
-//import 'package:cadastro_app/widgets/responsive_layout.dart';
-import 'package:cadastro_app/widgets/sidebar.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:provider/provider.dart';
+
+import '../contants/constants.dart';
+import '../providers/auth_provider.dart';
+import '../providers/demanda_provider.dart';
+import '../providers/membro_provider.dart';
+import '../providers/responsavel_provider.dart';
+import '../utils/responsive.dart';
+import '../widgets/dashboard_card.dart';
+//import 'package:cadastro_app/widgets/responsive_layout.dart';
+import '../widgets/sidebar.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});

@@ -1,6 +1,3 @@
-// import 'dart:convert';
-// ignore_for_file: use_setters_to_change_properties
-
 // lib/services/api_service.dart
 import 'dart:convert';
 import 'dart:io';
@@ -8,12 +5,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../contants/constants.dart';
-
-import '../models/responsavel_model.dart';
-import '../models/membro_model.dart';
-import '../models/demanda_saude_model.dart';
-import '../models/demanda_educacao_model.dart';
-import '../models/user_model.dart';
 
 class ApiService {
   static final ApiService _instance = ApiService._internal();
@@ -206,6 +197,86 @@ class ApiService {
     return {'success': false, 'message': AppConstants.loginError};
   }
 
+  Future<Map<String, dynamic>> register(Map<String, dynamic> userData) async {
+    try {
+      final response = await _dio.post(
+        AppConstants.authRegister.replaceFirst(AppConstants.apiBaseUrl, ''),
+        data: userData,
+      );
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        return {'success': true, 'data': response.data};
+      }
+    } on DioException catch (e) {
+      return _handleDioError(e);
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Erro ao criar conta',
+        'error': e.toString(),
+      };
+    }
+
+    return {'success': false, 'message': 'Erro ao criar conta'};
+  }
+
+  Future<Map<String, dynamic>> verifyToken() async {
+    if (_authToken == null) {
+      return {'success': false, 'message': 'Token não encontrado'};
+    }
+
+    try {
+      final response = await _dio.post(
+        AppConstants.authVerify.replaceFirst(AppConstants.apiBaseUrl, ''),
+        data: {'token': _authToken},
+      );
+
+      if (response.statusCode == 200) {
+        return {'success': true, 'data': response.data};
+      }
+    } on DioException catch (e) {
+      return _handleDioError(e);
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Erro ao verificar token',
+        'error': e.toString(),
+      };
+    }
+
+    return {'success': false, 'message': 'Token inválido'};
+  }
+
+  Future<Map<String, dynamic>> refreshToken(String refreshToken) async {
+    try {
+      final response = await _dio.post(
+        AppConstants.authRefresh.replaceFirst(AppConstants.apiBaseUrl, ''),
+        data: {'refresh': refreshToken},
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        _authToken = data['access'];
+        
+        // Atualizar token salvo
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString(AppConstants.tokenKey, _authToken!);
+        
+        return {'success': true, 'data': data};
+      }
+    } on DioException catch (e) {
+      return _handleDioError(e);
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Erro ao renovar token',
+        'error': e.toString(),
+      };
+    }
+
+    return {'success': false, 'message': 'Não foi possível renovar o token'};
+  }
+
   Future<Map<String, dynamic>> getUserProfile() async {
     try {
       final response = await _dio.get(
@@ -220,6 +291,50 @@ class ApiService {
     }
 
     return {'success': false, 'message': 'Erro ao carregar perfil'};
+  }
+
+  Future<Map<String, dynamic>> updateUserProfile(Map<String, dynamic> data) async {
+    try {
+      final response = await _dio.put(
+        AppConstants.authProfile.replaceFirst(AppConstants.apiBaseUrl, ''),
+        data: data,
+      );
+
+      if (response.statusCode == 200) {
+        // Atualizar dados do usuário salvos
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString(AppConstants.userDataKey, jsonEncode(response.data));
+        
+        return {'success': true, 'data': response.data};
+      }
+    } on DioException catch (e) {
+      return _handleDioError(e);
+    }
+
+    return {'success': false, 'message': 'Erro ao atualizar perfil'};
+  }
+
+  Future<Map<String, dynamic>> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    try {
+      final response = await _dio.post(
+        '/api/v1/auth/change-password/',
+        data: {
+          'current_password': currentPassword,
+          'new_password': newPassword,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return {'success': true, 'data': response.data};
+      }
+    } on DioException catch (e) {
+      return _handleDioError(e);
+    }
+
+    return {'success': false, 'message': 'Erro ao alterar senha'};
   }
 
   Future<Map<String, dynamic>> logout() async {

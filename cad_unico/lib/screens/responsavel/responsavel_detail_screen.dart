@@ -1,14 +1,15 @@
-import 'package:cadastro_app/models/responsavel_model.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:provider/provider.dart';
+
+import '../../models/responsavel_model.dart';
 import '../../providers/responsavel_provider.dart';
 // import '../../models/user_model.dart';
 import '../../utils/app_utils.dart';
+import '../../utils/responsive.dart';
 import '../../widgets/error_widget.dart';
 import '../../widgets/loading_widget.dart';
-import '../../utils/responsive.dart';
 
 
 class ResponsavelDetailScreen extends StatefulWidget {
@@ -193,14 +194,14 @@ class _ResponsavelDetailScreenState extends State<ResponsavelDetailScreen> {
         }
         
         if (provider.error != null) {
-          return ErrorDisplayWidget(
+          return CustomErrorWidget(
             message: provider.error!,
             onRetry: _loadResponsavel,
           );
         }
         
         if (provider.selectedResponsavel == null) {
-          return const ErrorDisplayWidget(
+          return const CustomErrorWidget(
             message: 'Responsável não encontrado',
           );
         }

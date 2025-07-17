@@ -1,3 +1,4 @@
+// lib/models/demanda_saude_model.dart
 class DemandaSaudeModel {
   final String cpf;
   final String? genero;
@@ -29,27 +30,32 @@ class DemandaSaudeModel {
     this.evolucao,
   });
 
-  factory DemandaSaudeModel.fromJson(Map<String, dynamic> json) => DemandaSaudeModel(
-      cpf: json['cpf'],
-      genero: json['genero'],
-      saudeCid: json['saude_cid'],
-      dataNasc: json['data_nasc'] != null ? DateTime.parse(json['data_nasc']) : null,
-      gestPuerNutriz: json['gest_puer_nutriz'],
-      mobReduzida: json['mob_reduzida'],
-      cuidaOutrem: json['cuida_outrem'],
-      pcdOuMental: json['pcd_ou_mental'],
-      alergiaIntol: json['alergia_intol'],
-      subsPsicoativas: json['subs_psicoativas'],
-      medControlada: json['med_controlada'],
-      localRef: json['local_ref'],
-      evolucao: json['evolucao'],
+  factory DemandaSaudeModel.fromJson(Map<String, dynamic> json) {
+    return DemandaSaudeModel(
+      cpf: json['cpf']?.toString() ?? '',
+      genero: json['genero']?.toString(),
+      saudeCid: json['saude_cid']?.toString(),
+      dataNasc: json['data_nasc'] != null 
+          ? DateTime.tryParse(json['data_nasc'].toString())
+          : null,
+      gestPuerNutriz: json['gest_puer_nutriz']?.toString() ?? 'N',
+      mobReduzida: json['mob_reduzida']?.toString() ?? 'N',
+      cuidaOutrem: json['cuida_outrem']?.toString() ?? 'N',
+      pcdOuMental: json['pcd_ou_mental']?.toString() ?? 'N',
+      alergiaIntol: json['alergia_intol']?.toString(),
+      subsPsicoativas: json['subs_psicoativas']?.toString(),
+      medControlada: json['med_controlada']?.toString(),
+      localRef: json['local_ref']?.toString(),
+      evolucao: json['evolucao']?.toString(),
     );
+  }
 
-  Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson() {
+    return {
       'cpf': cpf,
       'genero': genero,
       'saude_cid': saudeCid,
-      'data_nasc': dataNasc?.toIso8601String().split('T')[0],
+      'data_nasc': dataNasc?.toIso8601String()?.split('T')[0],
       'gest_puer_nutriz': gestPuerNutriz,
       'mob_reduzida': mobReduzida,
       'cuida_outrem': cuidaOutrem,
@@ -60,18 +66,42 @@ class DemandaSaudeModel {
       'local_ref': localRef,
       'evolucao': evolucao,
     };
+  }
 
+  @override
+  String toString() {
+    return 'DemandaSaudeModel(cpf: $cpf, genero: $genero, saudeCid: $saudeCid)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is DemandaSaudeModel && other.cpf == cpf;
+  }
+
+  @override
+  int get hashCode => cpf.hashCode;
+
+  // Getters úteis
   bool get isGrupoPrioritario => 
-      gestPuerNutriz == 'S' || mobReduzida == 'S' || pcdOuMental == 'S';
+      gestPuerNutriz == 'S' || 
+      mobReduzida == 'S' || 
+      pcdOuMental == 'S';
+
+  String get statusSaude {
+    if (isGrupoPrioritario) return 'Prioritário';
+    if (saudeCid != null && saudeCid!.isNotEmpty) return 'Com CID';
+    return 'Normal';
+  }
 
   int? get idade {
     if (dataNasc == null) return null;
-    final agora = DateTime.now();
-    int idade = agora.year - dataNasc!.year;
-    if (agora.month < dataNasc!.month || 
-        (agora.month == dataNasc!.month && agora.day < dataNasc!.day)) {
-      idade--;
+    final now = DateTime.now();
+    int age = now.year - dataNasc!.year;
+    if (now.month < dataNasc!.month || 
+        (now.month == dataNasc!.month && now.day < dataNasc!.day)) {
+      age--;
     }
-    return idade;
+    return age;
   }
 }

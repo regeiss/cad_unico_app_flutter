@@ -3,11 +3,11 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../contants/constants.dart';
 import '../../models/responsavel_model.dart';
 import '../../providers/responsavel_provider.dart';
-// import '../../models/user_model.dart';
+
 import '../../utils/app_utils.dart';
-import '../../contants/constants.dart';
 import '../../utils/responsive.dart';
 import '../../widgets/empty_state_widget.dart';
 import '../../widgets/error_widget.dart';
@@ -327,7 +327,7 @@ class _ResponsaveisScreenState extends State<ResponsaveisScreen> {
         }
         
         if (provider.error != null && provider.responsaveis.isEmpty) {
-          return ErrorDisplayWidget(
+          return CustomErrorWidget(
             message: provider.error!,
             onRetry: _loadResponsaveis,
           );
@@ -338,7 +338,7 @@ class _ResponsaveisScreenState extends State<ResponsaveisScreen> {
             title: 'Nenhum responsável encontrado',
             subtitle: 'Comece cadastrando um novo responsável no sistema',
             icon: Icons.people_outline,
-            actionLabel: 'Novo Responsável',
+            actionText: 'Novo Responsável',
             onAction: () => context.go('/responsaveis/novo'),
           );
         }
