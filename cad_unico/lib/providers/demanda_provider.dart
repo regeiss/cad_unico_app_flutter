@@ -81,7 +81,7 @@ class DemandaProvider extends ChangeNotifier {
           
       debugPrint('Carregadas ${_demandasEducacao.length} demandas de educação');
       
-    } catch (e) {
+    } on Exception catch (e) {
       _error = e.toString();
       debugPrint('Erro ao carregar demandas de educação: $e');
     } finally {
@@ -114,7 +114,7 @@ class DemandaProvider extends ChangeNotifier {
           
       debugPrint('Carregadas ${_demandasAmbiente.length} demandas de ambiente');
       
-    } catch (e) {
+    } on Exception catch (e) {
       _error = e.toString();
       debugPrint('Erro ao carregar demandas de ambiente: $e');
     } finally {
@@ -157,13 +157,11 @@ class DemandaProvider extends ChangeNotifier {
   }
 
   // Filtrar grupos prioritários
-  List<DemandaSaudeModel> get gruposPrioritarios {
-    return _demandasSaude.where((demanda) =>
+  List<DemandaSaudeModel> get gruposPrioritarios => _demandasSaude.where((demanda) =>
       demanda.gestPuerNutriz == 'S' ||
       demanda.mobReduzida == 'S' ||
       demanda.pcdOuMental == 'S'
     ).toList();
-  }
 
   // Estatísticas
   int get totalDemandasSaude => _demandasSaude.length;

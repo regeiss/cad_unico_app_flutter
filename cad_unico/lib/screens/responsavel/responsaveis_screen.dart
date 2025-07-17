@@ -27,7 +27,10 @@ class _ResponsaveisScreenState extends State<ResponsaveisScreen> {
   String _searchQuery = '';
   String? _statusFilter;
   String? _bairroFilter;
-  
+  String? selectedStatus = 'A';
+  List<String> filterStatuses = ['A']; // Filtros ativos por padrão
+
+
   @override
   void initState() {
     super.initState();
@@ -254,18 +257,25 @@ class _ResponsaveisScreenState extends State<ResponsaveisScreen> {
                   _applyFilters();
                 },
               ),
-              ...AppConstants.statusOptions.entries.map(
-                (entry) => FilterChipWidget(
-                  label: entry.value,
-                  isSelected: _statusFilter == entry.key,
-                  onPressed: () {
-                    setState(() {
-                      _statusFilter = entry.key;
-                    });
-                    _applyFilters();
-                  },
-                ),
-              ),
+              ...AppConstants.statusOptions['general']!.entries.map(
+                  (entry) => FilterChip(
+                    selected: filterStatuses.contains(entry.key),
+                    label: Text(entry.value['label'] as String),
+                    avatar: Icon(
+                      entry.value['icon'] as IconData,
+                      size: 16,
+                    ),
+                    onSelected: (selected) {
+                      setState(() {
+                        if (selected) {
+                          filterStatuses.add(entry.key);
+                        } else {
+                          filterStatuses.remove(entry.key);
+                        }
+                      });
+                    },
+                  ),
+                ), // <
             ],
           ),
           
@@ -515,17 +525,25 @@ class _ResponsaveisScreenState extends State<ResponsaveisScreen> {
                       });
                     },
                   ),
-                  ...AppConstants.statusOptions.entries.map(
-                    (entry) => FilterChipWidget(
-                      label: entry.value,
-                      isSelected: _statusFilter == entry.key,
-                      onPressed: () {
-                        setState(() {
-                          _statusFilter = entry.key;
-                        });
-                      },
+                  ...AppConstants.statusOptions['general']!.entries.map(
+                  (entry) => FilterChip(
+                    selected: filterStatuses.contains(entry.key),
+                    label: Text(entry.value['label'] as String),
+                    avatar: Icon(
+                      entry.value['icon'] as IconData,
+                      size: 16,
                     ),
+                    onSelected: (selected) {
+                      setState(() {
+                        if (selected) {
+                          filterStatuses.add(entry.key);
+                        } else {
+                          filterStatuses.remove(entry.key);
+                        }
+                      });
+                    },
                   ),
+                ), // <- .toList() é OBRIGATÓRIO
                 ],
               ),
               

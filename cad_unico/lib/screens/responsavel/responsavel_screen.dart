@@ -1,15 +1,15 @@
-import 'package:cadastro_app/models/responsavel_model.dart';
-import 'package:cadastro_app/providers/responsavel_provider.dart';
-import 'package:cadastro_app/contants/constants.dart';
-import 'package:cadastro_app/utils/responsive.dart';
 import 'package:flutter/material.dart';
-// import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+// import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
+import '../../contants/constants.dart';
+import '../../models/responsavel_model.dart';
+import '../../providers/responsavel_provider.dart';
 import '../../utils/app_utils.dart';
+import '../../utils/responsive.dart';
 // import '../../models/user_model.dart';
 
 class ResponsavelFormScreen extends StatefulWidget {
@@ -190,12 +190,12 @@ class _ResponsavelFormScreenState extends State<ResponsavelFormScreen> {
         }
       } else {
         Fluttertoast.showToast(
-          msg: provider.error ?? AppConstants.errorGeneral,
+          msg: provider.error ?? AppConstants.errorUpdate,
           backgroundColor: Colors.red,
           textColor: Colors.white,
         );
       }
-    } catch (e) {
+    } on Exception catch (e) {
       Fluttertoast.showToast(
         msg: 'Erro ao salvar: $e',
         backgroundColor: Colors.red,
@@ -560,7 +560,7 @@ class _ResponsavelFormScreenState extends State<ResponsavelFormScreen> {
                   items: AppConstants.statusOptions.entries.map(
                     (entry) => DropdownMenuItem(
                       value: entry.key,
-                      child: Text(entry.value),
+                      child: Text(entry.value as String),
                     ),
                   ).toList(),
                   onChanged: (value) {

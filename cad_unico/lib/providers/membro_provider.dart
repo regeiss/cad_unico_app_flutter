@@ -51,7 +51,7 @@ class MembroProvider with ChangeNotifier {
       _currentPage++;
       _hasNextPage = newMembros.length == 20;
 
-    } catch (e) {
+    } on Exception catch (e) {
       _error = e.toString();
       debugPrint('Erro ao carregar membros: $e');
     } finally {
@@ -69,7 +69,7 @@ class MembroProvider with ChangeNotifier {
     try {
       setFilters({'cpf_responsavel': cpfResponsavel});
       await loadMembros(refresh: true);
-    } catch (e) {
+    } on Exception catch  (e) {
       _error = e.toString();
       debugPrint('Erro ao carregar membros por responsável: $e');
     } finally {
@@ -89,7 +89,7 @@ class MembroProvider with ChangeNotifier {
       final newMembro = MembroModel.fromJson(data);
       _membros.insert(0, newMembro);
       return true;
-    } catch (e) {
+    }  (e) {
       _error = e.toString();
       debugPrint('Erro ao criar membro: $e');
       return false;
