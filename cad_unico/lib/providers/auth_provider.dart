@@ -60,21 +60,6 @@ class AuthProvider extends ChangeNotifier {
     _tokenRefreshTimer?.cancel();
     super.dispose();
   }
-  // ==========================================================================
-  // GETTERS
-  // ==========================================================================
-
-  // UserModel? get user => _user;
-  // AuthStatus get status => _status;
-  // bool get isLoading => _isLoading;
-  // bool get isLoggingIn => _isLoggingIn;
-  // bool get isLoggingOut => _isLoggingOut;
-  // bool get isRegistering => _isRegistering;
-  // String? get errorMessage => _errorMessage;
-  // String? get token => _token;
-  // bool get isAuthenticated =>
-  //     _status == AuthStatus.authenticated && _user != null;
-  // bool get hasError => _status == AuthStatus.error && _errorMessage != null;
 
   String get userDisplayName {
     if (_user == null) return 'Usuário';
@@ -831,6 +816,8 @@ class AuthProvider extends ChangeNotifier {
   bool canViewSensitiveData() {
     return _isAuthenticated && isUserActive;
   }
+  
+  void _setLoading(bool bool) {}
 }
 
 // // lib/providers/auth_provider.dart
