@@ -71,8 +71,7 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
+  Widget build(BuildContext context) => Scaffold(
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -87,8 +86,7 @@ class _SplashScreenState extends State<SplashScreen>
         child: Center(
           child: AnimatedBuilder(
             animation: _animationController,
-            builder: (context, child) {
-              return FadeTransition(
+            builder: (context, child) => FadeTransition(
                 opacity: _fadeAnimation,
                 child: ScaleTransition(
                   scale: _scaleAnimation,
@@ -163,11 +161,9 @@ class _SplashScreenState extends State<SplashScreen>
                     ],
                   ),
                 ),
-              );
-            },
+              ),
           ),
         ),
       ),
     );
-  }
 }

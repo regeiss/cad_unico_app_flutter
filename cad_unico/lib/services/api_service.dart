@@ -55,7 +55,8 @@ class ApiService {
         onResponse: (response, handler) {
           // Log da resposta em modo debug
           if (AppConstants.enableLogResponses && kDebugMode) {
-            debugPrint('✅ RESPONSE: ${response.statusCode} ${response.requestOptions.uri}');
+            debugPrint(
+                '✅ RESPONSE: ${response.statusCode} ${response.requestOptions.uri}');
             debugPrint('✅ DATA: ${response.data}');
           }
           handler.next(response);
@@ -72,7 +73,7 @@ class ApiService {
               // Repetir a requisição original com novo token
               final originalRequest = error.requestOptions;
               originalRequest.headers['Authorization'] = 'Bearer $_authToken';
-              
+
               try {
                 final response = await _dio.request(
                   originalRequest.path,
@@ -85,7 +86,7 @@ class ApiService {
                 );
                 handler.resolve(response);
                 return;
-              } catch (e) {
+              } on Exception {
                 // Se falhar novamente, prosseguir com o erro original
               }
             } else {
@@ -107,7 +108,7 @@ class ApiService {
   Future<void> setAuthToken(String token, String refreshToken) async {
     _authToken = token;
     _refreshToken = refreshToken;
-    
+
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(AppConstants.tokenKey, token);
     await prefs.setString(AppConstants.refreshTokenKey, refreshToken);
@@ -131,23 +132,23 @@ class ApiService {
       if (response.statusCode == 200) {
         final data = response.data;
         _authToken = data['access'];
-        
+
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString(AppConstants.tokenKey, _authToken!);
-        
+
         return true;
       }
-    }on Exception catch (e) {
+    } on Exception catch (e) {
       debugPrint('Erro ao renovar token: $e');
     }
-    
+
     return false;
   }
 
   Future<void> _clearAuthData() async {
     _authToken = null;
     _refreshToken = null;
-    
+
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(AppConstants.tokenKey);
     await prefs.remove(AppConstants.refreshTokenKey);
@@ -172,14 +173,15 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final data = response.data;
-        
+
         // Salvar tokens
         await setAuthToken(data['access'], data['refresh']);
-        
+
         // Salvar dados do usuário
         if (data['user'] != null) {
           final prefs = await SharedPreferences.getInstance();
-          await prefs.setString(AppConstants.userDataKey, jsonEncode(data['user']));
+          await prefs.setString(
+              AppConstants.userDataKey, jsonEncode(data['user']));
         }
 
         return {'success': true, 'data': data};
@@ -193,7 +195,6 @@ class ApiService {
         'error': e.toString(),
       };
     }
-
     return {'success': false, 'message': AppConstants.loginError};
   }
 
@@ -257,11 +258,11 @@ class ApiService {
       if (response.statusCode == 200) {
         final data = response.data;
         _authToken = data['access'];
-        
+
         // Atualizar token salvo
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString(AppConstants.tokenKey, _authToken!);
-        
+
         return {'success': true, 'data': data};
       }
     } on DioException catch (e) {
@@ -293,7 +294,8 @@ class ApiService {
     return {'success': false, 'message': 'Erro ao carregar perfil'};
   }
 
-  Future<Map<String, dynamic>> updateUserProfile(Map<String, dynamic> data) async {
+  Future<Map<String, dynamic>> updateUserProfile(
+      Map<String, dynamic> data) async {
     try {
       final response = await _dio.put(
         AppConstants.authProfile.replaceFirst(AppConstants.apiBaseUrl, ''),
@@ -303,8 +305,9 @@ class ApiService {
       if (response.statusCode == 200) {
         // Atualizar dados do usuário salvos
         final prefs = await SharedPreferences.getInstance();
-        await prefs.setString(AppConstants.userDataKey, jsonEncode(response.data));
-        
+        await prefs.setString(
+            AppConstants.userDataKey, jsonEncode(response.data));
+
         return {'success': true, 'data': response.data};
       }
     } on DioException catch (e) {
@@ -359,11 +362,12 @@ class ApiService {
   // ==========================================================================
 
   // Metodo tampao para eviter erros - deve ser removido quando a API estiver pronta
-  Future <Map<String, dynamic>> get({
+  Future<Map<String, dynamic>> get({
     int page = 1,
     String? search,
     String? status,
-    String? ordering, required Map<String, dynamic> filters,
+    String? ordering,
+    required Map<String, dynamic> filters,
   }) async {
     try {
       final queryParameters = <String, dynamic>{
@@ -382,7 +386,8 @@ class ApiService {
       }
 
       final response = await _dio.get(
-        AppConstants.responsaveisEndpoint.replaceFirst(AppConstants.apiBaseUrl, ''),
+        AppConstants.responsaveisEndpoint
+            .replaceFirst(AppConstants.apiBaseUrl, ''),
         queryParameters: queryParameters,
       );
 
@@ -397,182 +402,236 @@ class ApiService {
   }
 
   Future<Map<String, dynamic>> getResponsavel(String cpf) async {
-  try {
-    final token = await _getAuthToken();
-    
-    final response = await _dio.get(
-      '/cadastro/api/responsaveis/$cpf/',
-      options: Options(
-        headers: _getAuthHeaders(token),
-      ),
-    );
+    try {
+      if (_authToken == null) {
+        await loadSavedTokens();
+        if (_authToken == null) {
+          throw ApiException(
+              'Token de autenticação não encontrado. Faça login novamente.',
+              statusCode: 401);
+        }
+      }
 
-    if (response.statusCode == 200) {
-      return response.data;
-    } else {
-      throw ApiException(
-        'Erro ao buscar responsável',
-        statusCode: response.statusCode,
+      final response = await _dio.get(
+        '/cadastro/api/responsaveis/$cpf/',
+        options: Options(
+          headers: _getAuthHeaders(
+              _authToken!), // Now _authToken is guaranteed non-null
+        ),
       );
+
+      if (response.statusCode == 200) {
+        return response.data;
+      } else {
+        throw ApiException(
+          'Erro ao buscar responsável',
+          statusCode: response.statusCode,
+        );
+      }
+    } on DioException catch (e) {
+      // ... your existing DioError handling
+      if (e.response?.statusCode == 404) {
+        throw ApiException(
+          'Responsável não encontrado',
+          statusCode: 404,
+        );
+      } else if (e.response?.statusCode == 401) {
+        throw ApiException(
+          'Não autorizado. Faça login novamente.',
+          statusCode: 401,
+        );
+      } else {
+        throw ApiException(
+          e.response?.data['message'] ?? 'Erro ao buscar responsável',
+          statusCode: e.response?.statusCode,
+        );
+      }
+    } catch (e) {
+      if (e is ApiException) {
+        rethrow;
+      }
+      throw ApiException('Erro de conexão: ${e.toString()}');
     }
-  } on DioException catch (e) {
-    if (e.response?.statusCode == 404) {
-      throw ApiException(
-        'Responsável não encontrado',
-        statusCode: 404,
-      );
-    } else if (e.response?.statusCode == 401) {
-      throw ApiException(
-        'Não autorizado. Faça login novamente.',
-        statusCode: 401,
-      );
-    } else {
-      throw ApiException(
-        e.response?.data['message'] ?? 'Erro ao buscar responsável',
-        statusCode: e.response?.statusCode,
-      );
-    }
-  } catch (e) {
-    throw ApiException('Erro de conexão: ${e.toString()}');
   }
-}
 
-/// Busca um responsável com seus membros
-Future<Map<String, dynamic>> getResponsavelComMembros(String cpf) async {
-  try {
-    final token = await _getAuthToken();
-    
-    final response = await _dio.get(
-      '/cadastro/api/responsaveis/$cpf/com_membros/',
-      options: Options(
-        headers: _getAuthHeaders(token),
-      ),
-    );
+  /// Busca um responsável com seus membros
+  Future<Map<String, dynamic>> getResponsavelComMembros(String cpf) async {
+    try {
+      // Rely on the *current instance's* _authToken.
+      // Ensure `loadSavedTokens()` is called once at app startup
+      // or immediately after `setAuthToken` is called after login/refresh.
+      if (_authToken == null) {
+        // It's possible the _authToken isn't loaded yet on first run.
+        // Let's try loading it from preferences if it's null.
+        await loadSavedTokens();
+        if (_authToken == null) {
+          throw ApiException(
+              'Token de autenticação não encontrado. Faça login novamente.',
+              statusCode: 401);
+        }
+      }
 
-    if (response.statusCode == 200) {
-      return response.data;
-    } else {
-      throw ApiException(
-        'Erro ao buscar responsável com membros',
-        statusCode: response.statusCode,
+      final response = await _dio.get(
+        '/cadastro/api/responsaveis/$cpf/',
+        options: Options(
+          headers: _getAuthHeaders(
+              _authToken!), // Now _authToken is guaranteed non-null
+        ),
       );
+
+      if (response.statusCode == 200) {
+        return response.data;
+      } else {
+        throw ApiException(
+          'Erro ao buscar responsável com membros',
+          statusCode: response.statusCode,
+        );
+      }
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        throw ApiException(
+          'Responsável não encontrado',
+          statusCode: 404,
+        );
+      } else if (e.response?.statusCode == 401) {
+        throw ApiException(
+          'Não autorizado. Faça login novamente.',
+          statusCode: 401,
+        );
+      } else {
+        throw ApiException(
+          e.response?.data['message'] ??
+              'Erro ao buscar responsável com membros',
+          statusCode: e.response?.statusCode,
+        );
+      }
+    } catch (e) {
+      throw ApiException('Erro de conexão: ${e.toString()}');
     }
-  } on DioException catch (e) {
-    if (e.response?.statusCode == 404) {
-      throw ApiException(
-        'Responsável não encontrado',
-        statusCode: 404,
-      );
-    } else if (e.response?.statusCode == 401) {
-      throw ApiException(
-        'Não autorizado. Faça login novamente.',
-        statusCode: 401,
-      );
-    } else {
-      throw ApiException(
-        e.response?.data['message'] ?? 'Erro ao buscar responsável com membros',
-        statusCode: e.response?.statusCode,
-      );
-    }
-  } catch (e) {
-    throw ApiException('Erro de conexão: ${e.toString()}');
   }
-}
 
-/// Busca um responsável com todas as demandas associadas
-Future<Map<String, dynamic>> getResponsavelComDemandas(String cpf) async {
-  try {
-    final token = await _getAuthToken();
-    
-    final response = await _dio.get(
-      '/cadastro/api/responsaveis/$cpf/com_demandas/',
-      options: Options(
-        headers: _getAuthHeaders(token),
-      ),
-    );
+  /// Busca um responsável com todas as demandas associadas
+  Future<Map<String, dynamic>> getResponsavelComDemandas(String cpf) async {
+    try {
+      // Rely on the *current instance's* _authToken.
+      // Ensure `loadSavedTokens()` is called once at app startup
+      // or immediately after `setAuthToken` is called after login/refresh.
+      if (_authToken == null) {
+        // It's possible the _authToken isn't loaded yet on first run.
+        // Let's try loading it from preferences if it's null.
+        await loadSavedTokens();
+        if (_authToken == null) {
+          throw ApiException(
+              'Token de autenticação não encontrado. Faça login novamente.',
+              statusCode: 401);
+        }
+      }
 
-    if (response.statusCode == 200) {
-      return response.data;
-    } else {
-      throw ApiException(
-        'Erro ao buscar responsável com demandas',
-        statusCode: response.statusCode,
+      final response = await _dio.get(
+        '/cadastro/api/responsaveis/$cpf/',
+        options: Options(
+          headers: _getAuthHeaders(
+              _authToken!), // Now _authToken is guaranteed non-null
+        ),
       );
+
+      if (response.statusCode == 200) {
+        return response.data;
+      } else {
+        throw ApiException(
+          'Erro ao buscar responsável com demandas',
+          statusCode: response.statusCode,
+        );
+      }
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        throw ApiException(
+          'Responsável não encontrado',
+          statusCode: 404,
+        );
+      } else if (e.response?.statusCode == 401) {
+        throw ApiException(
+          'Não autorizado. Faça login novamente.',
+          statusCode: 401,
+        );
+      } else {
+        throw ApiException(
+          e.response?.data['message'] ??
+              'Erro ao buscar responsável com demandas',
+          statusCode: e.response?.statusCode,
+        );
+      }
+    } catch (e) {
+      throw ApiException('Erro de conexão: ${e.toString()}');
     }
-  } on DioException catch (e) {
-    if (e.response?.statusCode == 404) {
-      throw ApiException(
-        'Responsável não encontrado',
-        statusCode: 404,
-      );
-    } else if (e.response?.statusCode == 401) {
-      throw ApiException(
-        'Não autorizado. Faça login novamente.',
-        statusCode: 401,
-      );
-    } else {
-      throw ApiException(
-        e.response?.data['message'] ?? 'Erro ao buscar responsável com demandas',
-        statusCode: e.response?.statusCode,
-      );
-    }
-  } catch (e) {
-    throw ApiException('Erro de conexão: ${e.toString()}');
   }
-}
 
-/// Busca responsável por CPF usando query parameter
-Future<Map<String, dynamic>> buscarResponsavelPorCpf(String cpf) async {
-  try {
-    final token = await _getAuthToken();
-    
-    final response = await _dio.get(
-      '/cadastro/api/responsaveis/buscar_por_cpf/',
-      queryParameters: {'cpf': cpf},
-      options: Options(
-        headers: _getAuthHeaders(token),
-      ),
-    );
+  /// Busca responsável por CPF usando query parameter
+  Future<Map<String, dynamic>> buscarResponsavelPorCpf(String cpf) async {
+    try {
+      // Rely on the *current instance's* _authToken.
+      // Ensure `loadSavedTokens()` is called once at app startup
+      // or immediately after `setAuthToken` is called after login/refresh.
+      if (_authToken == null) {
+        // It's possible the _authToken isn't loaded yet on first run.
+        // Let's try loading it from preferences if it's null.
+        await loadSavedTokens();
+        if (_authToken == null) {
+          throw ApiException(
+              'Token de autenticação não encontrado. Faça login novamente.',
+              statusCode: 401);
+        }
+      }
 
-    if (response.statusCode == 200) {
-      return response.data;
-    } else {
-      throw ApiException(
-        'Erro ao buscar responsável por CPF',
-        statusCode: response.statusCode,
+      final response = await _dio.get(
+        '/cadastro/api/responsaveis/$cpf/',
+        options: Options(
+          headers: _getAuthHeaders(
+              _authToken!), // Now _authToken is guaranteed non-null
+        ),
       );
+
+      if (response.statusCode == 200) {
+        return response.data;
+      } else {
+        throw ApiException(
+          'Erro ao buscar responsável por CPF',
+          statusCode: response.statusCode,
+        );
+      }
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        throw ApiException(
+          'Responsável não encontrado',
+          statusCode: 404,
+        );
+      } else if (e.response?.statusCode == 400) {
+        throw ApiException(
+          e.response?.data['detail'] ?? 'CPF inválido',
+          statusCode: 400,
+        );
+      } else if (e.response?.statusCode == 401) {
+        throw ApiException(
+          'Não autorizado. Faça login novamente.',
+          statusCode: 401,
+        );
+      } else {
+        throw ApiException(
+          e.response?.data['detail'] ?? 'Erro ao buscar responsável',
+          statusCode: e.response?.statusCode,
+        );
+      }
+    } catch (e) {
+      throw ApiException('Erro de conexão: ${e.toString()}');
     }
-  } on DioException catch (e) {
-    if (e.response?.statusCode == 404) {
-      throw ApiException(
-        'Responsável não encontrado',
-        statusCode: 404,
-      );
-    } else if (e.response?.statusCode == 400) {
-      throw ApiException(
-        e.response?.data['detail'] ?? 'CPF inválido',
-        statusCode: 400,
-      );
-    } else if (e.response?.statusCode == 401) {
-      throw ApiException(
-        'Não autorizado. Faça login novamente.',
-        statusCode: 401,
-      );
-    } else {
-      throw ApiException(
-        e.response?.data['detail'] ?? 'Erro ao buscar responsável',
-        statusCode: e.response?.statusCode,
-      );
-    }
-  } catch (e) {
-    throw ApiException('Erro de conexão: ${e.toString()}');
   }
-}
+
   Future<Map<String, dynamic>> getResponsaveis({
     int page = 1,
     String? search,
     String? status,
-    String? ordering, required Map<String, dynamic> filters,
+    String? ordering,
+    required Map<String, dynamic> filters,
   }) async {
     try {
       final queryParameters = <String, dynamic>{
@@ -591,7 +650,8 @@ Future<Map<String, dynamic>> buscarResponsavelPorCpf(String cpf) async {
       }
 
       final response = await _dio.get(
-        AppConstants.responsaveisEndpoint.replaceFirst(AppConstants.apiBaseUrl, ''),
+        AppConstants.responsaveisEndpoint
+            .replaceFirst(AppConstants.apiBaseUrl, ''),
         queryParameters: queryParameters,
       );
 
@@ -608,7 +668,8 @@ Future<Map<String, dynamic>> buscarResponsavelPorCpf(String cpf) async {
   Future<Map<String, dynamic>> getResponsavelByCpf(String cpf) async {
     try {
       final response = await _dio.get(
-        AppConstants.getResponsavelByCpfUrl(cpf).replaceFirst(AppConstants.apiBaseUrl, ''),
+        AppConstants.getResponsavelByCpfUrl(cpf)
+            .replaceFirst(AppConstants.apiBaseUrl, ''),
       );
 
       if (response.statusCode == 200) {
@@ -637,10 +698,12 @@ Future<Map<String, dynamic>> buscarResponsavelPorCpf(String cpf) async {
   //   return {'success': false, 'message': 'Erro ao carregar dados do responsável'};
   // }
 
-  Future<Map<String, dynamic>> createResponsavel(Map<String, dynamic> data) async {
+  Future<Map<String, dynamic>> createResponsavel(
+      Map<String, dynamic> data) async {
     try {
       final response = await _dio.post(
-        AppConstants.responsaveisEndpoint.replaceFirst(AppConstants.apiBaseUrl, ''),
+        AppConstants.responsaveisEndpoint
+            .replaceFirst(AppConstants.apiBaseUrl, ''),
         data: data,
       );
 
@@ -658,10 +721,12 @@ Future<Map<String, dynamic>> buscarResponsavelPorCpf(String cpf) async {
     return {'success': false, 'message': 'Erro ao criar responsável'};
   }
 
-  Future<Map<String, dynamic>> updateResponsavel(String cpf, Map<String, dynamic> data) async {
+  Future<Map<String, dynamic>> updateResponsavel(
+      String cpf, Map<String, dynamic> data) async {
     try {
       final response = await _dio.put(
-        AppConstants.getResponsavelByCpfUrl(cpf).replaceFirst(AppConstants.apiBaseUrl, ''),
+        AppConstants.getResponsavelByCpfUrl(cpf)
+            .replaceFirst(AppConstants.apiBaseUrl, ''),
         data: data,
       );
 
@@ -687,7 +752,8 @@ Future<Map<String, dynamic>> buscarResponsavelPorCpf(String cpf) async {
     int page = 1,
     String? search,
     String? status,
-    String? cpfResponsavel, required Map<String, dynamic> filters,
+    String? cpfResponsavel,
+    required Map<String, dynamic> filters,
   }) async {
     try {
       final queryParameters = <String, dynamic>{
@@ -764,7 +830,8 @@ Future<Map<String, dynamic>> buscarResponsavelPorCpf(String cpf) async {
       }
 
       final response = await _dio.get(
-        AppConstants.demandasSaudeEndpoint.replaceFirst(AppConstants.apiBaseUrl, ''),
+        AppConstants.demandasSaudeEndpoint
+            .replaceFirst(AppConstants.apiBaseUrl, ''),
         queryParameters: queryParameters,
       );
 
@@ -791,7 +858,10 @@ Future<Map<String, dynamic>> buscarResponsavelPorCpf(String cpf) async {
       return _handleDioError(e);
     }
 
-    return {'success': false, 'message': 'Erro ao carregar grupos prioritários'};
+    return {
+      'success': false,
+      'message': 'Erro ao carregar grupos prioritários'
+    };
   }
 
   // ==========================================================================
@@ -817,7 +887,8 @@ Future<Map<String, dynamic>> buscarResponsavelPorCpf(String cpf) async {
       }
 
       final response = await _dio.get(
-        AppConstants.demandasEducacaoEndpoint.replaceFirst(AppConstants.apiBaseUrl, ''),
+        AppConstants.demandasEducacaoEndpoint
+            .replaceFirst(AppConstants.apiBaseUrl, ''),
         queryParameters: queryParameters,
       );
 
@@ -828,7 +899,10 @@ Future<Map<String, dynamic>> buscarResponsavelPorCpf(String cpf) async {
       return _handleDioError(e);
     }
 
-    return {'success': false, 'message': 'Erro ao carregar demandas de educação'};
+    return {
+      'success': false,
+      'message': 'Erro ao carregar demandas de educação'
+    };
   }
 
   // ==========================================================================
@@ -838,7 +912,7 @@ Future<Map<String, dynamic>> buscarResponsavelPorCpf(String cpf) async {
   Future<Map<String, dynamic>> getCepInfo(String cep) async {
     try {
       final cleanCep = cep.replaceAll('-', '').replaceAll('.', '');
-      
+
       final dio = Dio(); // Instância separada para APIs externas
       final response = await dio.get(AppConstants.getViaCepUrl(cleanCep));
 
@@ -862,7 +936,7 @@ Future<Map<String, dynamic>> buscarResponsavelPorCpf(String cpf) async {
       case DioExceptionType.receiveTimeout:
         message = AppConstants.timeoutError;
         break;
-      
+
       case DioExceptionType.badResponse:
         if (statusCode != null) {
           switch (statusCode) {
@@ -879,7 +953,8 @@ Future<Map<String, dynamic>> buscarResponsavelPorCpf(String cpf) async {
               message = AppConstants.noDataFound;
               break;
             case 422:
-              message = e.response?.data['message'] ?? AppConstants.requiredFieldsError;
+              message = e.response?.data['message'] ??
+                  AppConstants.requiredFieldsError;
               break;
             case 500:
               message = AppConstants.serverError;
@@ -889,7 +964,7 @@ Future<Map<String, dynamic>> buscarResponsavelPorCpf(String cpf) async {
           }
         }
         break;
-      
+
       case DioExceptionType.connectionError:
         if (e.error is SocketException) {
           message = 'Sem conexão com a internet';
@@ -897,7 +972,7 @@ Future<Map<String, dynamic>> buscarResponsavelPorCpf(String cpf) async {
           message = AppConstants.networkError;
         }
         break;
-      
+
       default:
         message = e.message ?? AppConstants.networkError;
     }
@@ -910,14 +985,10 @@ Future<Map<String, dynamic>> buscarResponsavelPorCpf(String cpf) async {
     };
   }
 
-  Future<String?> _getAuthToken() async {
-  final prefs = await SharedPreferences.getInstance();
-  return prefs.getString('auth_token');
-}
-
-  Map<String, String> _getAuthHeaders(String? token) => {
-      'Content-Type': 'application/json',
-    if (token != null) 'Authorization': 'Bearer $token',
+  Map<String, String> _getAuthHeaders(String token) => {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json', // Keep this if it's a default header as per AppConstants
+    'Authorization': 'Bearer $token',
   };
 
   // ==========================================================================
@@ -933,9 +1004,9 @@ Future<Map<String, dynamic>> buscarResponsavelPorCpf(String cpf) async {
 class ApiException implements Exception {
   final String message;
   final int? statusCode;
-  
+
   ApiException(this.message, {this.statusCode});
-  
+
   @override
   String toString() => message;
 }

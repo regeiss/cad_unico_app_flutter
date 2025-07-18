@@ -1,4 +1,4 @@
-import 'package:cadastro_app/screens/home_screen.dart';
+import '../screens/home_screen.dart';
 import 'package:flutter/material.dart';
 
 import '../contants/constants.dart';

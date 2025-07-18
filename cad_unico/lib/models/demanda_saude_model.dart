@@ -30,8 +30,7 @@ class DemandaSaudeModel {
     this.evolucao,
   });
 
-  factory DemandaSaudeModel.fromJson(Map<String, dynamic> json) {
-    return DemandaSaudeModel(
+  factory DemandaSaudeModel.fromJson(Map<String, dynamic> json) => DemandaSaudeModel(
       cpf: json['cpf']?.toString() ?? '',
       genero: json['genero']?.toString(),
       saudeCid: json['saude_cid']?.toString(),
@@ -48,14 +47,12 @@ class DemandaSaudeModel {
       localRef: json['local_ref']?.toString(),
       evolucao: json['evolucao']?.toString(),
     );
-  }
 
-  Map<String, dynamic> toJson() {
-    return {
+  Map<String, dynamic> toJson() => {
       'cpf': cpf,
       'genero': genero,
       'saude_cid': saudeCid,
-      'data_nasc': dataNasc?.toIso8601String()?.split('T')[0],
+      'data_nasc': dataNasc?.toIso8601String().split('T')[0],
       'gest_puer_nutriz': gestPuerNutriz,
       'mob_reduzida': mobReduzida,
       'cuida_outrem': cuidaOutrem,
@@ -66,12 +63,9 @@ class DemandaSaudeModel {
       'local_ref': localRef,
       'evolucao': evolucao,
     };
-  }
 
   @override
-  String toString() {
-    return 'DemandaSaudeModel(cpf: $cpf, genero: $genero, saudeCid: $saudeCid)';
-  }
+  String toString() => 'DemandaSaudeModel(cpf: $cpf, genero: $genero, saudeCid: $saudeCid)';
 
   @override
   bool operator ==(Object other) {

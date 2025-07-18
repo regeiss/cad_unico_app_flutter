@@ -379,33 +379,22 @@ static const Map<String, IconData> systemIcons = {
   };
 
   // Métodos auxiliares para trabalhar com status
-  static Map<String, dynamic>? getStatusInfo(String category, String status) {
-    return statusOptions[category]?[status];
-  }
+  static Map<String, dynamic>? getStatusInfo(String category, String status) => statusOptions[category]?[status];
 
-  static String getStatusLabel(String category, String status) {
-    return getStatusInfo(category, status)?['label'] ?? status;
-  }
+  static String getStatusLabel(String category, String status) => getStatusInfo(category, status)?['label'] ?? status;
 
-  static Color getStatusColor(String category, String status) {
-    return getStatusInfo(category, status)?['color'] ?? Colors.grey;
-  }
+  static Color getStatusColor(String category, String status) => getStatusInfo(category, status)?['color'] ?? Colors.grey;
 
-  static IconData getStatusIcon(String category, String status) {
-    return getStatusInfo(category, status)?['icon'] ?? Icons.help_outline;
-  }
+  static IconData getStatusIcon(String category, String status) => getStatusInfo(category, status)?['icon'] ?? Icons.help_outline;
 
-  static String getStatusDescription(String category, String status) {
-    return getStatusInfo(category, status)?['description'] ?? 'Status não encontrado';
-  }
+  static String getStatusDescription(String category, String status) => getStatusInfo(category, status)?['description'] ?? 'Status não encontrado';
 
   // Lista de opções para dropdowns
   static List<DropdownMenuItem<String>> getStatusDropdownItems(String category) {
     final options = statusOptions[category];
     if (options == null) return [];
 
-    return options.entries.map((entry) {
-      return DropdownMenuItem<String>(
+    return options.entries.map((entry) => DropdownMenuItem<String>(
         value: entry.key,
         child: Row(
           children: [
@@ -418,8 +407,7 @@ static const Map<String, IconData> systemIcons = {
             Text(entry.value['label'] as String),
           ],
         ),
-      );
-    }).toList();
+      )).toList();
   }
 
   // Configurações de formulário

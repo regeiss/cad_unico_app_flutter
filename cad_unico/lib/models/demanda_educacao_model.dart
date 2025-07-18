@@ -23,8 +23,7 @@ class DemandaEducacaoModel {
     required this.cpf,
   });
 
-  factory DemandaEducacaoModel.fromJson(Map<String, dynamic> json) {
-    return DemandaEducacaoModel(
+  factory DemandaEducacaoModel.fromJson(Map<String, dynamic> json) => DemandaEducacaoModel(
       cpfResponsavel: json['cpf_responsavel']?.toString() ?? '',
       nome: json['nome']?.toString() ?? '',
       genero: json['genero']?.toString(),
@@ -42,27 +41,22 @@ class DemandaEducacaoModel {
       evolucao: json['evolucao']?.toString(),
       cpf: json['cpf']?.toString() ?? '',
     );
-  }
 
-  Map<String, dynamic> toJson() {
-    return {
+  Map<String, dynamic> toJson() => {
       'cpf_responsavel': cpfResponsavel,
       'nome': nome,
       'genero': genero,
       'alojamento': alojamento,
-      'data_nasc': dataNasc?.toIso8601String()?.split('T')[0],
+      'data_nasc': dataNasc?.toIso8601String().split('T')[0],
       'unidade_ensino': unidadeEnsino,
       'turno': turno,
       'demanda': demanda,
       'evolucao': evolucao,
       'cpf': cpf,
     };
-  }
 
   @override
-  String toString() {
-    return 'DemandaEducacaoModel(cpf: $cpf, nome: $nome, turno: $turno)';
-  }
+  String toString() => 'DemandaEducacaoModel(cpf: $cpf, nome: $nome, turno: $turno)';
 
   @override
   bool operator ==(Object other) {

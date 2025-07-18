@@ -13,8 +13,7 @@ class FilterChipWidget extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return FilterChip(
+  Widget build(BuildContext context) => FilterChip(
       label: Text(label),
       selected: isSelected,
       onSelected: (_) => onPressed(),
@@ -26,5 +25,4 @@ class FilterChipWidget extends StatelessWidget {
         fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
       ),
     );
-  }
 }

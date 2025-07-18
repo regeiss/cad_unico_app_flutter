@@ -11,8 +11,7 @@ class LoadingWidget extends StatelessWidget {
   const LoadingWidget({super.key, this.message});
 
   @override
-  Widget build(BuildContext context) {
-    return Center(
+  Widget build(BuildContext context) => Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -31,5 +30,4 @@ class LoadingWidget extends StatelessWidget {
         ],
       ),
     );
-  }
 }
