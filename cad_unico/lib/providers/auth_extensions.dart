@@ -5,6 +5,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../models/user_model.dart';
 import 'auth_provider.dart';
 
 /// Extensão para facilitar o acesso ao AuthProvider
@@ -19,7 +20,7 @@ extension BuildContextAuth on BuildContext {
   bool get isAuthenticated => auth.isAuthenticated;
   
   /// Obtém dados do usuário
-  Map<String, dynamic>? get user => auth.user;
+  UserModel? get user => auth.user;
   
   /// Obtém token de autorização
   String? get authToken => auth.token;

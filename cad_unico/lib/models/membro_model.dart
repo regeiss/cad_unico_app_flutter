@@ -1,33 +1,52 @@
-class MembroModel {
+class Membro {
   final String cpf;
   final String nome;
   final String cpfResponsavel;
+  final String? cpfResponsavelNome;
   final DateTime? timestamp;
   final String? status;
 
-  MembroModel({
+  Membro({
     required this.cpf,
     required this.nome,
     required this.cpfResponsavel,
+    this.cpfResponsavelNome,
     this.timestamp,
     this.status,
   });
 
-  factory MembroModel.fromJson(Map<String, dynamic> json) => MembroModel(
-      cpf: json['cpf'],
-      nome: json['nome'],
-      cpfResponsavel: json['cpf_responsavel'],
+  factory Membro.fromJson(Map<String, dynamic> json) {
+    return Membro(
+      cpf: json['cpf'] ?? '',
+      nome: json['nome'] ?? '',
+      cpfResponsavel: json['cpf_responsavel'] ?? '',
+      cpfResponsavelNome: json['cpf_responsavel_nome'],
       timestamp: json['timestamp'] != null ? DateTime.parse(json['timestamp']) : null,
       status: json['status'],
     );
+  }
 
-  Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson() {
+    return {
       'cpf': cpf,
       'nome': nome,
       'cpf_responsavel': cpfResponsavel,
-      'timestamp': timestamp?.toIso8601String(),
       'status': status,
     };
+  }
 
-  bool get isAtivo => status == 'A';
+  String get statusDescricao {
+    switch (status) {
+      case 'A': return 'Ativo';
+      case 'I': return 'Inativo';
+      default: return status ?? 'Desconhecido';
+    }
+  }
+
+  String get cpfFormatado {
+    if (cpf.length == 11) {
+      return '${cpf.substring(0, 3)}.${cpf.substring(3, 6)}.${cpf.substring(6, 9)}-${cpf.substring(9)}';
+    }
+    return cpf;
+  }
 }

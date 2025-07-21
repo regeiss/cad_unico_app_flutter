@@ -1,46 +1,61 @@
-class CepAtingidoModel {
+class CepInfo {
   final String cep;
   final String logradouro;
-  final int? numInicial;
-  final int? numFinal;
+  final String? bairro;
   final String municipio;
   final String uf;
-  final String? bairro;
+  final int? numInicial;
+  final int? numFinal;
 
-  CepAtingidoModel({
+  CepInfo({
     required this.cep,
     required this.logradouro,
-    this.numInicial,
-    this.numFinal,
+    this.bairro,
     required this.municipio,
     required this.uf,
-    this.bairro,
+    this.numInicial,
+    this.numFinal,
   });
 
-  factory CepAtingidoModel.fromJson(Map<String, dynamic> json) => CepAtingidoModel(
-      cep: json['cep'],
-      logradouro: json['logradouro'],
+  factory CepInfo.fromJson(Map<String, dynamic> json) {
+    return CepInfo(
+      cep: json['cep'] ?? '',
+      logradouro: json['logradouro'] ?? '',
+      bairro: json['bairro'],
+      municipio: json['municipio'] ?? json['localidade'] ?? '',
+      uf: json['uf'] ?? '',
       numInicial: json['num_inicial'],
       numFinal: json['num_final'],
-      municipio: json['municipio'],
-      uf: json['uf'],
-      bairro: json['bairro'],
     );
+  }
 
-  Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson() {
+    return {
       'cep': cep,
       'logradouro': logradouro,
-      'num_inicial': numInicial,
-      'num_final': numFinal,
+      'bairro': bairro,
       'municipio': municipio,
       'uf': uf,
-      'bairro': bairro,
+      'num_inicial': numInicial,
+      'num_final': numFinal,
     };
+  }
+
+  String get cepFormatado {
+    if (cep.length == 8) {
+      return '${cep.substring(0, 5)}-${cep.substring(5)}';
+    }
+    return cep;
+  }
 
   String get enderecoCompleto {
-    final parts = <String>[logradouro];
-    if (bairro != null) parts.add(bairro!);
-    parts.add('$municipio/$uf');
-    return parts.join(', ');
+    final endereco = StringBuffer();
+    endereco.write(logradouro);
+    if (bairro != null && bairro!.isNotEmpty) {
+      endereco.write(', $bairro');
+    }
+    endereco.write(' - $municipio/$uf');
+    endereco.write(' - CEP: $cepFormatado');
+    return endereco.toString();
   }
 }

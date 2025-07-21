@@ -25,7 +25,7 @@ class DashboardCard extends StatelessWidget {
     final cardColor = color ?? Theme.of(context).colorScheme.primary;
     
     return Card(
-      elevation: AppConstants.elevation,
+      elevation: AppConstants.cardElevation,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),

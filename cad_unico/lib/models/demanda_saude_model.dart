@@ -1,5 +1,4 @@
-// lib/models/demanda_saude_model.dart
-class DemandaSaudeModel {
+class DemandaSaude {
   final String cpf;
   final String? genero;
   final String? saudeCid;
@@ -14,7 +13,7 @@ class DemandaSaudeModel {
   final String? localRef;
   final String? evolucao;
 
-  DemandaSaudeModel({
+  DemandaSaude({
     required this.cpf,
     this.genero,
     this.saudeCid,
@@ -30,25 +29,26 @@ class DemandaSaudeModel {
     this.evolucao,
   });
 
-  factory DemandaSaudeModel.fromJson(Map<String, dynamic> json) => DemandaSaudeModel(
-      cpf: json['cpf']?.toString() ?? '',
-      genero: json['genero']?.toString(),
-      saudeCid: json['saude_cid']?.toString(),
-      dataNasc: json['data_nasc'] != null 
-          ? DateTime.tryParse(json['data_nasc'].toString())
-          : null,
-      gestPuerNutriz: json['gest_puer_nutriz']?.toString() ?? 'N',
-      mobReduzida: json['mob_reduzida']?.toString() ?? 'N',
-      cuidaOutrem: json['cuida_outrem']?.toString() ?? 'N',
-      pcdOuMental: json['pcd_ou_mental']?.toString() ?? 'N',
-      alergiaIntol: json['alergia_intol']?.toString(),
-      subsPsicoativas: json['subs_psicoativas']?.toString(),
-      medControlada: json['med_controlada']?.toString(),
-      localRef: json['local_ref']?.toString(),
-      evolucao: json['evolucao']?.toString(),
+  factory DemandaSaude.fromJson(Map<String, dynamic> json) {
+    return DemandaSaude(
+      cpf: json['cpf'] ?? '',
+      genero: json['genero'],
+      saudeCid: json['saude_cid'],
+      dataNasc: json['data_nasc'] != null ? DateTime.parse(json['data_nasc']) : null,
+      gestPuerNutriz: json['gest_puer_nutriz'] ?? 'N',
+      mobReduzida: json['mob_reduzida'] ?? 'N',
+      cuidaOutrem: json['cuida_outrem'] ?? 'N',
+      pcdOuMental: json['pcd_ou_mental'] ?? 'N',
+      alergiaIntol: json['alergia_intol'],
+      subsPsicoativas: json['subs_psicoativas'],
+      medControlada: json['med_controlada'],
+      localRef: json['local_ref'],
+      evolucao: json['evolucao'],
     );
+  }
 
-  Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson() {
+    return {
       'cpf': cpf,
       'genero': genero,
       'saude_cid': saudeCid,
@@ -63,39 +63,33 @@ class DemandaSaudeModel {
       'local_ref': localRef,
       'evolucao': evolucao,
     };
-
-  @override
-  String toString() => 'DemandaSaudeModel(cpf: $cpf, genero: $genero, saudeCid: $saudeCid)';
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is DemandaSaudeModel && other.cpf == cpf;
   }
 
-  @override
-  int get hashCode => cpf.hashCode;
+  bool get isPrioritario {
+    return gestPuerNutriz == 'S' || 
+           mobReduzida == 'S' || 
+           pcdOuMental == 'S' ||
+           cuidaOutrem == 'S';
+  }
 
-  // Getters úteis
-  bool get isGrupoPrioritario => 
-      gestPuerNutriz == 'S' || 
-      mobReduzida == 'S' || 
-      pcdOuMental == 'S';
-
-  String get statusSaude {
-    if (isGrupoPrioritario) return 'Prioritário';
-    if (saudeCid != null && saudeCid!.isNotEmpty) return 'Com CID';
-    return 'Normal';
+  String get prioridadeDescricao {
+    final prioridades = <String>[];
+    if (gestPuerNutriz == 'S') prioridades.add('Gestante/Nutriz');
+    if (mobReduzida == 'S') prioridades.add('Mobilidade Reduzida');
+    if (pcdOuMental == 'S') prioridades.add('PCD/Mental');
+    if (cuidaOutrem == 'S') prioridades.add('Cuidador');
+    
+    return prioridades.isEmpty ? 'Sem prioridade especial' : prioridades.join(', ');
   }
 
   int? get idade {
     if (dataNasc == null) return null;
-    final now = DateTime.now();
-    int age = now.year - dataNasc!.year;
-    if (now.month < dataNasc!.month || 
-        (now.month == dataNasc!.month && now.day < dataNasc!.day)) {
-      age--;
+    final agora = DateTime.now();
+    int idade = agora.year - dataNasc!.year;
+    if (agora.month < dataNasc!.month || 
+        (agora.month == dataNasc!.month && agora.day < dataNasc!.day)) {
+      idade--;
     }
-    return age;
+    return idade;
   }
 }
