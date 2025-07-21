@@ -519,44 +519,44 @@ class AuthProvider extends ChangeNotifier {
 
   // ============ MÉTODOS DE APOIO ============
 
-  void _setStatus(AuthStatus status) {
-    _status = status;
-    notifyListeners();
-  }
+  // void _setStatus(AuthStatus status) {
+  //   _status = status;
+  //   notifyListeners();
+  // }
 
-  void _setLoggingIn(bool loggingIn) {
-    _isLoggingIn = loggingIn;
-    notifyListeners();
-  }
+  // void _setLoggingIn(bool loggingIn) {
+  //   _isLoggingIn = loggingIn;
+  //   notifyListeners();
+  // }
 
-  void _setLoggingOut(bool loggingOut) {
-    _isLoggingOut = loggingOut;
-    notifyListeners();
-  }
+  // void _setLoggingOut(bool loggingOut) {
+  //   _isLoggingOut = loggingOut;
+  //   notifyListeners();
+  // }
 
-  void _setRegistering(bool registering) {
-    _isRegistering = registering;
-    notifyListeners();
-  }
+  // void _setRegistering(bool registering) {
+  //   _isRegistering = registering;
+  //   notifyListeners();
+  // }
 
-  void _setError(String error) {
-    _errorMessage = error;
-    _status = AuthStatus.error;
-    notifyListeners();
-  }
+  // void _setError(String error) {
+  //   _errorMessage = error;
+  //   _status = AuthStatus.error;
+  //   notifyListeners();
+  // }
 
-  void _clearError() {
-    _errorMessage = null;
-    if (_status == AuthStatus.error) {
-      _status =
-          _user != null ? AuthStatus.authenticated : AuthStatus.unauthenticated;
-    }
-    notifyListeners();
-  }
+  // void _clearError() {
+  //   _errorMessage = null;
+  //   if (_status == AuthStatus.error) {
+  //     _status =
+  //         _user != null ? AuthStatus.authenticated : AuthStatus.unauthenticated;
+  //   }
+  //   notifyListeners();
+  // }
 
-  void clearError() {
-    _clearError();
-  }
+  // void clearError() {
+  //   _clearError();
+  // }
 
   void _showSuccessMessage(String message) {
     if (kIsWeb) {
@@ -786,21 +786,21 @@ class AuthProvider extends ChangeNotifier {
   }
 
   /// Obtém iniciais do usuário
-  String get userInitials {
-    final firstName = _user?['first_name'] ?? '';
-    final lastName = _user?['last_name'] ?? '';
-    final username = _user?['username'] ?? '';
+  // String get userInitials {
+  //   final firstName = _user?['first_name'] ?? '';
+  //   final lastName = _user?['last_name'] ?? '';
+  //   final username = _user?['username'] ?? '';
 
-    if (firstName.isNotEmpty && lastName.isNotEmpty) {
-      return '${firstName[0]}${lastName[0]}'.toUpperCase();
-    } else if (username.isNotEmpty) {
-      return username.length >= 2
-          ? username.substring(0, 2).toUpperCase()
-          : username.toUpperCase();
-    }
+  //   if (firstName.isNotEmpty && lastName.isNotEmpty) {
+  //     return '${firstName[0]}${lastName[0]}'.toUpperCase();
+  //   } else if (username.isNotEmpty) {
+  //     return username.length >= 2
+  //         ? username.substring(0, 2).toUpperCase()
+  //         : username.toUpperCase();
+  //   }
 
-    return 'U';
-  }
+  //   return 'U';
+  // }
 
   /// Verifica se pode acessar área administrativa
   bool canAccessAdmin() {
