@@ -143,7 +143,7 @@ class CepService {
       }
       
       return [];
-    } on DioException on Exception  {
+    } on DioException {} on Exception  {
       debugPrint('Erro ao buscar endereços: ${e.message}');
       throw Exception('Erro de rede ao buscar endereços');
     } on Exception  {

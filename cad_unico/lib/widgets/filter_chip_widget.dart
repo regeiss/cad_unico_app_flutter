@@ -17,7 +17,7 @@ class FilterChipWidget extends StatelessWidget {
       label: Text(label),
       selected: isSelected,
       onSelected: (_) => onPressed(),
-      selectedColor: Theme.of(context).colorScheme.primary.withValues(alpha: (0.2),
+      selectedColor: Theme.of(context).colorScheme.primary.withValues(alpha: (0.2)),
       labelStyle: TextStyle(
         color: isSelected 
             ? Theme.of(context).colorScheme.primary

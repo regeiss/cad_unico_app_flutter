@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../contants/constants.dart';
+
 class DashboardCard extends StatelessWidget {
   final String title;
   final String value;
@@ -23,7 +24,7 @@ class DashboardCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cardColor = color ?? Theme.of(context).colorScheme.primary;
-    
+
     return Card(
       elevation: AppConstants.cardElevation,
       child: InkWell(
@@ -37,8 +38,8 @@ class DashboardCard extends StatelessWidget {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                cardColor.withValues(alpha: (0.1),
-                cardColor.withValues(alpha: (0.05),
+                cardColor.withValues(alpha: (0.1)),
+                cardColor.withValues(alpha: (0.05)),
               ],
             ),
           ),
@@ -71,24 +72,24 @@ class DashboardCard extends StatelessWidget {
                 Text(
                   value,
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: cardColor,
-                  ),
+                        fontWeight: FontWeight.bold,
+                        color: cardColor,
+                      ),
                 ),
               const SizedBox(height: 4),
               Text(
                 title,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+                      fontWeight: FontWeight.w600,
+                    ),
               ),
               if (subtitle != null) ...[
                 const SizedBox(height: 4),
                 Text(
                   subtitle!,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.outline,
-                  ),
+                        color: Theme.of(context).colorScheme.outline,
+                      ),
                 ),
               ],
             ],

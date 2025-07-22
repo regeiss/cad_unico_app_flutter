@@ -1,5 +1,7 @@
 // ignore_for_file: avoid_catches_without_on_clauses, avoid_classes_with_only_static_members
 
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 
 class AnalyticsService {

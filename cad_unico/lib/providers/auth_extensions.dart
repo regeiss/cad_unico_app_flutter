@@ -1,166 +1,228 @@
 import 'package:flutter/material.dart';
+import '../models/user_model.dart';
 import 'auth_provider.dart';
 
-/// Extensões úteis para o AuthProvider
+/// Extensions para AuthProvider com funcionalidades adicionais
 extension AuthProviderExtensions on AuthProvider {
-  
-  /// Retorna o token de autenticação atual
-  String? get authToken {
-    return user?.token; // Assumindo que user tem uma propriedade token
+  /// Verifica se o usuário está logado e tem dados válidos
+  bool get hasValidUser {
+    return currentUser != null && 
+           currentUser!.id != null && 
+           currentUser!.username.isNotEmpty;
   }
-  
-  /// Verifica se o usuário está autenticado
-  bool get isAuthenticated {
-    return user != null && authToken != null;
-  }
-  
-  /// Retorna true se o provider foi inicializado
-  bool get hasInitialized {
-    return !isLoading; // Usando isLoading como indicador inverso de inicialização
-  }
-  
+
   /// Verifica se o usuário é administrador
-  bool get hasAdminRole {
-    return user?.isStaff == true; // Usando isStaff como indicador de admin
+  bool get isAdmin {
+    return currentUser != null && currentUser!.isStaff == true;
   }
-  
-  /// Retorna o nome completo do usuário
-  String get userFullName {
-    if (user == null) return '';
+
+  /// Obtém o nome de exibição do usuário
+  String get displayName {
+    if (currentUser == null) return 'Usuário';
     
-    final firstName = user!.firstName ?? '';
-    final lastName = user!.lastName ?? '';
+    final firstName = currentUser!.firstName;
+    final lastName = currentUser!.lastName;
     
-    if (firstName.isEmpty && lastName.isEmpty) {
-      return user!.username;
+    if (firstName != null && firstName.isNotEmpty) {
+      if (lastName != null && lastName.isNotEmpty) {
+        return '$firstName $lastName';
+      }
+      return firstName;
     }
     
-    return '$firstName $lastName'.trim();
+    return currentUser!.username;
   }
-  
-  /// Retorna headers de autenticação para requisições HTTP
-  Map<String, String> get authHeaders {
-    final token = authToken;
-    if (token == null) return {};
-    
-    return {
-      'Authorization': 'Bearer $token',
-      'Content-Type': 'application/json',
-    };
-  }
-  
-  /// Verifica se o token está expirado (implementação básica)
-  bool get isTokenExpired {
-    // Implementação básica - pode ser melhorada com verificação real do JWT
-    return !isAuthenticated;
-  }
-  
-  /// Retorna as iniciais do usuário para avatar
+
+  /// Obtém as iniciais do usuário para avatar
   String get userInitials {
-    final fullName = userFullName;
-    if (fullName.isEmpty) return '?';
+    if (currentUser == null) return '??';
     
-    final names = fullName.split(' ');
-    if (names.length == 1) {
-      return names[0].substring(0, 1).toUpperCase();
+    final firstName = currentUser!.firstName;
+    final lastName = currentUser!.lastName;
+    
+    if (firstName != null && firstName.isNotEmpty) {
+      String initials = firstName[0].toUpperCase();
+      if (lastName != null && lastName.isNotEmpty) {
+        initials += lastName[0].toUpperCase();
+      }
+      return initials;
     }
     
-    return '${names[0].substring(0, 1)}${names[names.length - 1].substring(0, 1)}'.toUpperCase();
+    return currentUser!.username.isNotEmpty 
+        ? currentUser!.username[0].toUpperCase() 
+        : '?';
   }
-  
-  /// Verifica se o usuário tem permissão específica
-  bool hasPermission(String permission) {
-    // Implementação básica - pode ser expandida conforme necessário
-    if (!isAuthenticated) return false;
-    if (hasAdminRole) return true;
+
+  /// Verifica se o usuário tem email válido
+  bool get hasValidEmail {
+    return currentUser != null && 
+           currentUser!.email != null && 
+           currentUser!.email!.isNotEmpty &&
+           currentUser!.email!.contains('@');
+  }
+
+  /// Verifica se o perfil do usuário está completo
+  bool get isProfileComplete {
+    if (currentUser == null) return false;
     
-    // Adicionar lógica específica de permissões aqui
-    return false;
+    return currentUser!.username.isNotEmpty &&
+           hasValidEmail &&
+           currentUser!.firstName != null &&
+           currentUser!.firstName!.isNotEmpty;
   }
-  
-  /// Retorna informações resumidas do usuário
+
+  /// Obtém a data de cadastro formatada
+  String get formattedJoinDate {
+    if (currentUser?.dateJoined == null) return 'Data não disponível';
+    
+    final date = currentUser!.dateJoined!;
+    return '${date.day.toString().padLeft(2, '0')}/'
+           '${date.month.toString().padLeft(2, '0')}/'
+           '${date.year}';
+  }
+
+  /// Verifica se o usuário está ativo
+  bool get isUserActive {
+    return currentUser?.isActive == true;
+  }
+
+  /// Obtém informações resumidas do usuário
   Map<String, dynamic> get userSummary {
-    if (!isAuthenticated) {
+    if (currentUser == null) {
       return {
-        'authenticated': false,
-        'name': 'Usuário não autenticado',
-        'role': 'guest',
+        'isLoggedIn': false,
+        'displayName': 'Não logado',
+        'initials': '?',
+        'isAdmin': false,
+        'isActive': false,
       };
     }
-    
+
     return {
-      'authenticated': true,
-      'id': user!.id,
-      'username': user!.username,
-      'name': userFullName,
-      'email': user!.email,
-      'role': hasAdminRole ? 'admin' : 'user',
-      'isStaff': user!.isStaff,
-      'isActive': user!.isActive,
+      'isLoggedIn': true,
+      'id': currentUser!.id,
+      'username': currentUser!.username,
+      'displayName': displayName,
+      'initials': userInitials,
+      'email': currentUser!.email,
+      'isAdmin': isAdmin,
+      'isActive': isUserActive,
+      'isStaff': currentUser!.isStaff,
+      'joinDate': formattedJoinDate,
+      'profileComplete': isProfileComplete,
     };
   }
-  
-  /// Valida se o usuário pode acessar uma determinada rota
-  bool canAccessRoute(String routeName) {
-    if (!isAuthenticated) {
-      // Rotas públicas que não precisam de autenticação
-      const publicRoutes = ['/login', '/register', '/forgot-password'];
-      return publicRoutes.contains(routeName);
-    }
-    
-    // Se está autenticado, pode acessar rotas protegidas
-    return true;
-  }
-  
-  /// Formata o nome do usuário para exibição
-  String get displayName {
-    if (!isAuthenticated) return 'Visitante';
-    
-    final fullName = userFullName;
-    if (fullName.isNotEmpty && fullName != user!.username) {
-      return fullName;
-    }
-    
-    return user!.username;
-  }
-  
-  /// Retorna a cor do avatar baseada no usuário
+
+  /// Gera cor do avatar baseada no nome do usuário
   Color get avatarColor {
-    if (!isAuthenticated) return Colors.grey;
+    if (currentUser == null) return Colors.grey;
+    
+    final username = currentUser!.username;
+    final hash = username.hashCode.abs();
     
     final colors = [
       Colors.blue,
       Colors.green,
       Colors.orange,
       Colors.purple,
+      Colors.red,
       Colors.teal,
       Colors.indigo,
+      Colors.brown,
       Colors.pink,
-      Colors.amber,
+      Colors.deepOrange,
     ];
     
-    final hash = user!.username.hashCode;
-    return colors[hash.abs() % colors.length];
+    return colors[hash % colors.length];
   }
-  
-  /// Verifica se é necessário atualizar o token
-  bool get needsTokenRefresh {
-    // Implementação básica - pode ser melhorada
-    return isAuthenticated && isTokenExpired;
+
+  /// Verifica se pode acessar funcionalidades administrativas
+  bool canAccessAdmin() {
+    return isAuthenticated && isUserActive && isAdmin;
   }
-  
-  /// Retorna o tempo desde o último login (em minutos)
-  int get minutesSinceLogin {
-    if (user?.dateJoined == null) return 0;
+
+  /// Verifica se precisa completar o perfil
+  bool needsProfileCompletion() {
+    return isAuthenticated && !isProfileComplete;
+  }
+
+  /// Obtém saudação personalizada baseada no horário
+  String getPersonalizedGreeting() {
+    final now = DateTime.now();
+    final hour = now.hour;
+    
+    String greeting;
+    if (hour < 12) {
+      greeting = 'Bom dia';
+    } else if (hour < 18) {
+      greeting = 'Boa tarde';
+    } else {
+      greeting = 'Boa noite';
+    }
+    
+    final name = currentUser?.firstName ?? currentUser?.username ?? '';
+    if (name.isNotEmpty) {
+      return '$greeting, $name!';
+    }
+    
+    return '$greeting!';
+  }
+
+  /// Verifica se o usuário tem permissões específicas
+  bool hasPermission(String permission) {
+    if (!isAuthenticated || currentUser == null) return false;
+    
+    // Administradores têm todas as permissões
+    if (isAdmin) return true;
+    
+    // Aqui você pode implementar lógica específica de permissões
+    // baseada no seu sistema de roles/permissions
+    return false;
+  }
+}
+
+/// Extensões para validação de dados do usuário
+extension UserValidation on UserModel {
+  /// Valida se o email tem formato correto
+  bool get isEmailValid {
+    if (this.email == null || this.email!.isEmpty) return false;
+    return true;
+  }
+
+  // Verifica se o usuário tem nome completo
+  bool get hasFullName {
+    return this.firstName != null && 
+           this.firstName!.isNotEmpty && 
+           this.lastName != null && 
+           this.lastName!.isNotEmpty;
+  }
+
+  // Verifica se é um usuário recém-criado (menos de 7 dias)
+  bool get isNewUser {
+    if (this.dateJoined == null) return false;
     
     final now = DateTime.now();
-    final loginTime = user!.dateJoined!;
-    
-    return now.difference(loginTime).inMinutes;
+    final difference = now.difference(this.dateJoined!);
+    return difference.inDays < 7;
   }
-  
-  /// Verifica se o usuário logou recentemente (últimas 24h)
-  bool get isRecentLogin {
-    return minutesSinceLogin <= (24 * 60); // 24 horas em minutos
+
+  // Obtém o tempo desde o cadastro
+  String get timeSinceJoined {
+    if (this.dateJoined == null) return 'Data desconhecida';
+    
+    final now = DateTime.now();
+    final difference = now.difference(this.dateJoined!);
+    
+    if (difference.inDays > 365) {
+      final years = (difference.inDays / 365).floor();
+      return '$years ${years == 1 ? 'ano' : 'anos'}';
+    } else if (difference.inDays > 30) {
+      final months = (difference.inDays / 30).floor();
+      return '$months ${months == 1 ? 'mês' : 'meses'}';
+    } else if (difference.inDays > 0) {
+      return '${difference.inDays} ${difference.inDays == 1 ? 'dia' : 'dias'}';
+    } else {
+      return 'Hoje';
+    }
   }
 }

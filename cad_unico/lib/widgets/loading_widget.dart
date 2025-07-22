@@ -42,7 +42,7 @@ class LoadingWidget extends StatelessWidget {
 
     if (overlay) {
       return Container(
-        color: Colors.black.withValues(alpha: (0.3),
+        color: Colors.black.withValues(alpha: (0.3)),
         child: Center(child: widget),
       );
     }
@@ -133,7 +133,7 @@ class _SkeletonListItemState extends State<_SkeletonListItem>
                 height: 20,
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: Colors.grey[300]!.withValues(alpha: (_animation.value),
+                  color: Colors.grey[300]!.withValues(alpha: (_animation.value)),
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),
@@ -142,7 +142,7 @@ class _SkeletonListItemState extends State<_SkeletonListItem>
                 height: 16,
                 width: MediaQuery.of(context).size.width * 0.6,
                 decoration: BoxDecoration(
-                  color: Colors.grey[300]!.withValues(alpha: (_animation.value),
+                  color: Colors.grey[300]!.withValues(alpha: (_animation.value)),
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),
@@ -151,7 +151,7 @@ class _SkeletonListItemState extends State<_SkeletonListItem>
                 height: 14,
                 width: MediaQuery.of(context).size.width * 0.4,
                 decoration: BoxDecoration(
-                  color: Colors.grey[300]!.withValues(alpha: (_animation.value),
+                  color: Colors.grey[300]!.withValues(alpha: (_animation.value)),
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),

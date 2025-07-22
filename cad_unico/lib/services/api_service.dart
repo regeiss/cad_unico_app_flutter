@@ -1,550 +1,665 @@
-import 'dart:async';
 import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../contants/constants.dart';
 
 class ApiResponse {
   final bool success;
-  final String message;
-  final dynamic data;
+  final String? message;
+  final Map<String, dynamic>? data;
   final int? statusCode;
+  final dynamic error;
 
   ApiResponse({
     required this.success,
-    required this.message,
+    this.message,
     this.data,
     this.statusCode,
+    this.error,
   });
 
-  factory ApiResponse.success({String? message, dynamic data, int? statusCode}) {
+  factory ApiResponse.success({
+    String? message,
+    Map<String, dynamic>? data,
+    int? statusCode,
+  }) {
     return ApiResponse(
       success: true,
-      message: message ?? 'Operação realizada com sucesso',
+      message: message,
       data: data,
       statusCode: statusCode,
     );
   }
 
-  factory ApiResponse.error({String? message, int? statusCode}) {
+  factory ApiResponse.error({
+    required String message,
+    int? statusCode,
+    dynamic error,
+  }) {
     return ApiResponse(
       success: false,
-      message: message ?? 'Erro na operação',
+      message: message,
       statusCode: statusCode,
+      error: error,
     );
   }
 }
 
 class ApiService {
-  static const String _baseUrl = AppConstants.apiBaseUrl;
-  static const int _timeoutDuration = 30;
-  
-  // Headers padrão
-  static Map<String, String> get _defaultHeaders => {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
-  };
+  late Dio _dio;
+  String? _token;
 
-  // Headers com autenticação
-  static Future<Map<String, String>> _getAuthHeaders() async {
-    final headers = Map<String, String>.from(_defaultHeaders);
-    final token = await getAuthToken();
-    if (token != null) {
-      headers['Authorization'] = 'Bearer $token';
-    }
-    return headers;
+  ApiService() {
+    _dio = Dio(BaseOptions(
+      baseUrl: AppConstants.apiBaseUrl,
+      connectTimeout: const Duration(seconds: 30),
+      receiveTimeout: const Duration(seconds: 30),
+      sendTimeout: const Duration(seconds: 30),
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    ));
+
+    _setupInterceptors();
+    _loadTokenFromStorage();
   }
 
-  // Salvar token de autenticação
-  static Future<void> saveAuthToken(String token) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('auth_token', token);
+  void _setupInterceptors() {
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) async {
+          // Adicionar token de autorização se disponível
+          if (_token != null && _token!.isNotEmpty) {
+            options.headers['Authorization'] = 'Bearer $_token';
+          }
+          
+          if (kDebugMode) {
+            debugPrint('🔗 REQUEST: ${options.method} ${options.path}');
+            debugPrint('📝 Headers: ${options.headers}');
+            if (options.data != null) {
+              debugPrint('📄 Data: ${options.data}');
+            }
+          }
+          
+          handler.next(options);
+        },
+        onResponse: (response, handler) {
+          if (kDebugMode) {
+            debugPrint('✅ RESPONSE: ${response.statusCode} ${response.requestOptions.path}');
+            debugPrint('📄 Data: ${response.data}');
+          }
+          handler.next(response);
+        },
+        onError: (error, handler) {
+          if (kDebugMode) {
+            debugPrint('❌ ERROR: ${error.message}');
+            debugPrint('📄 Response: ${error.response?.data}');
+          }
+          handler.next(error);
+        },
+      ),
+    );
   }
 
-  // Obter token de autenticação
-  static Future<String?> getAuthToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('auth_token');
-  }
-
-  // Remover token de autenticação
-  static Future<void> removeAuthToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('auth_token');
-  }
-
-  // Verificar se está autenticado
-  static Future<bool> isAuthenticated() async {
-    final token = await getAuthToken();
-    return token != null && token.isNotEmpty;
-  }
-
-  // Método auxiliar para fazer requisições HTTP
-  static Future<ApiResponse> _makeRequest(
-    String method,
-    String endpoint, {
-    Map<String, dynamic>? body,
-    Map<String, String>? queryParams,
-    bool requireAuth = true,
-  }) async {
+  Future<void> _loadTokenFromStorage() async {
     try {
-      final uri = Uri.parse('$_baseUrl$endpoint').replace(
-        queryParameters: queryParams,
-      );
-      
-      final headers = requireAuth 
-          ? await _getAuthHeaders()
-          : _defaultHeaders;
-
-      http.Response response;
-      
-      switch (method.toUpperCase()) {
-        case 'GET':
-          response = await http.get(uri, headers: headers)
-              .timeout(const Duration(seconds: _timeoutDuration));
-          break;
-        case 'POST':
-          response = await http.post(
-            uri,
-            headers: headers,
-            body: body != null ? jsonEncode(body) : null,
-          ).timeout(const Duration(seconds: _timeoutDuration));
-          break;
-        case 'PUT':
-          response = await http.put(
-            uri,
-            headers: headers,
-            body: body != null ? jsonEncode(body) : null,
-          ).timeout(const Duration(seconds: _timeoutDuration));
-          break;
-        case 'DELETE':
-          response = await http.delete(uri, headers: headers)
-              .timeout(const Duration(seconds: _timeoutDuration));
-          break;
-        default:
-          return ApiResponse.error(message: 'Método HTTP não suportado: $method');
-      }
-
-      return _handleResponse(response);
-    } on TimeoutException {
-      return ApiResponse.error(
-        message: 'Tempo limite excedido. Verifique sua conexão.',
-        statusCode: 408,
-      );
-    } on http.ClientException catch (e) {
-      return ApiResponse.error(
-        message: 'Erro de conexão: ${e.message}',
-        statusCode: 0,
-      );
+      final prefs = await SharedPreferences.getInstance();
+      _token = prefs.getString('token');
     } catch (e) {
-      return ApiResponse.error(
-        message: 'Erro inesperado: ${e.toString()}',
-        statusCode: 500,
-      );
+      debugPrint('Erro ao carregar token: $e');
     }
   }
 
-  // Tratar resposta HTTP
-  static ApiResponse _handleResponse(http.Response response) {
+  Future<void> _saveTokenToStorage(String token) async {
     try {
-      final responseData = jsonDecode(response.body);
-      
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        return ApiResponse.success(
-          message: responseData['message'] ?? 'Sucesso',
-          data: responseData,
-          statusCode: response.statusCode,
-        );
-      } else {
-        String errorMessage = 'Erro na requisição';
-        
-        if (responseData is Map<String, dynamic>) {
-          errorMessage = responseData['message'] ?? 
-                        responseData['error'] ?? 
-                        responseData['detail'] ?? 
-                        'Erro na requisição';
-        }
-        
-        return ApiResponse.error(
-          message: errorMessage,
-          statusCode: response.statusCode,
-        );
-      }
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('token', token);
+      _token = token;
     } catch (e) {
-      return ApiResponse.error(
-        message: 'Erro ao processar resposta: ${e.toString()}',
-        statusCode: response.statusCode,
-      );
+      debugPrint('Erro ao salvar token: $e');
     }
   }
 
-  // ============ AUTENTICAÇÃO ============
-
-  /// Login do usuário
-  static Future<ApiResponse> login(String username, String password) async {
+  Future<void> _removeTokenFromStorage() async {
     try {
-      final response = await _makeRequest(
-        'POST',
-        '/auth/login/',
-        body: {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('token');
+      _token = null;
+    } catch (e) {
+      debugPrint('Erro ao remover token: $e');
+    }
+  }
+
+  // ========== MÉTODOS DE AUTENTICAÇÃO ==========
+
+  /// Realiza login do usuário
+  Future<ApiResponse> login(String username, String password) async {
+    try {
+      final response = await _dio.post(
+        '/api/v1/auth/login/',
+        data: {
           'username': username,
           'password': password,
         },
-        requireAuth: false,
       );
 
-      if (response.success && response.data != null) {
-        final token = response.data['token'] ?? response.data['access'];
-        if (token != null) {
-          await saveAuthToken(token);
+      if (response.statusCode == 200) {
+        final data = response.data as Map<String, dynamic>;
+        
+        // Salvar token se presente
+        if (data['token'] != null) {
+          await _saveTokenToStorage(data['token']);
         }
+
+        return ApiResponse.success(
+          message: 'Login realizado com sucesso',
+          data: data,
+          statusCode: response.statusCode,
+        );
       }
 
-      return response;
+      return ApiResponse.error(
+        message: response.data['message'] ?? 'Erro no login',
+        statusCode: response.statusCode,
+      );
+    } on DioException catch (e) {
+      return _handleDioError(e);
     } catch (e) {
       return ApiResponse.error(
-        message: 'Erro no login: ${e.toString()}',
+        message: 'Erro inesperado: $e',
+        error: e,
       );
     }
   }
 
-  /// Logout do usuário
-  static Future<ApiResponse> logout() async {
+  /// Realiza logout do usuário
+  Future<ApiResponse> logout(String refreshToken) async {
     try {
-      final response = await _makeRequest('POST', '/auth/logout/');
-      await removeAuthToken();
-      return response;
+      final response = await _dio.post(
+        '/api/v1/auth/logout/',
+        data: {
+          'refresh': refreshToken,
+        },
+      );
+
+      await _removeTokenFromStorage();
+
+      return ApiResponse.success(
+        message: 'Logout realizado com sucesso',
+        statusCode: response.statusCode,
+      );
+    } on DioException catch (e) {
+      // Mesmo com erro, remover token local
+      await _removeTokenFromStorage();
+      return _handleDioError(e);
     } catch (e) {
-      // Mesmo com erro, remove o token local
-      await removeAuthToken();
+      await _removeTokenFromStorage();
       return ApiResponse.error(
-        message: 'Erro no logout: ${e.toString()}',
+        message: 'Erro no logout: $e',
+        error: e,
       );
     }
   }
 
-  /// Obter perfil do usuário
-  static Future<ApiResponse> getUserProfile() async {
+  /// Valida se o token ainda é válido
+  Future<ApiResponse> validateToken(String token) async {
     try {
-      return await _makeRequest('GET', '/auth/user/');
+      final response = await _dio.post(
+        '/api/v1/auth/verify/',
+        data: {
+          'token': token,
+        },
+      );
+
+      return ApiResponse.success(
+        message: 'Token válido',
+        statusCode: response.statusCode,
+      );
+    } on DioException catch (e) {
+      return _handleDioError(e);
     } catch (e) {
       return ApiResponse.error(
-        message: 'Erro ao obter perfil: ${e.toString()}',
+        message: 'Erro ao validar token: $e',
+        error: e,
       );
     }
   }
 
-  /// Verificar token
-  static Future<ApiResponse> verifyToken() async {
+  /// Renova o token de acesso
+  Future<ApiResponse> refreshToken(String refreshToken) async {
     try {
-      return await _makeRequest('POST', '/auth/verify/');
+      final response = await _dio.post(
+        '/api/v1/auth/refresh/',
+        data: {
+          'refresh': refreshToken,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data as Map<String, dynamic>;
+        
+        // Salvar novo token
+        if (data['access'] != null) {
+          await _saveTokenToStorage(data['access']);
+        }
+
+        return ApiResponse.success(
+          message: 'Token renovado com sucesso',
+          data: data,
+          statusCode: response.statusCode,
+        );
+      }
+
+      return ApiResponse.error(
+        message: 'Erro ao renovar token',
+        statusCode: response.statusCode,
+      );
+    } on DioException catch (e) {
+      return _handleDioError(e);
     } catch (e) {
       return ApiResponse.error(
-        message: 'Erro ao verificar token: ${e.toString()}',
+        message: 'Erro ao renovar token: $e',
+        error: e,
       );
     }
   }
 
-  // ============ RESPONSÁVEIS ============
+  /// Registra um novo usuário
+  Future<ApiResponse> register({
+    required String username,
+    required String email,
+    required String password,
+    required String passwordConfirm,
+    String? firstName,
+    String? lastName,
+  }) async {
+    try {
+      final response = await _dio.post(
+        '/api/v1/auth/register/',
+        data: {
+          'username': username,
+          'email': email,
+          'password': password,
+          'password_confirm': passwordConfirm,
+          if (firstName != null) 'first_name': firstName,
+          if (lastName != null) 'last_name': lastName,
+        },
+      );
 
-  /// Listar responsáveis
-  static Future<ApiResponse> getResponsaveis({
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        return ApiResponse.success(
+          message: 'Usuário registrado com sucesso',
+          data: response.data,
+          statusCode: response.statusCode,
+        );
+      }
+
+      return ApiResponse.error(
+        message: response.data['message'] ?? 'Erro no registro',
+        statusCode: response.statusCode,
+      );
+    } on DioException catch (e) {
+      return _handleDioError(e);
+    } catch (e) {
+      return ApiResponse.error(
+        message: 'Erro no registro: $e',
+        error: e,
+      );
+    }
+  }
+
+  /// Obtém o perfil do usuário logado
+  Future<ApiResponse> getUserProfile() async {
+    try {
+      final response = await _dio.get('/api/v1/auth/profile/');
+
+      if (response.statusCode == 200) {
+        return ApiResponse.success(
+          message: 'Perfil carregado com sucesso',
+          data: response.data,
+          statusCode: response.statusCode,
+        );
+      }
+
+      return ApiResponse.error(
+        message: 'Erro ao carregar perfil',
+        statusCode: response.statusCode,
+      );
+    } on DioException catch (e) {
+      return _handleDioError(e);
+    } catch (e) {
+      return ApiResponse.error(
+        message: 'Erro ao carregar perfil: $e',
+        error: e,
+      );
+    }
+  }
+
+  /// Atualiza o perfil do usuário
+  Future<ApiResponse> updateProfile(Map<String, dynamic> userData) async {
+    try {
+      final response = await _dio.put(
+        '/api/v1/auth/profile/',
+        data: userData,
+      );
+
+      if (response.statusCode == 200) {
+        return ApiResponse.success(
+          message: 'Perfil atualizado com sucesso',
+          data: response.data,
+          statusCode: response.statusCode,
+        );
+      }
+
+      return ApiResponse.error(
+        message: 'Erro ao atualizar perfil',
+        statusCode: response.statusCode,
+      );
+    } on DioException catch (e) {
+      return _handleDioError(e);
+    } catch (e) {
+      return ApiResponse.error(
+        message: 'Erro ao atualizar perfil: $e',
+        error: e,
+      );
+    }
+  }
+
+  /// Altera a senha do usuário
+  Future<ApiResponse> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    try {
+      final response = await _dio.post(
+        '/api/v1/auth/change-password/',
+        data: {
+          'current_password': currentPassword,
+          'new_password': newPassword,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return ApiResponse.success(
+          message: 'Senha alterada com sucesso',
+          statusCode: response.statusCode,
+        );
+      }
+
+      return ApiResponse.error(
+        message: response.data['message'] ?? 'Erro ao alterar senha',
+        statusCode: response.statusCode,
+      );
+    } on DioException catch (e) {
+      return _handleDioError(e);
+    } catch (e) {
+      return ApiResponse.error(
+        message: 'Erro ao alterar senha: $e',
+        error: e,
+      );
+    }
+  }
+
+  // ========== MÉTODOS DE DADOS ==========
+
+  /// Busca responsáveis
+  Future<ApiResponse> getResponsaveis({
     int page = 1,
     int pageSize = 20,
     String? search,
     String? status,
   }) async {
     try {
-      final queryParams = <String, String>{
-        'page': page.toString(),
-        'page_size': pageSize.toString(),
+      final queryParams = <String, dynamic>{
+        'page': page,
+        'page_size': pageSize,
       };
-      
+
       if (search != null && search.isNotEmpty) {
         queryParams['search'] = search;
       }
-      
+
       if (status != null && status.isNotEmpty) {
         queryParams['status'] = status;
       }
 
-      return await _makeRequest(
-        'GET',
-        '/cadastro/api/responsaveis/',
-        queryParams: queryParams,
+      final response = await _dio.get(
+        '/api/v1/cadastro/api/responsaveis/',
+        queryParameters: queryParams,
       );
-    } catch (e) {
-      return ApiResponse.error(
-        message: 'Erro ao listar responsáveis: ${e.toString()}',
-      );
-    }
-  }
 
-  /// Buscar responsável por CPF
-  static Future<ApiResponse> getResponsavelByCpf(String cpf) async {
-    try {
-      return await _makeRequest(
-        'GET',
-        '/cadastro/api/responsaveis/$cpf/',
-      );
-    } catch (e) {
-      return ApiResponse.error(
-        message: 'Erro ao buscar responsável: ${e.toString()}',
-      );
-    }
-  }
-
-  /// Criar responsável
-  static Future<ApiResponse> createResponsavel(Map<String, dynamic> data) async {
-    try {
-      return await _makeRequest(
-        'POST',
-        '/cadastro/api/responsaveis/',
-        body: data,
-      );
-    } catch (e) {
-      return ApiResponse.error(
-        message: 'Erro ao criar responsável: ${e.toString()}',
-      );
-    }
-  }
-
-  /// Atualizar responsável
-  static Future<ApiResponse> updateResponsavel(String cpf, Map<String, dynamic> data) async {
-    try {
-      return await _makeRequest(
-        'PUT',
-        '/cadastro/api/responsaveis/$cpf/',
-        body: data,
-      );
-    } catch (e) {
-      return ApiResponse.error(
-        message: 'Erro ao atualizar responsável: ${e.toString()}',
-      );
-    }
-  }
-
-  /// Buscar responsável com membros
-  static Future<ApiResponse> getResponsavelComMembros(String cpf) async {
-    try {
-      return await _makeRequest(
-        'GET',
-        '/cadastro/api/responsaveis/$cpf/com_membros/',
-      );
-    } catch (e) {
-      return ApiResponse.error(
-        message: 'Erro ao buscar responsável com membros: ${e.toString()}',
-      );
-    }
-  }
-
-  // ============ MEMBROS ============
-
-  /// Listar membros
-  static Future<ApiResponse> getMembros({
-    int page = 1,
-    int pageSize = 20,
-    String? search,
-    String? cpfResponsavel,
-  }) async {
-    try {
-      final queryParams = <String, String>{
-        'page': page.toString(),
-        'page_size': pageSize.toString(),
-      };
-      
-      if (search != null && search.isNotEmpty) {
-        queryParams['search'] = search;
-      }
-      
-      if (cpfResponsavel != null && cpfResponsavel.isNotEmpty) {
-        queryParams['cpf_responsavel'] = cpfResponsavel;
-      }
-
-      return await _makeRequest(
-        'GET',
-        '/cadastro/api/membros/',
-        queryParams: queryParams,
-      );
-    } catch (e) {
-      return ApiResponse.error(
-        message: 'Erro ao listar membros: ${e.toString()}',
-      );
-    }
-  }
-
-  /// Criar membro
-  static Future<ApiResponse> createMembro(Map<String, dynamic> data) async {
-    try {
-      return await _makeRequest(
-        'POST',
-        '/cadastro/api/membros/',
-        body: data,
-      );
-    } catch (e) {
-      return ApiResponse.error(
-        message: 'Erro ao criar membro: ${e.toString()}',
-      );
-    }
-  }
-
-  // ============ DEMANDAS ============
-
-  /// Listar demandas de saúde
-  static Future<ApiResponse> getDemandasSaude({
-    int page = 1,
-    int pageSize = 20,
-    String? search,
-  }) async {
-    try {
-      final queryParams = <String, String>{
-        'page': page.toString(),
-        'page_size': pageSize.toString(),
-      };
-      
-      if (search != null && search.isNotEmpty) {
-        queryParams['search'] = search;
-      }
-
-      return await _makeRequest(
-        'GET',
-        '/cadastro/api/demandas-saude/',
-        queryParams: queryParams,
-      );
-    } catch (e) {
-      return ApiResponse.error(
-        message: 'Erro ao listar demandas de saúde: ${e.toString()}',
-      );
-    }
-  }
-
-  /// Listar demandas de educação
-  static Future<ApiResponse> getDemandasEducacao({
-    int page = 1,
-    int pageSize = 20,
-    String? search,
-  }) async {
-    try {
-      final queryParams = <String, String>{
-        'page': page.toString(),
-        'page_size': pageSize.toString(),
-      };
-      
-      if (search != null && search.isNotEmpty) {
-        queryParams['search'] = search;
-      }
-
-      return await _makeRequest(
-        'GET',
-        '/cadastro/api/demandas-educacao/',
-        queryParams: queryParams,
-      );
-    } catch (e) {
-      return ApiResponse.error(
-        message: 'Erro ao listar demandas de educação: ${e.toString()}',
-      );
-    }
-  }
-
-  /// Listar grupos prioritários
-  static Future<ApiResponse> getGruposPrioritarios() async {
-    try {
-      return await _makeRequest(
-        'GET',
-        '/cadastro/api/demandas-saude/grupos_prioritarios/',
-      );
-    } catch (e) {
-      return ApiResponse.error(
-        message: 'Erro ao listar grupos prioritários: ${e.toString()}',
-      );
-    }
-  }
-
-  // ============ UTILIDADES ============
-
-  /// Buscar CEP
-  static Future<ApiResponse> buscarCep(String cep) async {
-    try {
-      // Remove formatação do CEP
-      final cepLimpo = cep.replaceAll(RegExp(r'[^0-9]'), '');
-      
-      if (cepLimpo.length != 8) {
-        return ApiResponse.error(
-          message: 'CEP deve ter 8 dígitos',
+      if (response.statusCode == 200) {
+        return ApiResponse.success(
+          data: response.data,
+          statusCode: response.statusCode,
         );
       }
 
-      // Usar API ViaCEP
-      final response = await http.get(
-        Uri.parse('https://viacep.com.br/ws/$cepLimpo/json/'),
-        headers: _defaultHeaders,
-      ).timeout(const Duration(seconds: 10));
+      return ApiResponse.error(
+        message: 'Erro ao buscar responsáveis',
+        statusCode: response.statusCode,
+      );
+    } on DioException catch (e) {
+      return _handleDioError(e);
+    } catch (e) {
+      return ApiResponse.error(
+        message: 'Erro ao buscar responsáveis: $e',
+        error: e,
+      );
+    }
+  }
+
+  /// Busca responsável por CPF
+  Future<ApiResponse> getResponsavelByCpf(String cpf) async {
+    try {
+      final response = await _dio.get(
+        '/api/v1/cadastro/api/responsaveis/$cpf/',
+      );
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        
-        if (data['erro'] == true) {
-          return ApiResponse.error(
-            message: 'CEP não encontrado',
-            statusCode: 404,
-          );
+        return ApiResponse.success(
+          data: response.data,
+          statusCode: response.statusCode,
+        );
+      }
+
+      return ApiResponse.error(
+        message: 'Responsável não encontrado',
+        statusCode: response.statusCode,
+      );
+    } on DioException catch (e) {
+      return _handleDioError(e);
+    } catch (e) {
+      return ApiResponse.error(
+        message: 'Erro ao buscar responsável: $e',
+        error: e,
+      );
+    }
+  }
+
+  /// Busca responsável com membros
+  Future<ApiResponse> getResponsavelComMembros(String cpf) async {
+    try {
+      final response = await _dio.get(
+        '/api/v1/cadastro/api/responsaveis/$cpf/com_membros/',
+      );
+
+      if (response.statusCode == 200) {
+        return ApiResponse.success(
+          data: response.data,
+          statusCode: response.statusCode,
+        );
+      }
+
+      return ApiResponse.error(
+        message: 'Responsável não encontrado',
+        statusCode: response.statusCode,
+      );
+    } on DioException catch (e) {
+      return _handleDioError(e);
+    } catch (e) {
+      return ApiResponse.error(
+        message: 'Erro ao buscar responsável com membros: $e',
+        error: e,
+      );
+    }
+  }
+
+  /// Busca demandas de saúde
+  Future<ApiResponse> getDemandasSaude({
+    int page = 1,
+    int pageSize = 20,
+    String? search,
+  }) async {
+    try {
+      final queryParams = <String, dynamic>{
+        'page': page,
+        'page_size': pageSize,
+      };
+
+      if (search != null && search.isNotEmpty) {
+        queryParams['search'] = search;
+      }
+
+      final response = await _dio.get(
+        '/api/v1/cadastro/api/demandas-saude/',
+        queryParameters: queryParams,
+      );
+
+      if (response.statusCode == 200) {
+        return ApiResponse.success(
+          data: response.data,
+          statusCode: response.statusCode,
+        );
+      }
+
+      return ApiResponse.error(
+        message: 'Erro ao buscar demandas de saúde',
+        statusCode: response.statusCode,
+      );
+    } on DioException catch (e) {
+      return _handleDioError(e);
+    } catch (e) {
+      return ApiResponse.error(
+        message: 'Erro ao buscar demandas de saúde: $e',
+        error: e,
+      );
+    }
+  }
+
+  /// Busca demandas de educação
+  Future<ApiResponse> getDemandasEducacao({
+    int page = 1,
+    int pageSize = 20,
+    String? search,
+  }) async {
+    try {
+      final queryParams = <String, dynamic>{
+        'page': page,
+        'page_size': pageSize,
+      };
+
+      if (search != null && search.isNotEmpty) {
+        queryParams['search'] = search;
+      }
+
+      final response = await _dio.get(
+        '/api/v1/cadastro/api/demandas-educacao/',
+        queryParameters: queryParams,
+      );
+
+      if (response.statusCode == 200) {
+        return ApiResponse.success(
+          data: response.data,
+          statusCode: response.statusCode,
+        );
+      }
+
+      return ApiResponse.error(
+        message: 'Erro ao buscar demandas de educação',
+        statusCode: response.statusCode,
+      );
+    } on DioException catch (e) {
+      return _handleDioError(e);
+    } catch (e) {
+      return ApiResponse.error(
+        message: 'Erro ao buscar demandas de educação: $e',
+        error: e,
+      );
+    }
+  }
+
+  // ========== MÉTODOS UTILITÁRIOS ==========
+
+  /// Tratamento de erros do Dio
+  ApiResponse _handleDioError(DioException e) {
+    String message;
+    int? statusCode = e.response?.statusCode;
+
+    switch (e.type) {
+      case DioExceptionType.connectionTimeout:
+      case DioExceptionType.sendTimeout:
+      case DioExceptionType.receiveTimeout:
+        message = 'Timeout na conexão. Verifique sua internet.';
+        break;
+
+      case DioExceptionType.badResponse:
+        if (e.response?.data != null) {
+          try {
+            final errorData = e.response!.data;
+            if (errorData is Map<String, dynamic>) {
+              message = errorData['message'] ?? 
+                       errorData['error'] ?? 
+                       errorData['detail'] ?? 
+                       'Erro do servidor';
+            } else {
+              message = 'Erro do servidor: ${e.response!.statusCode}';
+            }
+          } catch (_) {
+            message = 'Erro do servidor: ${e.response!.statusCode}';
+          }
+        } else {
+          message = 'Erro do servidor: ${e.response!.statusCode}';
         }
-        
-        return ApiResponse.success(
-          message: 'CEP encontrado',
-          data: data,
-        );
-      } else {
-        return ApiResponse.error(
-          message: 'Erro ao buscar CEP',
-          statusCode: response.statusCode,
-        );
-      }
-    } catch (e) {
-      return ApiResponse.error(
-        message: 'Erro ao buscar CEP: ${e.toString()}',
-      );
+        break;
+
+      case DioExceptionType.connectionError:
+        message = 'Erro de conexão. Verifique sua internet.';
+        break;
+
+      case DioExceptionType.cancel:
+        message = 'Requisição cancelada.';
+        break;
+
+      default:
+        message = 'Erro inesperado: ${e.message}';
+        break;
     }
+
+    return ApiResponse.error(
+      message: message,
+      statusCode: statusCode,
+      error: e,
+    );
   }
 
-  /// Verificar conectividade
-  static Future<ApiResponse> checkConnectivity() async {
-    try {
-      final response = await http.get(
-        Uri.parse('$_baseUrl/health/'),
-        headers: _defaultHeaders,
-      ).timeout(const Duration(seconds: 5));
+  /// Verifica se está autenticado
+  bool get isAuthenticated => _token != null && _token!.isNotEmpty;
 
-      if (response.statusCode == 200) {
-        return ApiResponse.success(
-          message: 'Conectado',
-          data: {'connected': true},
-        );
-      } else {
-        return ApiResponse.error(
-          message: 'Servidor indisponível',
-          statusCode: response.statusCode,
-        );
-      }
-    } catch (e) {
-      return ApiResponse.error(
-        message: 'Sem conexão com o servidor',
-        statusCode: 0,
-      );
-    }
+  /// Obtém o token atual
+  String? get currentToken => _token;
+
+  /// Define um novo token
+  void setToken(String token) {
+    _token = token;
+    _saveTokenToStorage(token);
   }
 
-  // ============ ESTATÍSTICAS ============
-
-  /// Obter estatísticas do dashboard
-  static Future<ApiResponse> getDashboardStats() async {
-    try {
-      return await _makeRequest('GET', '/api/v1/dashboard/stats/');
-    } catch (e) {
-      return ApiResponse.error(
-        message: 'Erro ao obter estatísticas: ${e.toString()}',
-      );
-    }
+  /// Remove o token
+  void clearToken() {
+    _removeTokenFromStorage();
   }
 }

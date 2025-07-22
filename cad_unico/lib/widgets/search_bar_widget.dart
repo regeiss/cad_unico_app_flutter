@@ -93,7 +93,7 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: (0.05),
+            color: Colors.black.withValues(alpha: (0.05)),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -534,7 +534,7 @@ class _SearchBarWithSuggestionsState extends State<SearchBarWithSuggestions> {
               borderRadius: BorderRadius.circular(8),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: (0.1),
+                  color: Colors.black.withValues(alpha: (0.1)),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),

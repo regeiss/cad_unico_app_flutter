@@ -65,6 +65,36 @@ class AppConstants {
   static const String unauthorizedMessage =
       'Sessão expirada. Faça login novamente.';
 
+  // Labels e placeholders
+  static const String loginButtonLabel = 'Entrar';
+  static const String logoutButtonLabel = 'Sair';
+  static const String registerButtonLabel = 'Registrar';
+  static const String cancelButtonLabel = 'Cancelar';
+  static const String deleteButtonLabel = 'Excluir';
+  static const String editButtonLabel = 'Editar';
+  static const String createButtonLabel = 'Criar';
+  static const String updateButtonLabel = 'Atualizar';
+  static const String searchButtonLabel = 'Buscar';
+  static const String clearButtonLabel = 'Limpar';
+
+  static const String saveButtonLabel = 'Salvar';
+  static const String usernameLabel = 'Usuário';
+  static const String usernamePlaceholder = 'Digite seu usuário';
+  static const String passwordLabel = 'Senha';
+  static const String passwordPlaceholder = 'Digite sua senha';
+  static const String confirmPasswordLabel = 'Confirmar Senha';
+  static const String confirmPasswordPlaceholder = 'Confirme sua senha';
+  static const String emailLabel = 'Email';
+  static const String emailPlaceholder = 'Digite seu email';
+  static const String firstNameLabel = 'Nome';
+  static const String firstNamePlaceholder = 'Digite seu nome';
+  static const String lastNameLabel = 'Sobrenome';
+  static const String lastNamePlaceholder = 'Digite seu sobrenome';
+  static const int passwordMinLength = 10;
+  static const String weakPasswordMessage =
+      'Senha fraca. Deve ter pelo menos $passwordMinLength caracteres.';
+  static const String phoneLabel = 'Telefone';
+  static const String phonePlaceholder = 'Digite seu telefone';
   // Mensagens de sucesso
   static const String loginSuccessMessage = 'Login realizado com sucesso!';
   static const String logoutSuccessMessage = 'Logout realizado com sucesso!';
@@ -79,12 +109,12 @@ class AppConstants {
   static const String invalidCpfMessage = 'CPF inválido';
   static const String invalidPhoneMessage = 'Telefone inválido';
   static const String invalidCepMessage = 'CEP inválido';
-  
+
 // Validações de login
   static const String usernameRequiredMessage = 'Username é obrigatório';
   static const String passwordRequiredMessage = 'Senha é obrigatória';
   static const String invalidCredentialsMessage = 'Credenciais inválidas';
-  static const String accountDisabledMessage = 'Conta desativada';      
+  static const String accountDisabledMessage = 'Conta desativada';
   static const String passwordsDontMatchMessage = 'Senhas não conferem';
   static const String passwordTooShortMessage =
       'Senha deve ter pelo menos 6 caracteres';
@@ -278,6 +308,19 @@ class AppConstants {
   // static const String cepPattern = r'^\d{5}-\d{3};
   // static const String emailPattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,};
 
+  // Animation Durations
+  static const Duration mediumAnimation = Duration(milliseconds: 300);
+
+  // Sidebar Dimensions
+  static const double sidebarWidth = 280.0;
+  static const double sidebarCollapsedWidth = 70.0;
+
+  // Icons
+  static const IconData logoutIcon = Icons.logout;
+  static const IconData settingsIcon = Icons.settings;
+
+  // Display
+  static const String displayName = 'Cadastro Unificado';
   // Configurações de tema
   static const double defaultElevation = 2.0;
   static const double cardElevation = 4.0;
@@ -322,21 +365,28 @@ class AppConstants {
     return width >= mobileBreakpoint && width < tabletBreakpoint;
   }
 
-  static bool isDesktop(BuildContext context) => MediaQuery.of(context).size.width >= tabletBreakpoint;
+  static bool isDesktop(BuildContext context) =>
+      MediaQuery.of(context).size.width >= tabletBreakpoint;
 
-  static bool isLargeDesktop(BuildContext context) => MediaQuery.of(context).size.width >= desktopBreakpoint;
+  static bool isLargeDesktop(BuildContext context) =>
+      MediaQuery.of(context).size.width >= desktopBreakpoint;
 
   static String getStatusLabel(String status) => statusLabels[status] ?? status;
 
-  static Color getStatusColor(String status) => statusColors[status] ?? Colors.grey;
+  static Color getStatusColor(String status) =>
+      statusColors[status] ?? Colors.grey;
 
   static String getGenderLabel(String gender) => genderLabels[gender] ?? gender;
 
-  static String getDemandTypeLabel(String type) => demandTypeLabels[type] ?? type;
+  static String getDemandTypeLabel(String type) =>
+      demandTypeLabels[type] ?? type;
 
-  static IconData getDemandTypeIcon(String type) => demandTypeIcons[type] ?? Icons.help_outline;
+  static IconData getDemandTypeIcon(String type) =>
+      demandTypeIcons[type] ?? Icons.help_outline;
 
-  static IconData getStatusIcon(String status) => statusIcons[status] ?? Icons.help_outline;
+  static IconData getStatusIcon(String status) =>
+      statusIcons[status] ?? Icons.help_outline;
 
-  static String getStateName(String stateCode) => stateNames[stateCode] ?? stateCode;
+  static String getStateName(String stateCode) =>
+      stateNames[stateCode] ?? stateCode;
 }
