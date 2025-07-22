@@ -202,7 +202,7 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (Responsive.isMobile) ...[
+              if (Responsive.isMobile(context)) ...[
                 Text(
                   'Entrar',
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(

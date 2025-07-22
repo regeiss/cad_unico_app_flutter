@@ -152,7 +152,7 @@ class _DemandasScreenState extends State<DemandasScreen>
                         title: 'Educação',
                         value: provider.totalDemandasEducacao.toString(),
                         icon: Icons.school,
-                        color: Colors.blue,
+                        color: Colors.blue, subtitle: '',
                         //isCompact: true,
                       ),
                     ),
@@ -166,7 +166,7 @@ class _DemandasScreenState extends State<DemandasScreen>
                         title: 'Ambiente',
                         value: provider.totalDemandasAmbiente.toString(),
                         icon: Icons.pets,
-                        color: Colors.green,
+                        color: Colors.green, subtitle: '',
                         //isCompact: true,
                       ),
                     ),
@@ -176,7 +176,7 @@ class _DemandasScreenState extends State<DemandasScreen>
                         title: 'Prioritários',
                         value: provider.totalGruposPrioritarios.toString(),
                         icon: Icons.priority_high,
-                        color: Colors.orange,
+                        color: Colors.orange, subtitle: '',
                         // isCompact: true,
                       ),
                     ),
@@ -188,8 +188,7 @@ class _DemandasScreenState extends State<DemandasScreen>
       ),
     );
 
-  Widget _buildSearchBar() {
-    return Padding(
+  Widget _buildSearchBar() => Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: TextField(
         decoration: InputDecoration(
@@ -208,10 +207,8 @@ class _DemandasScreenState extends State<DemandasScreen>
         },
       ),
     );
-  }
 
-  Widget _buildTabBar() {
-    return Container(
+  Widget _buildTabBar() => Container(
       margin: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
         color: Colors.grey[200],
@@ -233,7 +230,6 @@ class _DemandasScreenState extends State<DemandasScreen>
         ],
       ),
     );
-  }
 
   Widget _buildOverviewTab(DemandaProvider provider) {
     if (provider.isLoading) {
