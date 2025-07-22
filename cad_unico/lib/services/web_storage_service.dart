@@ -29,7 +29,7 @@ class WebStorageService {
       }
 
       return success;
-    } on Exception {
+    } catch (e) {
       if (kDebugMode) {
         print('❌ Erro ao salvar token no localStorage: $e');
       }
@@ -50,7 +50,7 @@ class WebStorageService {
       }
 
       return token;
-    } on Exception {
+    } catch (e) {
       if (kDebugMode) {
         print('❌ Erro ao recuperar token do localStorage: $e');
       }
@@ -65,7 +65,7 @@ class WebStorageService {
     try {
       html.window.localStorage[_refreshTokenKey] = refreshToken;
       return html.window.localStorage[_refreshTokenKey] == refreshToken;
-    } on Exception {
+    } catch (e) {
       if (kDebugMode) {
         print('❌ Erro ao salvar refresh token: $e');
       }
@@ -79,7 +79,7 @@ class WebStorageService {
 
     try {
       return html.window.localStorage[_refreshTokenKey];
-    } on Exception {
+    } catch (e) {
       if (kDebugMode) {
         print('❌ Erro ao recuperar refresh token: $e');
       }
@@ -98,7 +98,7 @@ class WebStorageService {
       html.window.localStorage[_userKey] = userJson;
 
       return html.window.localStorage[_userKey] == userJson;
-    } on Exception {
+    } catch (e) {
       if (kDebugMode) {
         print('❌ Erro ao salvar usuário: $e');
       }
@@ -116,7 +116,7 @@ class WebStorageService {
         return jsonDecode(userJson) as Map<String, dynamic>;
       }
       return null;
-    } on Exception {
+    } catch (e) {
       if (kDebugMode) {
         print('❌ Erro ao recuperar usuário: $e');
       }
@@ -133,7 +133,7 @@ class WebStorageService {
     try {
       html.window.localStorage[_isLoggedInKey] = isLoggedIn.toString();
       return html.window.localStorage[_isLoggedInKey] == isLoggedIn.toString();
-    } on Exception {
+    } catch (e) {
       if (kDebugMode) {
         print('❌ Erro ao definir status de login: $e');
       }
@@ -148,7 +148,7 @@ class WebStorageService {
     try {
       final value = html.window.localStorage[_isLoggedInKey];
       return value == 'true';
-    } on Exception {
+    } catch (e) {
       if (kDebugMode) {
         print('❌ Erro ao verificar status de login: $e');
       }
@@ -186,7 +186,7 @@ class WebStorageService {
       }
 
       return allSuccess;
-    } on Exception {
+    } catch (e) {
       if (kDebugMode) {
         print('❌ Erro ao salvar sessão: $e');
       }
@@ -211,7 +211,7 @@ class WebStorageService {
       }
 
       return true;
-    } on Exception {
+    } catch (e) {
       if (kDebugMode) {
         print('❌ Erro ao limpar auth: $e');
       }
@@ -231,7 +231,7 @@ class WebStorageService {
       }
 
       return true;
-    } on Exception {
+    } catch (e) {
       if (kDebugMode) {
         print('❌ Erro ao limpar tudo: $e');
       }
@@ -249,9 +249,13 @@ class WebStorageService {
       if (kDebugMode) {
         print('🔍 localStorage contents:');
 
-        print('  Token: ${getToken()?.substring(0, 20)}...');
-        print('  RefreshToken: ${getRefreshToken()?.substring(0, 20)}...');
-        print('  User: ${getUser()?['username']}');
+        final token = getToken();
+        final refreshToken = getRefreshToken();
+        final user = getUser();
+        
+        print('  Token: ${token != null ? "${token.substring(0, 20)}..." : "null"}');
+        print('  RefreshToken: ${refreshToken != null ? "${refreshToken.substring(0, 20)}..." : "null"}');
+        print('  User: ${user?['username'] ?? "null"}');
         print('  IsLoggedIn: ${isLoggedIn()}');
       }
       // Lista todas as chaves
@@ -259,8 +263,10 @@ class WebStorageService {
       if (kDebugMode) {
         print('  Todas as chaves: $keys');
       }
-    } on Exception {
-      debugPrint('❌ Erro ao listar localStorage: $e');
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Erro ao listar localStorage: $e');
+      }
     }
   }
 
@@ -274,7 +280,10 @@ class WebStorageService {
       final result = html.window.localStorage[testKey] == 'test';
       html.window.localStorage.remove(testKey);
       return result;
-    } on Exception {
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ localStorage não disponível: $e');
+      }
       return false;
     }
   }
