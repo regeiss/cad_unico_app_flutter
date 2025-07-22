@@ -416,8 +416,7 @@ class _HomeScreenState extends State<HomeScreen> {
     required IconData icon,
     required Color color,
     required VoidCallback onTap,
-  }) {
-    return Card(
+  }) => Card(
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
@@ -452,7 +451,6 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
-  }
 
   Widget _buildRecentActivity() => Column(
         crossAxisAlignment: CrossAxisAlignment.start,

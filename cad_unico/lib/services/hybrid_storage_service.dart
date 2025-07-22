@@ -40,7 +40,7 @@ class HybridStorageService {
       } else {
         return await _saveToMobile(_tokenKey, token);
       }
-    } on Exception {
+    } catch (e) {
       if (kDebugMode) {
         print('❌ Erro ao salvar token: $e');
       }
@@ -56,7 +56,7 @@ class HybridStorageService {
       } else {
         return _getFromMobile(_tokenKey);
       }
-    } on Exception {
+    } catch (e) {
       if (kDebugMode) {
         print('❌ Erro ao recuperar token: $e');
       }
@@ -72,7 +72,7 @@ class HybridStorageService {
       } else {
         return await _saveToMobile(_refreshTokenKey, refreshToken);
       }
-    } on Exception {
+    } catch (e) {
       if (kDebugMode) {
         print('❌ Erro ao salvar refresh token: $e');
       }
@@ -88,7 +88,7 @@ class HybridStorageService {
       } else {
         return _getFromMobile(_refreshTokenKey);
       }
-    } on Exception {
+    } catch (e) {
       if (kDebugMode) {
         print('❌ Erro ao recuperar refresh token: $e');
       }
@@ -106,7 +106,7 @@ class HybridStorageService {
       } else {
         return await _saveToMobile(_userKey, userJson);
       }
-    } on Exception {
+    } catch (e) {
       if (kDebugMode) {
         print('❌ Erro ao salvar usuário: $e');
       }
@@ -129,7 +129,7 @@ class HybridStorageService {
         return jsonDecode(userJson) as Map<String, dynamic>;
       }
       return null;
-    } on Exception {
+    } catch (e) {
       if (kDebugMode) {
         print('❌ Erro ao recuperar usuário: $e');
       }
@@ -147,7 +147,7 @@ class HybridStorageService {
       } else {
         return await _prefs!.setBool(_isLoggedInKey, isLoggedIn);
       }
-    } on Exception {
+    } catch (e) {
       if (kDebugMode) {
         print('❌ Erro ao definir status de login: $e');
       }
@@ -164,7 +164,7 @@ class HybridStorageService {
       } else {
         return _prefs!.getBool(_isLoggedInKey) ?? false;
       }
-    } on Exception {
+    } catch (e) {
       if (kDebugMode) {
         print('❌ Erro ao verificar status de login: $e');
       }
@@ -200,7 +200,7 @@ class HybridStorageService {
       }
 
       return allSuccess;
-    } on Exception {
+    } catch (e) {
       if (kDebugMode) {
         print('❌ Erro ao salvar sessão: $e');
       }
@@ -234,7 +234,7 @@ class HybridStorageService {
       }
 
       return true;
-    } on Exception {
+    } catch (e) {
       if (kDebugMode) {
         print('❌ Erro ao limpar dados: $e');
       }
@@ -250,7 +250,7 @@ class HybridStorageService {
         if (kDebugMode) {
           print('🔄 SharedPreferences recarregado');
         }
-      } on Exception {
+      } catch (e) {
         if (kDebugMode) {
           print('❌ Erro ao recarregar: $e');
         }
@@ -279,7 +279,7 @@ class HybridStorageService {
         print('⚠️ Falha na verificação web storage para $key após retries');
       }
       return false;
-    } on Exception {
+    } catch (e) {
       if (kDebugMode) {
         print('❌ Erro ao salvar no localStorage: $e');
       }
@@ -290,7 +290,7 @@ class HybridStorageService {
   String? _getFromWeb(String key) {
     try {
       return html.window.localStorage[key];
-    } on Exception {
+    } catch (e) {
       if (kDebugMode) {
         print('❌ Erro ao ler do localStorage: $e');
       }
@@ -303,7 +303,7 @@ class HybridStorageService {
   Future<bool> _saveToMobile(String key, String value) async {
     try {
       return await _prefs!.setString(key, value);
-    } on Exception {
+    } catch (e) {
       if (kDebugMode) {
         print('❌ Erro ao salvar no SharedPreferences: $e');
       }
@@ -314,7 +314,7 @@ class HybridStorageService {
   String? _getFromMobile(String key) {
     try {
       return _prefs!.getString(key);
-    } on Exception {
+    } catch (e) {
       if (kDebugMode) {
         print('❌ Erro ao ler do SharedPreferences: $e');
       }
@@ -335,9 +335,9 @@ class HybridStorageService {
       final user = await getUser();
       final loggedIn = await isLoggedIn();
 
-      print('  Token: ${token?.substring(0, 20)}...');
-      print('  RefreshToken: ${refreshToken?.substring(0, 20)}...');
-      print('  User: ${user?['username']}');
+      print('  Token: ${token != null ? "${token.substring(0, 20)}..." : "null"}');
+      print('  RefreshToken: ${refreshToken != null ? "${refreshToken.substring(0, 20)}..." : "null"}');
+      print('  User: ${user?['username'] ?? "null"}');
       print('  IsLoggedIn: $loggedIn');
 
       if (kIsWeb) {
@@ -349,8 +349,10 @@ class HybridStorageService {
       }
 
       print('==========================================');
-    } on Exception {
-      print('❌ Erro no debug: $e');
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Erro no debug: $e');
+      }
     }
   }
 
@@ -371,7 +373,7 @@ class HybridStorageService {
         await _prefs!.remove(testKey);
         return retrieved == testValue;
       }
-    } on Exception {
+    } catch (e) {
       if (kDebugMode) {
         print('❌ Erro no teste de storage: $e');
       }

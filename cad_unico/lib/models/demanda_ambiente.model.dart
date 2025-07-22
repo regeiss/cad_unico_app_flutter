@@ -1,4 +1,4 @@
-class DemandaAmbienteModel {
+class DemandaAmbiente {
   final String cpf;
   final int? quantidade;
   final String? especie;
@@ -11,7 +11,7 @@ class DemandaAmbienteModel {
   final String? porte;
   final String? evolucao;
 
-  DemandaAmbienteModel({
+  DemandaAmbiente({
     required this.cpf,
     this.quantidade,
     this.especie,
@@ -25,23 +25,24 @@ class DemandaAmbienteModel {
     this.evolucao,
   });
 
-  factory DemandaAmbienteModel.fromJson(Map<String, dynamic> json) => DemandaAmbienteModel(
-      cpf: json['cpf']?.toString() ?? '',
-      quantidade: json['quantidade'] != null 
-          ? int.tryParse(json['quantidade'].toString())
-          : null,
-      especie: json['especie']?.toString(),
-      acompanhaTutor: json['acompanha_tutor']?.toString() ?? 'N',
-      vacinado: json['vacinado']?.toString(),
-      vacRaiva: json['vac_raiva']?.toString(),
-      vacV8v10: json['vac_v8v10']?.toString(),
-      necRacao: json['nec_racao']?.toString(),
-      castrado: json['castrado']?.toString(),
-      porte: json['porte']?.toString(),
-      evolucao: json['evolucao']?.toString(),
+  factory DemandaAmbiente.fromJson(Map<String, dynamic> json) {
+    return DemandaAmbiente(
+      cpf: json['cpf'] ?? '',
+      quantidade: json['quantidade'],
+      especie: json['especie'],
+      acompanhaTutor: json['acompanha_tutor'] ?? 'N',
+      vacinado: json['vacinado'],
+      vacRaiva: json['vac_raiva'],
+      vacV8v10: json['vac_v8v10'],
+      necRacao: json['nec_racao'],
+      castrado: json['castrado'],
+      porte: json['porte'],
+      evolucao: json['evolucao'],
     );
+  }
 
-  Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson() {
+    return {
       'cpf': cpf,
       'quantidade': quantidade,
       'especie': especie,
@@ -54,40 +55,75 @@ class DemandaAmbienteModel {
       'porte': porte,
       'evolucao': evolucao,
     };
-
-  @override
-  String toString() => 'DemandaAmbienteModel(cpf: $cpf, especie: $especie, quantidade: $quantidade)';
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is DemandaAmbienteModel && other.cpf == cpf;
   }
 
-  @override
-  int get hashCode => cpf.hashCode;
-
-  // Getters úteis
-  bool get precisaVacinacao => vacinado != 'S';
-  bool get precisaCastracao => castrado != 'S';
-  bool get precisaRacao => necRacao == 'S';
-
-  String get statusVacinacao {
-    if (vacinado == 'S' && vacRaiva == 'S' && vacV8v10 == 'S') {
-      return 'Completa';
-    } else if (vacinado == 'S') {
-      return 'Parcial';
+  // Getters utilitários
+  String get especieFormatada {
+    switch (especie?.toLowerCase()) {
+      case 'cao':
+      case 'cão':
+        return '🐕 Cão';
+      case 'gato':
+        return '🐱 Gato';
+      case 'ave':
+        return '🐦 Ave';
+      case 'outro':
+        return '🐾 Outro';
+      default:
+        return especie ?? 'Não informado';
     }
-    return 'Pendente';
   }
 
-  String get situacaoAnimal {
-    List<String> pendencias = [];
-    if (precisaVacinacao) pendencias.add('Vacinação');
-    if (precisaCastracao) pendencias.add('Castração');
-    if (precisaRacao) pendencias.add('Ração');
+  String get porteFormatado {
+    switch (porte?.toLowerCase()) {
+      case 'pequeno':
+      case 'p':
+        return 'Pequeno';
+      case 'medio':
+      case 'médio':
+      case 'm':
+        return 'Médio';
+      case 'grande':
+      case 'g':
+        return 'Grande';
+      default:
+        return porte ?? 'Não informado';
+    }
+  }
+
+  bool get vacinacoesCompletas => 
+      vacRaiva == 'S' && vacV8v10 == 'S';
+
+  String get statusSaude {
+    final status = <String>[];
     
-    if (pendencias.isEmpty) return 'Regular';
-    return 'Pendente: ${pendencias.join(', ')}';
+    if (vacinado == 'S') {
+      status.add('Vacinado');
+      if (vacinacoesCompletas) {
+        status.add('(Completo)');
+      } else {
+        status.add('(Incompleto)');
+      }
+    } else {
+      status.add('Não Vacinado');
+    }
+    
+    if (castrado == 'S') {
+      status.add('Castrado');
+    } else {
+      status.add('Não Castrado');
+    }
+    
+    return status.join(' • ');
+  }
+
+  String get necessidades {
+    final necessidades = <String>[];
+    
+    if (necRacao == 'S') necessidades.add('Ração');
+    if (vacinado != 'S') necessidades.add('Vacinação');
+    if (castrado != 'S') necessidades.add('Castração');
+    
+    return necessidades.isEmpty ? 'Nenhuma' : necessidades.join(', ');
   }
 }

@@ -29,11 +29,14 @@ class DemandaSaude {
     this.evolucao,
   });
 
-  factory DemandaSaude.fromJson(Map<String, dynamic> json) => DemandaSaude(
+  factory DemandaSaude.fromJson(Map<String, dynamic> json) {
+    return DemandaSaude(
       cpf: json['cpf'] ?? '',
       genero: json['genero'],
       saudeCid: json['saude_cid'],
-      dataNasc: json['data_nasc'] != null ? DateTime.parse(json['data_nasc']) : null,
+      dataNasc: json['data_nasc'] != null
+          ? DateTime.tryParse(json['data_nasc'])
+          : null,
       gestPuerNutriz: json['gest_puer_nutriz'] ?? 'N',
       mobReduzida: json['mob_reduzida'] ?? 'N',
       cuidaOutrem: json['cuida_outrem'] ?? 'N',
@@ -44,12 +47,14 @@ class DemandaSaude {
       localRef: json['local_ref'],
       evolucao: json['evolucao'],
     );
+  }
 
-  Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson() {
+    return {
       'cpf': cpf,
       'genero': genero,
       'saude_cid': saudeCid,
-      'data_nasc': dataNasc?.toIso8601String().split('T')[0],
+      'data_nasc': dataNasc?.toIso8601String().split('T').first,
       'gest_puer_nutriz': gestPuerNutriz,
       'mob_reduzida': mobReduzida,
       'cuida_outrem': cuidaOutrem,
@@ -60,30 +65,30 @@ class DemandaSaude {
       'local_ref': localRef,
       'evolucao': evolucao,
     };
-
-  bool get isPrioritario => gestPuerNutriz == 'S' || 
-           mobReduzida == 'S' || 
-           pcdOuMental == 'S' ||
-           cuidaOutrem == 'S';
-
-  String get prioridadeDescricao {
-    final prioridades = <String>[];
-    if (gestPuerNutriz == 'S') prioridades.add('Gestante/Nutriz');
-    if (mobReduzida == 'S') prioridades.add('Mobilidade Reduzida');
-    if (pcdOuMental == 'S') prioridades.add('PCD/Mental');
-    if (cuidaOutrem == 'S') prioridades.add('Cuidador');
-    
-    return prioridades.isEmpty ? 'Sem prioridade especial' : prioridades.join(', ');
   }
 
-  int? get idade {
-    if (dataNasc == null) return null;
-    final agora = DateTime.now();
-    int idade = agora.year - dataNasc!.year;
-    if (agora.month < dataNasc!.month || 
-        (agora.month == dataNasc!.month && agora.day < dataNasc!.day)) {
+  // Getters utilitários
+  bool get isPrioritario =>
+      gestPuerNutriz == 'S' || mobReduzida == 'S' || pcdOuMental == 'S';
+
+  int get idade {
+    if (dataNasc == null) return 0;
+    final hoje = DateTime.now();
+    int idade = hoje.year - dataNasc!.year;
+    if (hoje.month < dataNasc!.month ||
+        (hoje.month == dataNasc!.month && hoje.day < dataNasc!.day)) {
       idade--;
     }
     return idade;
+  }
+
+  String get statusPrioridade {
+    final prioridades = <String>[];
+    if (gestPuerNutriz == 'S') prioridades.add('Gestante/Puérpera/Nutriz');
+    if (mobReduzida == 'S') prioridades.add('Mobilidade Reduzida');
+    if (pcdOuMental == 'S') prioridades.add('PCD/Deficiência Mental');
+    if (cuidaOutrem == 'S') prioridades.add('Cuida de Terceiros');
+
+    return prioridades.isEmpty ? 'Normal' : prioridades.join(', ');
   }
 }
