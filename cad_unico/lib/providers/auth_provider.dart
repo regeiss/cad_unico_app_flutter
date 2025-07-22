@@ -44,7 +44,7 @@ class AuthProvider extends ChangeNotifier {
   Future<void> _loadUserProfile() async {
     try {
       final userData = await _apiService.getUserProfile();
-      _user = User.fromJson(userData);
+      _user = UserModel.fromJson(userData);
       _isAuthenticated = true;
       _clearError();
       notifyListeners();

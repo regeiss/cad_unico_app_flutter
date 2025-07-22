@@ -1,264 +1,166 @@
-// lib/utils/auth_extensions.dart
-// ignore_for_file: avoid_classes_with_only_static_members
-
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../models/user_model.dart';
 import 'auth_provider.dart';
 
-/// Extensão para facilitar o acesso ao AuthProvider
-extension BuildContextAuth on BuildContext {
-  /// Obtém o AuthProvider
-  AuthProvider get auth => Provider.of<AuthProvider>(this, listen: false);
-
-  /// Obtém o AuthProvider com listen
-  AuthProvider get authWatch => Provider.of<AuthProvider>(this, listen: true);
-
-  /// Verifica se está autenticado
-  bool get isAuthenticated => auth.isAuthenticated;
-
-  /// Obtém dados do usuário
-  UserModel? get user => auth.user;
-
-  /// Obtém token de autorização
-  String? get authToken => auth.token;
-
-  /// Faz logout
-  Future<void> logout() => auth.logout();
-}
-
-/// Mixin para widgets que precisam de autenticação
-mixin AuthRequiredMixin<T extends StatefulWidget> on State<T> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkAuth();
-    });
+/// Extensões úteis para o AuthProvider
+extension AuthProviderExtensions on AuthProvider {
+  
+  /// Retorna o token de autenticação atual
+  String? get authToken {
+    return user?.token; // Assumindo que user tem uma propriedade token
   }
-
-  void _checkAuth() {
-    final authProvider = context.auth;
-    if (!authProvider.isAuthenticated) {
-      // Redireciona para login se não estiver autenticado
-      Navigator.of(context).pushReplacementNamed('/login');
-    }
+  
+  /// Verifica se o usuário está autenticado
+  bool get isAuthenticated {
+    return user != null && authToken != null;
   }
-}
-
-/// Widget que só exibe conteúdo se usuário estiver autenticado
-class AuthGuard extends StatelessWidget {
-  final Widget child;
-  final Widget? fallback;
-  final bool showLoading;
-
-  const AuthGuard({
-    super.key,
-    required this.child,
-    this.fallback,
-    this.showLoading = true,
-  });
-
-  @override
-  Widget build(BuildContext context) => Consumer<AuthProvider>(
-        builder: (context, auth, _) {
-          if (!auth.isInitialized && showLoading) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-
-          if (auth.isAuthenticated) {
-            return child;
-          }
-
-          return fallback ?? const SizedBox.shrink();
-        },
-      );
-}
-
-/// Widget que só exibe conteúdo se usuário for admin
-class AdminGuard extends StatelessWidget {
-  final Widget child;
-  final Widget? fallback;
-
-  const AdminGuard({
-    super.key,
-    required this.child,
-    this.fallback,
-  });
-
-  @override
-  Widget build(BuildContext context) => Consumer<AuthProvider>(
-        builder: (context, auth, _) {
-          if (auth.isAuthenticated && auth.isAdmin) {
-            return child;
-          }
-
-          return fallback ?? const SizedBox.shrink();
-        },
-      );
-}
-
-/// Widget para exibir avatar do usuário
-class UserAvatar extends StatelessWidget {
-  final double radius;
-  final Color? backgroundColor;
-  final Color? textColor;
-
-  const UserAvatar({
-    super.key,
-    this.radius = 20,
-    this.backgroundColor,
-    this.textColor,
-  });
-
-  @override
-  Widget build(BuildContext context) => Consumer<AuthProvider>(
-        builder: (context, auth, _) => CircleAvatar(
-          radius: radius,
-          backgroundColor: backgroundColor ?? Theme.of(context).primaryColor,
-          child: Text(
-            auth.userInitials,
-            style: TextStyle(
-              color: textColor ?? Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: radius * 0.8,
-            ),
-          ),
-        ),
-      );
-}
-
-/// Widget para exibir nome do usuário
-class UserNameDisplay extends StatelessWidget {
-  final TextStyle? style;
-  final String? fallback;
-
-  const UserNameDisplay({
-    super.key,
-    this.style,
-    this.fallback,
-  });
-
-  @override
-  Widget build(BuildContext context) => Consumer<AuthProvider>(
-        builder: (context, auth, _) => Text(
-          auth.fullName.isNotEmpty ? auth.fullName : (fallback ?? 'Usuário'),
-          style: style,
-        ),
-      );
-}
-
-/// Interceptor para requisições HTTP com token
-class AuthInterceptor {
-  final AuthProvider authProvider;
-
-  AuthInterceptor(this.authProvider);
-
-  /// Adiciona headers de autenticação
-  Map<String, String> getHeaders([Map<String, String>? additionalHeaders]) {
-    final headers = authProvider.getAuthHeaders();
-    if (additionalHeaders != null) {
-      headers.addAll(additionalHeaders);
-    }
-    return headers;
+  
+  /// Retorna true se o provider foi inicializado
+  bool get hasInitialized {
+    return !isLoading; // Usando isLoading como indicador inverso de inicialização
   }
-
-  /// Trata resposta de erro 401 (não autorizado)
-  Future<bool> handleUnauthorized() async {
-    if (authProvider.isAuthenticated) {
-      // Tenta renovar token ou faz logout
-      await authProvider.logout();
-      return true; // Indica que houve logout
+  
+  /// Verifica se o usuário é administrador
+  bool get hasAdminRole {
+    return user?.isStaff == true; // Usando isStaff como indicador de admin
+  }
+  
+  /// Retorna o nome completo do usuário
+  String get userFullName {
+    if (user == null) return '';
+    
+    final firstName = user!.firstName ?? '';
+    final lastName = user!.lastName ?? '';
+    
+    if (firstName.isEmpty && lastName.isEmpty) {
+      return user!.username;
     }
+    
+    return '$firstName $lastName'.trim();
+  }
+  
+  /// Retorna headers de autenticação para requisições HTTP
+  Map<String, String> get authHeaders {
+    final token = authToken;
+    if (token == null) return {};
+    
+    return {
+      'Authorization': 'Bearer $token',
+      'Content-Type': 'application/json',
+    };
+  }
+  
+  /// Verifica se o token está expirado (implementação básica)
+  bool get isTokenExpired {
+    // Implementação básica - pode ser melhorada com verificação real do JWT
+    return !isAuthenticated;
+  }
+  
+  /// Retorna as iniciais do usuário para avatar
+  String get userInitials {
+    final fullName = userFullName;
+    if (fullName.isEmpty) return '?';
+    
+    final names = fullName.split(' ');
+    if (names.length == 1) {
+      return names[0].substring(0, 1).toUpperCase();
+    }
+    
+    return '${names[0].substring(0, 1)}${names[names.length - 1].substring(0, 1)}'.toUpperCase();
+  }
+  
+  /// Verifica se o usuário tem permissão específica
+  bool hasPermission(String permission) {
+    // Implementação básica - pode ser expandida conforme necessário
+    if (!isAuthenticated) return false;
+    if (hasAdminRole) return true;
+    
+    // Adicionar lógica específica de permissões aqui
     return false;
   }
-}
-
-/// Classe para validações de autenticação
-class AuthValidator {
-  /// Valida formato de email
-  static bool isValidEmail(String email) =>
-      RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
-
-  /// Valida força da senha
-  /// Pelo menos 8 caracteres, 1 maiúscula, 1 minúscula, 1 número
-  static bool isStrongPassword(String password) => password.length >= 8 &&
-        RegExp(r'[A-Z]').hasMatch(password) &&
-        RegExp(r'[a-z]').hasMatch(password) &&
-        RegExp(r'[0-9]').hasMatch(password);
-
-  /// Valida username
-  /// // Entre 3 e 20 caracteres, apenas letras, números e underscore
-  static bool isValidUsername(String username) => RegExp(r'^[a-zA-Z0-9_]{3,20}$').hasMatch(username);
-
-  /// Obtém mensagem de erro para senha fraca
-  static String getPasswordStrengthMessage(String password) {
-    if (password.length < 8) {
-      return 'Senha deve ter pelo menos 8 caracteres';
+  
+  /// Retorna informações resumidas do usuário
+  Map<String, dynamic> get userSummary {
+    if (!isAuthenticated) {
+      return {
+        'authenticated': false,
+        'name': 'Usuário não autenticado',
+        'role': 'guest',
+      };
     }
-    if (!RegExp(r'[A-Z]').hasMatch(password)) {
-      return 'Senha deve ter pelo menos uma letra maiúscula';
-    }
-    if (!RegExp(r'[a-z]').hasMatch(password)) {
-      return 'Senha deve ter pelo menos uma letra minúscula';
-    }
-    if (!RegExp(r'[0-9]').hasMatch(password)) {
-      return 'Senha deve ter pelo menos um número';
-    }
-    return '';
+    
+    return {
+      'authenticated': true,
+      'id': user!.id,
+      'username': user!.username,
+      'name': userFullName,
+      'email': user!.email,
+      'role': hasAdminRole ? 'admin' : 'user',
+      'isStaff': user!.isStaff,
+      'isActive': user!.isActive,
+    };
   }
-}
-
-/// Utilitários para JWT
-class JWTUtils {
-  /// Decodifica payload do JWT (sem verificação de assinatura)
-  static Map<String, dynamic>? decodePayload(String token) {
-    try {
-      final parts = token.split('.');
-      if (parts.length != 3) return null;
-
-      final payload = parts[1];
-
-      // Adiciona padding se necessário
-      var paddedPayload = payload;
-      while (paddedPayload.length % 4 != 0) {
-        paddedPayload += '=';
-      }
-
-      final decoded = utf8.decode(base64Url.decode(paddedPayload));
-      return jsonDecode(decoded) as Map<String, dynamic>;
-    } on Exception {
-      return null;
+  
+  /// Valida se o usuário pode acessar uma determinada rota
+  bool canAccessRoute(String routeName) {
+    if (!isAuthenticated) {
+      // Rotas públicas que não precisam de autenticação
+      const publicRoutes = ['/login', '/register', '/forgot-password'];
+      return publicRoutes.contains(routeName);
     }
+    
+    // Se está autenticado, pode acessar rotas protegidas
+    return true;
   }
-
-  /// Verifica se token está expirado
-  static bool isTokenExpired(String token) {
-    final payload = decodePayload(token);
-    if (payload == null) return true;
-
-    final exp = payload['exp'] as int?;
-    if (exp == null) return true;
-
-    final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-    return now >= exp;
+  
+  /// Formata o nome do usuário para exibição
+  String get displayName {
+    if (!isAuthenticated) return 'Visitante';
+    
+    final fullName = userFullName;
+    if (fullName.isNotEmpty && fullName != user!.username) {
+      return fullName;
+    }
+    
+    return user!.username;
   }
-
-  /// Obtém tempo restante do token em segundos
-  static int? getTokenRemainingTime(String token) {
-    final payload = decodePayload(token);
-    if (payload == null) return null;
-
-    final exp = payload['exp'] as int?;
-    if (exp == null) return null;
-
-    final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-    final remaining = exp - now;
-
-    return remaining > 0 ? remaining : 0;
+  
+  /// Retorna a cor do avatar baseada no usuário
+  Color get avatarColor {
+    if (!isAuthenticated) return Colors.grey;
+    
+    final colors = [
+      Colors.blue,
+      Colors.green,
+      Colors.orange,
+      Colors.purple,
+      Colors.teal,
+      Colors.indigo,
+      Colors.pink,
+      Colors.amber,
+    ];
+    
+    final hash = user!.username.hashCode;
+    return colors[hash.abs() % colors.length];
+  }
+  
+  /// Verifica se é necessário atualizar o token
+  bool get needsTokenRefresh {
+    // Implementação básica - pode ser melhorada
+    return isAuthenticated && isTokenExpired;
+  }
+  
+  /// Retorna o tempo desde o último login (em minutos)
+  int get minutesSinceLogin {
+    if (user?.dateJoined == null) return 0;
+    
+    final now = DateTime.now();
+    final loginTime = user!.dateJoined!;
+    
+    return now.difference(loginTime).inMinutes;
+  }
+  
+  /// Verifica se o usuário logou recentemente (últimas 24h)
+  bool get isRecentLogin {
+    return minutesSinceLogin <= (24 * 60); // 24 horas em minutos
   }
 }

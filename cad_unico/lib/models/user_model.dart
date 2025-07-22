@@ -2,97 +2,50 @@ class UserModel {
   final int id;
   final String username;
   final String email;
-  final String firstName;
-  final String lastName;
+  final String? firstName;
+  final String? lastName;
   final bool isStaff;
   final bool isActive;
-  final DateTime dateJoined;
-  final List<String> roles;
-  final List<String> permissions;
-  
-  UserModel({
+  final DateTime? dateJoined;
+  final String? token; // Nova propriedade token
+  final String? refreshToken; // Token de refresh opcional
+
+  const UserModel({
     required this.id,
     required this.username,
     required this.email,
-    required this.firstName,
-    required this.lastName,
-    required this.isStaff,
-    required this.isActive,
-    required this.dateJoined,
-    this.roles = const [],
-    this.permissions = const [],
+    this.firstName,
+    this.lastName,
+    this.isStaff = false,
+    this.isActive = true,
+    this.dateJoined,
+    this.token,
+    this.refreshToken,
   });
-  
-  // Create UserModel from JSON
-  factory UserModel.fromJson(Map<String, dynamic> json) => UserModel(
-      id: json['id'] ?? 0,
-      username: json['username'] ?? '',
-      email: json['email'] ?? '',
-      firstName: json['first_name'] ?? '',
-      lastName: json['last_name'] ?? '',
-      isStaff: json['is_staff'] ?? false,
-      isActive: json['is_active'] ?? true,
-      dateJoined: DateTime.tryParse(json['date_joined'] ?? '') ?? DateTime.now(),
-      roles: json['roles'] != null ? List<String>.from(json['roles']) : [],
-      permissions: json['permissions'] != null ? List<String>.from(json['permissions']) : [],
-    );
-  
-  // Convert UserModel to JSON
-  Map<String, dynamic> toJson() => {
-      'id': id,
-      'username': username,
-      'email': email,
-      'first_name': firstName,
-      'last_name': lastName,
-      'is_staff': isStaff,
-      'is_active': isActive,
-      'date_joined': dateJoined.toIso8601String(),
-      'roles': roles,
-      'permissions': permissions,
-    };
-  
-  // Check if user has specific role
-  bool hasRole(String role) => roles.contains(role);
-  
-  // Check if user has specific permission
-  bool hasPermission(String permission) => permissions.contains(permission);
-  
-  // Get full name
+
+  /// Retorna o nome completo do usuário
   String get fullName {
-    if (firstName.isNotEmpty && lastName.isNotEmpty) {
-      return '$firstName $lastName';
-    } else if (firstName.isNotEmpty) {
-      return firstName;
-    } else if (lastName.isNotEmpty) {
-      return lastName;
-    } else {
+    if (firstName == null && lastName == null) {
       return username;
     }
+    return '${firstName ?? ''} ${lastName ?? ''}'.trim();
   }
-  
-  // Get display name (first name or username)
-  String get displayName => firstName.isNotEmpty ? firstName : username;
-  
-  // Get initials
+
+  /// Verifica se o usuário está autenticado (tem token)
+  bool get isAuthenticated => token != null && token!.isNotEmpty;
+
+  /// Retorna as iniciais do usuário
   String get initials {
-    String result = '';
-    
-    if (firstName.isNotEmpty) {
-      result += firstName[0].toUpperCase();
+    if (firstName != null && lastName != null) {
+      return '${firstName![0]}${lastName![0]}'.toUpperCase();
     }
-    
-    if (lastName.isNotEmpty) {
-      result += lastName[0].toUpperCase();
+    if (firstName != null && firstName!.isNotEmpty) {
+      return firstName![0].toUpperCase();
     }
-    
-    if (result.isEmpty && username.isNotEmpty) {
-      result = username[0].toUpperCase();
-    }
-    
-    return result.isEmpty ? 'U' : result;
+    return username.isNotEmpty ? username[0].toUpperCase() : '?';
   }
-  
-  // Copy with method for updating user data
+
+  /// Cria uma cópia do modelo com novos valores
   UserModel copyWith({
     int? id,
     String? username,
@@ -102,9 +55,10 @@ class UserModel {
     bool? isStaff,
     bool? isActive,
     DateTime? dateJoined,
-    List<String>? roles,
-    List<String>? permissions,
-  }) => UserModel(
+    String? token,
+    String? refreshToken,
+  }) {
+    return UserModel(
       id: id ?? this.id,
       username: username ?? this.username,
       email: email ?? this.email,
@@ -113,136 +67,150 @@ class UserModel {
       isStaff: isStaff ?? this.isStaff,
       isActive: isActive ?? this.isActive,
       dateJoined: dateJoined ?? this.dateJoined,
-      roles: roles ?? this.roles,
-      permissions: permissions ?? this.permissions,
+      token: token ?? this.token,
+      refreshToken: refreshToken ?? this.refreshToken,
     );
-  
-  @override
-  String toString() => 'UserModel{id: $id, username: $username, email: $email, fullName: $fullName}';
-  
+  }
+
+  /// Cria um modelo sem token (para logout)
+  UserModel withoutToken() {
+    return copyWith(
+      token: null,
+      refreshToken: null,
+    );
+  }
+
+  /// Atualiza apenas o token
+  UserModel withToken(String newToken, {String? newRefreshToken}) {
+    return copyWith(
+      token: newToken,
+      refreshToken: newRefreshToken ?? refreshToken,
+    );
+  }
+
+  /// Converte o modelo para JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'username': username,
+      'email': email,
+      'first_name': firstName,
+      'last_name': lastName,
+      'is_staff': isStaff,
+      'is_active': isActive,
+      'date_joined': dateJoined?.toIso8601String(),
+      'token': token,
+      'refresh_token': refreshToken,
+    };
+  }
+
+  /// Cria um modelo a partir do JSON
+  factory UserModel.fromJson(Map<String, dynamic> json) {
+    return UserModel(
+      id: json['id'] as int,
+      username: json['username'] as String,
+      email: json['email'] as String,
+      firstName: json['first_name'] as String?,
+      lastName: json['last_name'] as String?,
+      isStaff: json['is_staff'] as bool? ?? false,
+      isActive: json['is_active'] as bool? ?? true,
+      dateJoined: json['date_joined'] != null 
+          ? DateTime.parse(json['date_joined'] as String)
+          : null,
+      token: json['token'] as String?,
+      refreshToken: json['refresh_token'] as String?,
+    );
+  }
+
+  /// Cria um modelo a partir da resposta de login da API
+  factory UserModel.fromLoginResponse(Map<String, dynamic> json) {
+    final userJson = json['user'] as Map<String, dynamic>? ?? json;
+    final token = json['token'] as String?;
+    final refreshToken = json['refresh'] as String?;
+
+    return UserModel(
+      id: userJson['id'] as int,
+      username: userJson['username'] as String,
+      email: userJson['email'] as String,
+      firstName: userJson['first_name'] as String?,
+      lastName: userJson['last_name'] as String?,
+      isStaff: userJson['is_staff'] as bool? ?? false,
+      isActive: userJson['is_active'] as bool? ?? true,
+      dateJoined: userJson['date_joined'] != null 
+          ? DateTime.parse(userJson['date_joined'] as String)
+          : null,
+      token: token,
+      refreshToken: refreshToken,
+    );
+  }
+
+  /// Converte para JSON para armazenamento local
+  Map<String, dynamic> toStorageJson() {
+    return {
+      'id': id,
+      'username': username,
+      'email': email,
+      'first_name': firstName,
+      'last_name': lastName,
+      'is_staff': isStaff,
+      'is_active': isActive,
+      'date_joined': dateJoined?.toIso8601String(),
+      'token': token,
+      'refresh_token': refreshToken,
+    };
+  }
+
+  /// Cria um modelo a partir do JSON do armazenamento local
+  factory UserModel.fromStorageJson(Map<String, dynamic> json) {
+    return UserModel.fromJson(json);
+  }
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    
+
     return other is UserModel &&
         other.id == id &&
         other.username == username &&
-        other.email == email;
+        other.email == email &&
+        other.firstName == firstName &&
+        other.lastName == lastName &&
+        other.isStaff == isStaff &&
+        other.isActive == isActive &&
+        other.dateJoined == dateJoined &&
+        other.token == token &&
+        other.refreshToken == refreshToken;
   }
-  
+
   @override
-  int get hashCode => id.hashCode ^ username.hashCode ^ email.hashCode;
+  int get hashCode {
+    return Object.hash(
+      id,
+      username,
+      email,
+      firstName,
+      lastName,
+      isStaff,
+      isActive,
+      dateJoined,
+      token,
+      refreshToken,
+    );
+  }
+
+  @override
+  String toString() {
+    return 'UserModel('
+        'id: $id, '
+        'username: $username, '
+        'email: $email, '
+        'firstName: $firstName, '
+        'lastName: $lastName, '
+        'isStaff: $isStaff, '
+        'isActive: $isActive, '
+        'dateJoined: $dateJoined, '
+        'hasToken: ${token != null}, '
+        'hasRefreshToken: ${refreshToken != null}'
+        ')';
+  }
 }
-
-// // ignore_for_file: type_annotate_public_apis
-
-// import 'package:flutter/material.dart';
-
-// class UserModel {
-//   final int id;
-//   final String username;
-//   final String email;
-//   final String firstName;
-//   final String lastName;
-//   final bool isStaff;
-//   final bool isActive;
-//   final DateTime? dateJoined;
-
-//   UserModel({
-//     required this.id,
-//     required this.username,
-//     required this.email,
-//     required this.firstName,
-//     required this.lastName,
-//     required this.isStaff,
-//     required this.isActive,
-//     this.dateJoined,
-//   });
-
-//   factory UserModel.fromJson(Map<String, dynamic> json) {
-//     final id = json['id'] ?? 0;
-//     final username = json['username'] ?? '';
-//     final email = json['email'] ?? '';
-//     final firstName = json['first_name'] ?? '';
-//     final lastName = json['last_name'] ?? '';
-//     final isStaff = json['is_staff'] ?? false;
-//     final isActive = json['is_active'] ?? true;
-
-//     final dateJoinedString = json['date_joined'];
-//     final dateJoined =
-//         dateJoinedString != null ? DateTime.tryParse(dateJoinedString) : null;
-
-//     debugPrint('Parsing UserModel:');
-//     debugPrint('  id: $id');
-//     debugPrint('  username: $username (type: ${username.runtimeType})');
-//     debugPrint('  email: $email (type: ${email.runtimeType})');
-//     debugPrint('  firstName: $firstName (type: ${firstName.runtimeType})');
-//     debugPrint('  lastName: $lastName (type: ${lastName.runtimeType})');
-//     debugPrint('  isStaff: $isStaff');
-//     debugPrint('  isActive: $isActive');
-//     debugPrint('  dateJoined: $dateJoined');
-//     debugPrint(
-//         '  Raw dateJoinedString: $dateJoinedString (type: ${dateJoinedString.runtimeType})'); // Crucial for date issue
-
-//     return UserModel(
-//       id: id,
-//       username: username,
-//       email: email,
-//       firstName: firstName,
-//       lastName: lastName,
-//       isStaff: isStaff,
-//       isActive: isActive,
-//       dateJoined: dateJoined,
-//     );
-//   }
-
-//   Map<String, dynamic> toJson() => {
-//         'id': id,
-//         'username': username,
-//         'email': email,
-//         'first_name': firstName,
-//         'last_name': lastName,
-//         'is_staff': isStaff,
-//         'is_active': isActive,
-//         'date_joined': dateJoined?.toIso8601String(),
-//       };
-
-//   String get fullName {
-//     if (firstName.isEmpty && lastName.isEmpty) {
-//       return username;
-//     }
-//     return '$firstName $lastName'.trim();
-//   }
-
-//   String get initials {
-//     if (firstName.isNotEmpty && lastName.isNotEmpty) {
-//       return '${firstName[0]}${lastName[0]}'.toUpperCase();
-//     } else if (firstName.isNotEmpty) {
-//       return firstName.substring(0, 1).toUpperCase();
-//     } else if (username.isNotEmpty) {
-//       return username.substring(0, 1).toUpperCase();
-//     }
-//     return 'U';
-//   }
-
-//   UserModel copyWith({
-//     int? id,
-//     String? username,
-//     String? email,
-//     String? firstName,
-//     String? lastName,
-//     bool? isStaff,
-//     bool? isActive,
-//     DateTime? dateJoined,
-//   }) =>
-//       UserModel(
-//         id: id ?? this.id,
-//         username: username ?? this.username,
-//         email: email ?? this.email,
-//         firstName: firstName ?? this.firstName,
-//         lastName: lastName ?? this.lastName,
-//         isStaff: isStaff ?? this.isStaff,
-//         isActive: isActive ?? this.isActive,
-//         dateJoined: dateJoined ?? this.dateJoined,
-//       );
-// }

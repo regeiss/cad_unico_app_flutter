@@ -79,7 +79,7 @@ class _SplashScreenState extends State<SplashScreen>
             end: Alignment.bottomRight,
             colors: [
               Theme.of(context).colorScheme.primary,
-              Theme.of(context).colorScheme.primary.withValues(alpha: (0.8),
+              Theme.of(context).colorScheme.primary.withValues(alpha: (0.8)),
             ],
           ),
         ),
@@ -102,7 +102,7 @@ class _SplashScreenState extends State<SplashScreen>
                           borderRadius: BorderRadius.circular(60),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: (0.2),
+                              color: Colors.black.withValues(alpha: (0.2)),
                               blurRadius: 20,
                               offset: const Offset(0, 10),
                             ),
