@@ -269,7 +269,6 @@ class AppConstants {
   static const int maxCacheSize = 100; // MB
 
   // Configurações de imagem
-  static const int maxImageSize = 5; // MB
   static const List<String> allowedImageFormats = [
     'jpg',
     'jpeg',
@@ -446,8 +445,6 @@ class AppConstants {
   };
 
   // Configurações de desenvolvimento
-  static const bool enableDebugMode = true;
-  static const bool enableAnalytics = false;
   static const bool enableCrashReporting = false;
 
   // Métodos utilitários

@@ -1,188 +1,274 @@
-// lib/utils/responsive.dart
+// ignore_for_file: deprecated_member_use, avoid_classes_with_only_static_members
 
 import 'package:flutter/material.dart';
 import '../constants/constants.dart';
 
-class Responsive extends StatelessWidget {
-  final Widget mobile;
-  final Widget? tablet;
-  final Widget desktop;
+class Responsive {
+  // Verifica se a tela é mobile
+  static bool isMobile(BuildContext context) => MediaQuery.of(context).size.width < AppConstants.mobileBreakpoint;
 
-  const Responsive({
-    super.key,
-    required this.mobile,
-    this.tablet,
-    required this.desktop,
-  });
+  // Verifica se a tela é tablet
+  static bool isTablet(BuildContext context) {
+    double width = MediaQuery.of(context).size.width;
+    return width >= AppConstants.mobileBreakpoint && 
+           width < AppConstants.tabletBreakpoint;
+  }
 
-  static bool isMobile(BuildContext context) =>
-      MediaQuery.of(context).size.width < AppConstants.mobileBreakpoint;
+  // Verifica se a tela é desktop
+  static bool isDesktop(BuildContext context) => MediaQuery.of(context).size.width >= AppConstants.tabletBreakpoint;
 
-  static bool isTablet(BuildContext context) =>
-      MediaQuery.of(context).size.width >= AppConstants.mobileBreakpoint &&
-      MediaQuery.of(context).size.width < AppConstants.desktopBreakpoint;
+  // Verifica se a tela é grande (desktop)
+  static bool isLargeDesktop(BuildContext context) => MediaQuery.of(context).size.width >= AppConstants.desktopBreakpoint;
 
-  static bool isDesktop(BuildContext context) =>
-      MediaQuery.of(context).size.width >= AppConstants.desktopBreakpoint;
-
-  @override
-  Widget build(BuildContext context) {
-    final Size size = MediaQuery.of(context).size;
+  // Retorna o tipo de dispositivo
+  static DeviceType getDeviceType(BuildContext context) {
+    double width = MediaQuery.of(context).size.width;
     
-    if (size.width >= AppConstants.desktopBreakpoint) {
-      return desktop;
-    } else if (size.width >= AppConstants.mobileBreakpoint && tablet != null) {
-      return tablet!;
+    if (width < AppConstants.mobileBreakpoint) {
+      return DeviceType.mobile;
+    } else if (width < AppConstants.tabletBreakpoint) {
+      return DeviceType.tablet;
+    } else if (width < AppConstants.desktopBreakpoint) {
+      return DeviceType.desktop;
     } else {
-      return mobile;
+      return DeviceType.largeDesktop;
     }
   }
-}
 
-// Extensões para facilitar o uso
-extension ResponsiveExtension on BuildContext {
-  bool get isMobile => Responsive.isMobile(this);
-  bool get isTablet => Responsive.isTablet(this);
-  bool get isDesktop => Responsive.isDesktop(this);
-  
-  double get screenWidth => MediaQuery.of(this).size.width;
-  double get screenHeight => MediaQuery.of(this).size.height;
-  
-  // Helpers para padding e spacing responsivos
-  double get responsivePadding {
-    if (isDesktop) return 24.0;
-    if (isTablet) return 16.0;
-    return 12.0;
+  // Retorna padding responsivo
+  static EdgeInsets getPadding(BuildContext context) {
+    if (isMobile(context)) {
+      return const EdgeInsets.all(AppConstants.defaultPadding);
+    } else if (isTablet(context)) {
+      return const EdgeInsets.all(AppConstants.largePadding);
+    } else {
+      return const EdgeInsets.all(AppConstants.extraLargePadding);
+    }
   }
-  
-  double get responsiveSpacing {
-    if (isDesktop) return 16.0;
-    if (isTablet) return 12.0;
-    return 8.0;
+
+  // Retorna número de colunas para grid responsivo
+  static int getGridColumns(BuildContext context) {
+    if (isMobile(context)) {
+      return 1;
+    } else if (isTablet(context)) {
+      return 2;
+    } else if (isDesktop(context)) {
+      return 3;
+    } else {
+      return 4;
+    }
   }
-  
-  // Helper para número de colunas em grids
-  int getGridColumns({int mobile = 1, int tablet = 2, int desktop = 4}) {
-    if (isDesktop) return desktop;
-    if (isTablet) return tablet;
-    return mobile;
+
+  // Retorna largura máxima do conteúdo
+  static double getMaxContentWidth(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    
+    if (isMobile(context)) {
+      return screenWidth;
+    } else if (isTablet(context)) {
+      return screenWidth * 0.9;
+    } else {
+      return 1200.0; // Largura máxima para desktop
+    }
   }
-  
-  // Helper para aspectRatio responsivo
-  double getAspectRatio({
-    double mobile = 1.0,
-    double tablet = 1.2,
-    double desktop = 1.5,
+
+  // Widget responsivo que retorna diferentes widgets baseado no tamanho da tela
+  static Widget responsive({
+    required BuildContext context,
+    required Widget mobile,
+    Widget? tablet,
+    Widget? desktop,
+    Widget? largeDesktop,
   }) {
-    if (isDesktop) return desktop;
-    if (isTablet) return tablet;
-    return mobile;
-  }
-}
-
-// Widget para valores responsivos
-class ResponsiveValue<T> {
-  final T mobile;
-  final T? tablet;
-  final T desktop;
-
-  const ResponsiveValue({
-    required this.mobile,
-    this.tablet,
-    required this.desktop,
-  });
-
-  T getValue(BuildContext context) {
-    if (Responsive.isDesktop(context)) {
-      return desktop;
-    } else if (Responsive.isTablet(context) && tablet != null) {
-      return tablet!;
-    } else {
+    if (isMobile(context)) {
       return mobile;
+    } else if (isTablet(context)) {
+      return tablet ?? mobile;
+    } else if (isDesktop(context)) {
+      return desktop ?? tablet ?? mobile;
+    } else {
+      return largeDesktop ?? desktop ?? tablet ?? mobile;
     }
   }
-}
 
-// Widget builder responsivo
-class ResponsiveBuilder extends StatelessWidget {
-  final Widget Function(BuildContext context, BoxConstraints constraints) builder;
+  // Retorna valor responsivo baseado no tipo de tela
+  static T value<T>({
+    required BuildContext context,
+    required T mobile,
+    T? tablet,
+    T? desktop,
+    T? largeDesktop,
+  }) {
+    if (isMobile(context)) {
+      return mobile;
+    } else if (isTablet(context)) {
+      return tablet ?? mobile;
+    } else if (isDesktop(context)) {
+      return desktop ?? tablet ?? mobile;
+    } else {
+      return largeDesktop ?? desktop ?? tablet ?? mobile;
+    }
+  }
 
-  const ResponsiveBuilder({
-    super.key,
-    required this.builder,
-  });
+  // Retorna altura responsiva baseada na porcentagem da tela
+  static double getHeight(BuildContext context, double percentage) => MediaQuery.of(context).size.height * percentage;
 
-  @override
-  Widget build(BuildContext context) => LayoutBuilder(
-      builder: builder,
+  // Retorna largura responsiva baseada na porcentagem da tela
+  static double getWidth(BuildContext context, double percentage) => MediaQuery.of(context).size.width * percentage;
+
+  // Retorna fonte responsiva
+  static double getFontSize(BuildContext context, double baseFontSize) {
+    double scaleFactor = MediaQuery.of(context).textScaleFactor;
+    
+    if (isMobile(context)) {
+      return baseFontSize * scaleFactor;
+    } else if (isTablet(context)) {
+      return (baseFontSize * 1.1) * scaleFactor;
+    } else {
+      return (baseFontSize * 1.2) * scaleFactor;
+    }
+  }
+
+  // Retorna espaçamento responsivo
+  static double getSpacing(BuildContext context, {
+    double mobile = AppConstants.defaultPadding,
+    double? tablet,
+    double? desktop,
+  }) {
+    if (isMobile(context)) {
+      return mobile;
+    } else if (isTablet(context)) {
+      return tablet ?? mobile * 1.5;
+    } else {
+      return desktop ?? tablet ?? mobile * 2;
+    }
+  }
+
+  // Verifica se deve mostrar drawer ou sidebar
+  static bool shouldShowDrawer(BuildContext context) => isMobile(context);
+
+  // Verifica se deve mostrar sidebar permanente
+  static bool shouldShowSidebar(BuildContext context) => !isMobile(context);
+
+  // Retorna orientação da tela
+  static Orientation getOrientation(BuildContext context) => MediaQuery.of(context).orientation;
+
+  // Verifica se está em modo paisagem
+  static bool isLandscape(BuildContext context) => getOrientation(context) == Orientation.landscape;
+
+  // Verifica se está em modo retrato
+  static bool isPortrait(BuildContext context) => getOrientation(context) == Orientation.portrait;
+
+  // Retorna densidade de pixels
+  static double getPixelRatio(BuildContext context) => MediaQuery.of(context).devicePixelRatio;
+
+  // Verifica se é uma tela de alta densidade
+  static bool isHighDensity(BuildContext context) => getPixelRatio(context) > 2.0;
+
+  // Retorna padding seguro (evita notch e barras do sistema)
+  static EdgeInsets getSafePadding(BuildContext context) => MediaQuery.of(context).padding;
+
+  // Widget que centraliza conteúdo com largura máxima
+  static Widget centeredContent({
+    required BuildContext context,
+    required Widget child,
+    double? maxWidth,
+  }) => Center(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: maxWidth ?? getMaxContentWidth(context),
+        ),
+        child: child,
+      ),
     );
 }
 
-// Classe para breakpoints customizados
-class BreakPoint {
-  final double mobile;
-  final double tablet;
-  final double desktop;
-
-  const BreakPoint({
-    this.mobile = AppConstants.mobileBreakpoint,
-    this.tablet = AppConstants.tabletBreakpoint,
-    this.desktop = AppConstants.desktopBreakpoint,
-  });
-
-  bool isMobile(double width) => width < mobile;
-  bool isTablet(double width) => width >= mobile && width < desktop;
-  bool isDesktop(double width) => width >= desktop;
+// Enum para tipos de dispositivo
+enum DeviceType {
+  mobile,
+  tablet,
+  desktop,
+  largeDesktop,
 }
 
-// Widget para layout responsivo avançado
-class ResponsiveLayout extends StatelessWidget {
+// Widget wrapper responsivo
+class ResponsiveWidget extends StatelessWidget {
   final Widget mobile;
   final Widget? tablet;
-  final Widget desktop;
-  final BreakPoint? breakPoints;
+  final Widget? desktop;
+  final Widget? largeDesktop;
+
+  const ResponsiveWidget({
+    super.key,
+    required this.mobile,
+    this.tablet,
+    this.desktop,
+    this.largeDesktop,
+  });
+
+  @override
+  Widget build(BuildContext context) => Responsive.responsive(
+      context: context,
+      mobile: mobile,
+      tablet: tablet,
+      desktop: desktop,
+      largeDesktop: largeDesktop,
+    );
+}
+
+// Layout responsivo com sidebar
+class ResponsiveLayout extends StatelessWidget {
+  final Widget? drawer;
+  final Widget body;
+  final Widget? sidebar;
+  final PreferredSizeWidget? appBar;
+  final Widget? floatingActionButton;
+  final bool showSidebarOnDesktop;
 
   const ResponsiveLayout({
     super.key,
-    required this.mobile,
-    this.tablet,
-    required this.desktop,
-    this.breakPoints,
+    this.drawer,
+    required this.body,
+    this.sidebar,
+    this.appBar,
+    this.floatingActionButton,
+    this.showSidebarOnDesktop = true,
   });
 
   @override
-  Widget build(BuildContext context) => LayoutBuilder(
-      builder: (context, constraints) {
-        final breakPoint = breakPoints ?? const BreakPoint();
-        final width = constraints.maxWidth;
-
-        if (breakPoint.isDesktop(width)) {
-          return desktop;
-        } else if (breakPoint.isTablet(width) && tablet != null) {
-          return tablet!;
-        } else {
-          return mobile;
-        }
-      },
+  Widget build(BuildContext context) => Scaffold(
+      appBar: appBar,
+      drawer: Responsive.shouldShowDrawer(context) ? drawer : null,
+      floatingActionButton: floatingActionButton,
+      body: Row(
+        children: [
+          // Sidebar para desktop
+          if (Responsive.shouldShowSidebar(context) && 
+              showSidebarOnDesktop && 
+              sidebar != null)
+            sidebar!,
+          
+          // Conteúdo principal
+          Expanded(
+            child: body,
+          ),
+        ],
+      ),
     );
 }
 
-// Mixin para widgets que precisam de comportamento responsivo
-mixin ResponsiveMixin<T extends StatefulWidget> on State<T> {
-  bool get isMobile => Responsive.isMobile(context);
-  bool get isTablet => Responsive.isTablet(context);
-  bool get isDesktop => Responsive.isDesktop(context);
+// Mixin para widgets responsivos
+mixin ResponsiveMixin {
+  bool isMobile(BuildContext context) => Responsive.isMobile(context);
+  bool isTablet(BuildContext context) => Responsive.isTablet(context);
+  bool isDesktop(BuildContext context) => Responsive.isDesktop(context);
   
-  double get screenWidth => MediaQuery.of(context).size.width;
-  double get screenHeight => MediaQuery.of(context).size.height;
+  DeviceType getDeviceType(BuildContext context) => 
+      Responsive.getDeviceType(context);
   
-  void onScreenSizeChanged() {
-    // Override este método para reagir a mudanças de tamanho de tela
-  }
+  EdgeInsets getPadding(BuildContext context) => 
+      Responsive.getPadding(context);
   
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    onScreenSizeChanged();
-  }
+  int getGridColumns(BuildContext context) => 
+      Responsive.getGridColumns(context);
 }
