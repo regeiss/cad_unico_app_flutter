@@ -3,7 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../contants/constants.dart';
+import '../constants/constants.dart';
 
 class ApiResponse {
   final bool success;

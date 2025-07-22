@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../contants/constants.dart';
+import '../constants/constants.dart';
 
 class DashboardCard extends StatelessWidget {
   final String title;

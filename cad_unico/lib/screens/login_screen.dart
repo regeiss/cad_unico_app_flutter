@@ -4,7 +4,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import '../contants/constants.dart';
+import '../constants/constants.dart';
 import '../providers/auth_provider.dart';
 import '../utils/responsive.dart';
 
@@ -79,7 +79,7 @@ class _LoginScreenState extends State<LoginScreen> {
           end: Alignment.bottomCenter,
           colors: [
             Theme.of(context).colorScheme.primary,
-            Theme.of(context).colorScheme.primary.withValues(alpha: (0.8),
+            Theme.of(context).colorScheme.primary.withValues(alpha: (0.8)),
           ],
         ),
       ),
@@ -112,7 +112,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 end: Alignment.bottomRight,
                 colors: [
                   Theme.of(context).colorScheme.primary,
-                  Theme.of(context).colorScheme.primary.withValues(alpha: (0.8),
+                  Theme.of(context).colorScheme.primary.withValues(alpha: (0.8)),
                 ],
               ),
             ),

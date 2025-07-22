@@ -1,6 +1,6 @@
 // lib/providers/membro_provider.dart
 import 'package:flutter/material.dart';
-import '../contants/constants.dart';
+import '../constants/constants.dart';
 import '../models/membro_model.dart';
 import '../services/api_service.dart';
 

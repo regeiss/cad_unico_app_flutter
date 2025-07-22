@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Import your providers
-import 'contants/constants.dart';
+import 'constants/constants.dart';
 import 'providers/auth_provider.dart';
 import 'providers/demanda_provider.dart';
 import 'providers/membro_provider.dart';

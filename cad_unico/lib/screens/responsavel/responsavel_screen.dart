@@ -5,7 +5,7 @@ import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 // import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
-import '../../contants/constants.dart';
+import '../../constants/constants.dart';
 import '../../models/responsavel_model.dart';
 import '../../providers/responsavel_provider.dart';
 import '../../utils/app_utils.dart';

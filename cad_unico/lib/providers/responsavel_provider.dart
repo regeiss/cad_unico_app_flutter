@@ -1,6 +1,6 @@
 // lib/providers/responsavel_provider.dart
 import 'package:flutter/material.dart';
-import '../contants/constants.dart';
+import '../constants/constants.dart';
 import '../models/responsavel_model.dart';
 import '../services/api_service.dart';
 

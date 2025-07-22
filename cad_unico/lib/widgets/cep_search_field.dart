@@ -73,7 +73,7 @@ class _CepSearchFieldState extends State<CepSearchField> {
           );
         }
       }
-    } on Exception {
+    } catch (e) {
       widget.onError?.call(e.toString());
 
       if (mounted) {

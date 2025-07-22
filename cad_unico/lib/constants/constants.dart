@@ -318,6 +318,38 @@ class AppConstants {
   // Icons
   static const IconData logoutIcon = Icons.logout;
   static const IconData settingsIcon = Icons.settings;
+  static const IconData helpIcon = Icons.help_outline;
+  static const IconData homeIcon = Icons.home;
+  static const IconData userIcon = Icons.person;
+  static const IconData notificationsIcon = Icons.notifications;
+  static const IconData searchIcon = Icons.search;
+  static const IconData addIcon = Icons.add;
+  static const IconData editIcon = Icons.edit;
+  static const IconData deleteIcon = Icons.delete;
+  static const IconData refreshIcon = Icons.refresh;
+  static const IconData closeIcon = Icons.close;
+  static const IconData checkIcon = Icons.check_circle;
+  static const IconData errorIcon = Icons.error_outline;
+  static const IconData infoIcon = Icons.info_outline;
+  static const IconData warningIcon = Icons.warning_amber_outlined;
+  static const IconData uploadIcon = Icons.upload_file;
+  static const IconData downloadIcon = Icons.download;    
+  static const IconData filterIcon = Icons.filter_list;
+  static const IconData sortIcon = Icons.sort;
+  static const IconData visibilityIcon = Icons.visibility;
+  static const IconData visibilityOffIcon = Icons.visibility_off;
+  static const IconData calendarIcon = Icons.calendar_today;
+  static const IconData locationIcon = Icons.location_on; 
+  static const IconData phoneIcon = Icons.phone;
+  static const IconData emailIcon = Icons.email;
+  static const IconData lockIcon = Icons.lock;
+  static const IconData unlockIcon = Icons.lock_open;
+  static const IconData uploadFileIcon = Icons.file_upload;
+  static const IconData downloadFileIcon = Icons.file_download;
+  static const IconData attachmentIcon = Icons.attach_file;
+  static const IconData membroIcon = Icons.group;
+  static const IconData demandaIcon = Icons.chat_bubble_outline;
+  static const IconData responsavelIcon = Icons.feedback; 
 
   // Display
   static const String displayName = 'Cadastro Unificado';
@@ -325,14 +357,6 @@ class AppConstants {
   static const double defaultElevation = 2.0;
   static const double cardElevation = 4.0;
   static const double modalElevation = 8.0;
-
-  // Configurações de fontes
-  static const String defaultFontFamily = 'Roboto';
-  static const double defaultFontSize = 16.0;
-  static const double smallFontSize = 12.0;
-  static const double largeFontSize = 20.0;
-  static const double titleFontSize = 24.0;
-  static const double headlineFontSize = 32.0;
 
   // Configurações de feedback
   static const Duration toastDuration = Duration(seconds: 3);
@@ -342,6 +366,14 @@ class AppConstants {
   // Configurações de acessibilidade
   static const double minTouchTargetSize = 48.0;
   static const Duration accessibilityTimeout = Duration(seconds: 10);
+
+  // Configurações de fontes
+  static const String defaultFontFamily = 'Roboto';
+  static const double defaultFontSize = 16.0;
+  static const double smallFontSize = 12.0;
+  static const double largeFontSize = 20.0;
+  static const double titleFontSize = 24.0;
+  static const double headlineFontSize = 32.0;
 
   // Links úteis
   static const Map<String, String> socialLinks = {

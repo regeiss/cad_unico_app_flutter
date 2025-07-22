@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../contants/constants.dart';
+import '../constants/constants.dart';
 import '../providers/auth_provider.dart';
 
 class SideBar extends StatelessWidget {
@@ -36,7 +36,7 @@ class SideBar extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: (0.05)),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(2, 0),
           ),
@@ -71,7 +71,7 @@ class SideBar extends StatelessWidget {
                         color: Theme.of(context).colorScheme.primary,
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Icon(
+                      child: const Icon(
                         Icons.admin_panel_settings,
                         color: Colors.white,
                         size: 24,
@@ -104,7 +104,7 @@ class SideBar extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: (0.3)),
+                    color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
@@ -127,14 +127,14 @@ class SideBar extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              authProvider.displayName,
+                              authProvider.userInitials ?? 'Usuário',
                               style: Theme.of(context).textTheme.titleSmall?.copyWith(
                                 fontWeight: FontWeight.w600,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
                             Text(
-                              authProvider.user?.email ?? '',
+                              authProvider.userEmail ?? 'email@exemplo.com',
                               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                 color: Theme.of(context).colorScheme.onSurfaceVariant,
                               ),
@@ -416,4 +416,3 @@ class _CollapsibleSidebarState extends State<CollapsibleSidebar>
         ),
     );
 }
-

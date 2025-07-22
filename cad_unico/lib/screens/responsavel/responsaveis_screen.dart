@@ -3,7 +3,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import '../../contants/constants.dart';
+import '../../constants/constants.dart';
 import '../../models/responsavel_model.dart';
 import '../../providers/responsavel_provider.dart';
 

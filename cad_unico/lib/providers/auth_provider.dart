@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../contants/constants.dart';
-import '../services/api_service.dart';
+
+import '../constants/constants.dart';
 import '../models/user_model.dart';
+import '../services/api_service.dart';
 
 class AuthProvider extends ChangeNotifier {
   final ApiService _apiService = ApiService();
@@ -45,6 +46,60 @@ class AuthProvider extends ChangeNotifier {
     return _currentUser!.username.isNotEmpty 
         ? _currentUser!.username[0].toUpperCase() 
         : '?';
+  }
+  String get displayName {
+    if (_currentUser == null) return 'Usuário';
+    
+    final firstName = _currentUser!.firstName;
+    final lastName = _currentUser!.lastName;
+    
+    if (firstName != null && firstName.isNotEmpty) {
+      if (lastName != null && lastName.isNotEmpty) {
+        return '$firstName $lastName';
+      }
+      return firstName;
+    }
+    
+    return _currentUser!.username;
+  }
+  String? get userEmail => _currentUser?.email ?? "";
+  String? get userName => _currentUser?.username ?? "";
+  bool get isAdmin => _currentUser?.isStaff ?? false;
+  bool get isProfileComplete {
+    if (_currentUser == null) return false;
+    
+    return _currentUser!.username.isNotEmpty &&
+           _currentUser!.email != null && 
+           _currentUser!.email!.isNotEmpty &&
+           _currentUser!.email!.contains('@') &&
+           _currentUser!.firstName != null &&
+           _currentUser!.firstName!.isNotEmpty;
+  }
+  bool get hasValidEmail {
+    return _currentUser != null && 
+           _currentUser!.email != null && 
+           _currentUser!.email.isNotEmpty &&
+           _currentUser!.email.contains('@');
+  }
+  bool get isNewUser {
+    if (_currentUser == null || _currentUser!.dateJoined == null) return false;
+    
+    final difference = DateTime.now().difference(_currentUser!.dateJoined!);
+    return difference.inDays < 7;
+  }
+  String get timeSinceJoined {
+    if (_currentUser == null || _currentUser!.dateJoined == null) return 'Data desconhecida';
+    
+    final difference = DateTime.now().difference(_currentUser!.dateJoined!);
+    if (difference.inDays > 0) {
+      return '${difference.inDays} dia(s) atrás';
+    } else if (difference.inHours > 0) {
+      return '${difference.inHours} hora(s) atrás';
+    } else if (difference.inMinutes > 0) {
+      return '${difference.inMinutes} minuto(s) atrás';
+    } else {
+      return 'Agora mesmo';
+    }
   }
 
   /// Verifica o status de autenticação ao inicializar

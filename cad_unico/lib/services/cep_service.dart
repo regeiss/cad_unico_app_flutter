@@ -96,7 +96,7 @@ class CepService {
       }
       
       return null;
-    } on DioException on Exception  {
+    } on DioException catch (e) {
       debugPrint('Erro ao buscar CEP: ${e.message}');
       if (e.type == DioExceptionType.connectionTimeout) {
         throw Exception('Tempo limite de conexão esgotado');
@@ -105,7 +105,7 @@ class CepService {
       } else {
         throw Exception('Erro de rede ao buscar CEP');
       }
-    } on Exception  {
+    } catch (e) {
       debugPrint('Erro inesperado ao buscar CEP: $e');
       throw Exception('Erro inesperado ao buscar CEP');
     }
@@ -143,10 +143,10 @@ class CepService {
       }
       
       return [];
-    } on DioException {} on Exception  {
+    } on DioException catch (e) {
       debugPrint('Erro ao buscar endereços: ${e.message}');
       throw Exception('Erro de rede ao buscar endereços');
-    } on Exception  {
+    } catch (e) {
       debugPrint('Erro inesperado ao buscar endereços: $e');
       rethrow;
     }
@@ -158,30 +158,3 @@ class CepService {
     return cleanCep.length == 8 && int.tryParse(cleanCep) != null;
   }
 }
-
-// lib/widgets/cep_search_field.dart
-
-// Atualização no responsavel_screen.dart para usar o novo campo de CEP
-// Substitua o campo de CEP atual por:
-
-/*
-CepSearchField(
-  controller: _cepController,
-  label: 'CEP',
-  required: true,
-  onCepFound: (cepData) {
-    // Preenche automaticamente os campos de endereço
-    setState(() {
-      _logradouroController.text = cepData.logradouro;
-      _bairroController.text = cepData.bairro;
-      // Você pode adicionar campos de cidade e UF se necessário
-    });
-  },
-  onError: (error) {
-    // Tratar erros se necessário
-    debugPrint('Erro CEP: $error');
-  },
-),
-*/
-
-// lib/services/offline_service.dart
