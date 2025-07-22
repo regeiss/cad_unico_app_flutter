@@ -25,8 +25,7 @@ class DemandaAmbiente {
     this.evolucao,
   });
 
-  factory DemandaAmbiente.fromJson(Map<String, dynamic> json) {
-    return DemandaAmbiente(
+  factory DemandaAmbiente.fromJson(Map<String, dynamic> json) => DemandaAmbiente(
       cpf: json['cpf'] ?? '',
       quantidade: json['quantidade'],
       especie: json['especie'],
@@ -39,10 +38,8 @@ class DemandaAmbiente {
       porte: json['porte'],
       evolucao: json['evolucao'],
     );
-  }
 
-  Map<String, dynamic> toJson() {
-    return {
+  Map<String, dynamic> toJson() => {
       'cpf': cpf,
       'quantidade': quantidade,
       'especie': especie,
@@ -55,7 +52,6 @@ class DemandaAmbiente {
       'porte': porte,
       'evolucao': evolucao,
     };
-  }
 
   // Getters utilitários
   String get especieFormatada {

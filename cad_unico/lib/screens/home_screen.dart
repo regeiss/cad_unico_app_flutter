@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
-import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:provider/provider.dart';
+
 import '../providers/auth_provider.dart';
 import '../providers/demanda_provider.dart';
-import '../providers/membro_provider.dart';
 import '../providers/responsavel_provider.dart';
-import '../utils/constants.dart';
+
 import '../utils/responsive.dart';
 import '../widgets/dashboard_card.dart';
 import '../widgets/sidebar.dart';
@@ -47,8 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  List<NavigationItem> _getNavigationItems() {
-    return [
+  List<NavigationItem> _getNavigationItems() => [
       NavigationItem(
         title: 'Dashboard',
         route: '/home',
@@ -70,7 +68,6 @@ class _HomeScreenState extends State<HomeScreen> {
         icon: Icons.assignment,
       ),
     ];
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -208,7 +205,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: CircleAvatar(
                   backgroundColor: Theme.of(context).primaryColor,
                   child: Text(
-                    auth.user?.username?.substring(0, 1).toUpperCase() ?? 'U',
+                    auth.user?.username.substring(0, 1).toUpperCase() ?? 'U',
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -270,8 +267,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
 
-  Widget _buildWelcomeHeader() {
-    return Consumer<AuthProvider>(
+  Widget _buildWelcomeHeader() => Consumer<AuthProvider>(
       builder: (context, auth, child) {
         final now = DateTime.now();
         final hour = now.hour;
@@ -305,10 +301,8 @@ class _HomeScreenState extends State<HomeScreen> {
         );
       },
     );
-  }
 
-  Widget _buildStatsCards() {
-    return Consumer3<ResponsavelProvider, MembroProvider, DemandaProvider>(
+  Widget _buildStatsCards() => Consumer3<ResponsavelProvider, MembroProvider, DemandaProvider>(
       builder: (context, responsavelProvider, membroProvider, demandaProvider, child) {
         final isDesktop = Responsive.isDesktop(context);
         
@@ -385,10 +379,8 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       },
     );
-  }
 
-  Widget _buildDemandasChart() {
-    return Consumer<DemandaProvider>(
+  Widget _buildDemandasChart() => Consumer<DemandaProvider>(
       builder: (context, demandaProvider, child) {
         final totalDemandas = demandaProvider.totalDemandasSaude + 
                              demandaProvider.totalDemandasEducacao + 
@@ -476,7 +468,6 @@ class _HomeScreenState extends State<HomeScreen> {
         );
       },
     );
-  }
 
   Widget _buildDemandaItem(
     String label,
@@ -535,8 +526,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildRecentActivities() {
-    return Card(
+  Widget _buildRecentActivities() => Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -594,15 +584,13 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
-  }
 
   Widget _buildActivityItem(
     String title,
     String time,
     IconData icon,
     Color color,
-  ) {
-    return Padding(
+  ) => Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
       child: Row(
         children: [
@@ -640,7 +628,6 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
     );
-  }
 
   Widget _buildQuickActions() {
     final actions = [
@@ -704,7 +691,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisSpacing: 8,
                 childAspectRatio: 2.5,
                 children: actions
-                    .map((action) => _buildActionButton(action))
+                    .map(_buildActionButton)
                     .toList(),
               ),
           ],

@@ -6,7 +6,7 @@ import '../providers/auth_provider.dart';
 import '../utils/responsive.dart';
 
 class SideBar extends StatefulWidget {
-  const SideBar({super.key});
+  const SideBar({super.key, required int selectedIndex, required void Function(int index) onItemTapped, required List<dynamic> navigationItems});
 
   @override
   State<SideBar> createState() => _SideBarState();
@@ -86,8 +86,7 @@ class _SideBarState extends State<SideBar> {
     return _buildDesktopSidebar(context, user);
   }
 
-  Widget _buildDesktopSidebar(BuildContext context, user) {
-    return Container(
+  Widget _buildDesktopSidebar(BuildContext context, user) => Container(
       width: _isExpanded ? 280 : 70,
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
@@ -106,19 +105,15 @@ class _SideBarState extends State<SideBar> {
             child: ListView.builder(
               padding: const EdgeInsets.symmetric(vertical: 8),
               itemCount: _menuItems.length,
-              itemBuilder: (context, index) {
-                return _buildMenuItem(context, index);
-              },
+              itemBuilder: _buildMenuItem,
             ),
           ),
           _buildFooter(context),
         ],
       ),
     );
-  }
 
-  Widget _buildMobileSidebar(BuildContext context, user) {
-    return Drawer(
+  Widget _buildMobileSidebar(BuildContext context, user) => Drawer(
       child: Column(
         children: [
           _buildHeader(context, user),
@@ -126,19 +121,15 @@ class _SideBarState extends State<SideBar> {
             child: ListView.builder(
               padding: const EdgeInsets.symmetric(vertical: 8),
               itemCount: _menuItems.length,
-              itemBuilder: (context, index) {
-                return _buildMenuItem(context, index);
-              },
+              itemBuilder: _buildMenuItem,
             ),
           ),
           _buildFooter(context),
         ],
       ),
     );
-  }
 
-  Widget _buildHeader(BuildContext context, user) {
-    return Container(
+  Widget _buildHeader(BuildContext context, user) => Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -230,7 +221,6 @@ class _SideBarState extends State<SideBar> {
         ],
       ),
     );
-  }
 
   Widget _buildMenuItem(BuildContext context, int index) {
     final item = _menuItems[index];
@@ -288,8 +278,7 @@ class _SideBarState extends State<SideBar> {
     );
   }
 
-  Widget _buildFooter(BuildContext context) {
-    return Container(
+  Widget _buildFooter(BuildContext context) => Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         border: Border(
@@ -381,7 +370,6 @@ class _SideBarState extends State<SideBar> {
         ],
       ),
     );
-  }
 }
 
 class SideBarItem {

@@ -1,10 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
-import '../../models/membro_model.dart';
-// import 'package:go_router/go_router.dart';
-
-import '../../providers/membro_provider.dart';
 import '../../utils/app_utils.dart';
 // import '../../models/user_model.dart';
 import '../../utils/responsive.dart';

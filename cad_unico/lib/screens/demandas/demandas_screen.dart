@@ -37,11 +37,9 @@ class _DemandasScreenState extends State<DemandasScreen>
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
+  Widget build(BuildContext context) => Scaffold(
       body: Consumer<DemandaProvider>(
-        builder: (context, demandaProvider, child) {
-          return RefreshIndicator(
+        builder: (context, demandaProvider, child) => RefreshIndicator(
             onRefresh: () => demandaProvider.loadAllDemandas(),
             child: Column(
               children: [
@@ -68,11 +66,9 @@ class _DemandasScreenState extends State<DemandasScreen>
                 ),
               ],
             ),
-          );
-        },
+          ),
       ),
     );
-  }
 
   Widget _buildHeader(DemandaProvider provider) => Container(
       padding: const EdgeInsets.all(16.0),
@@ -88,7 +84,7 @@ class _DemandasScreenState extends State<DemandasScreen>
           const SizedBox(height: 16),
           
           // Cards de estatísticas
-          if (Responsive.isDesktop)
+          if (Responsive.isDesktop(context))
             Row(
               children: [
                 Expanded(
@@ -97,7 +93,8 @@ class _DemandasScreenState extends State<DemandasScreen>
                     value: provider.totalDemandasSaude.toString(),
                     icon: Icons.health_and_safety,
                     color: Colors.red,
-                    //isCompact: true,
+                    subtitle: '',
+                    isCompact: true,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -107,7 +104,8 @@ class _DemandasScreenState extends State<DemandasScreen>
                     value: provider.totalDemandasEducacao.toString(),
                     icon: Icons.school,
                     color: Colors.blue,
-                    //isCompact: true,
+                    subtitle: '',
+                    isCompact: true,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -117,7 +115,8 @@ class _DemandasScreenState extends State<DemandasScreen>
                     value: provider.totalDemandasAmbiente.toString(),
                     icon: Icons.pets,
                     color: Colors.green,
-                    //isCompact: true,
+                    subtitle: '',
+                    isCompact: true,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -127,7 +126,8 @@ class _DemandasScreenState extends State<DemandasScreen>
                     value: provider.totalGruposPrioritarios.toString(),
                     icon: Icons.priority_high,
                     color: Colors.orange,
-                    //isCompact: true,
+                    subtitle: '',
+                    isCompact: true,
                   ),
                 ),
               ],
@@ -143,7 +143,8 @@ class _DemandasScreenState extends State<DemandasScreen>
                         value: provider.totalDemandasSaude.toString(),
                         icon: Icons.health_and_safety,
                         color: Colors.red,
-                        //isCompact: true,
+                        isCompact: true,
+                        subtitle: '',
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -153,7 +154,7 @@ class _DemandasScreenState extends State<DemandasScreen>
                         value: provider.totalDemandasEducacao.toString(),
                         icon: Icons.school,
                         color: Colors.blue, subtitle: '',
-                        //isCompact: true,
+                        isCompact: true,
                       ),
                     ),
                   ],
@@ -167,7 +168,7 @@ class _DemandasScreenState extends State<DemandasScreen>
                         value: provider.totalDemandasAmbiente.toString(),
                         icon: Icons.pets,
                         color: Colors.green, subtitle: '',
-                        //isCompact: true,
+                        isCompact: true,
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -177,7 +178,7 @@ class _DemandasScreenState extends State<DemandasScreen>
                         value: provider.totalGruposPrioritarios.toString(),
                         icon: Icons.priority_high,
                         color: Colors.orange, subtitle: '',
-                        // isCompact: true,
+                        isCompact: true,
                       ),
                     ),
                   ],
@@ -422,8 +423,7 @@ class _DemandasScreenState extends State<DemandasScreen>
     );
   }
 
-  Widget _buildSaudeCard(DemandaSaude demanda) {
-    return Card(
+  Widget _buildSaudeCard(DemandaSaude demanda) => Card(
       margin: const EdgeInsets.only(bottom: 8.0),
       child: ListTile(
         leading: CircleAvatar(
@@ -458,10 +458,8 @@ class _DemandasScreenState extends State<DemandasScreen>
         },
       ),
     );
-  }
 
-  Widget _buildEducacaoCard(DemandaEducacao demanda) {
-    return Card(
+  Widget _buildEducacaoCard(DemandaEducacao demanda) => Card(
       margin: const EdgeInsets.only(bottom: 8.0),
       child: ListTile(
         leading: const CircleAvatar(
@@ -484,10 +482,8 @@ class _DemandasScreenState extends State<DemandasScreen>
         },
       ),
     );
-  }
 
-  Widget _buildAmbienteCard(DemandaAmbiente demanda) {
-    return Card(
+  Widget _buildAmbienteCard(DemandaAmbiente demanda) => Card(
       margin: const EdgeInsets.only(bottom: 8.0),
       child: ListTile(
         leading: const CircleAvatar(
@@ -521,5 +517,4 @@ class _DemandasScreenState extends State<DemandasScreen>
         },
       ),
     );
-  }
 }

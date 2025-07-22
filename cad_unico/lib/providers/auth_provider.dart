@@ -24,8 +24,7 @@ class User {
     required this.dateJoined,
   });
 
-  factory User.fromJson(Map<String, dynamic> json) {
-    return User(
+  factory User.fromJson(Map<String, dynamic> json) => User(
       id: json['id'],
       username: json['username'],
       email: json['email'],
@@ -35,7 +34,6 @@ class User {
       isActive: json['is_active'] ?? true,
       dateJoined: DateTime.parse(json['date_joined']),
     );
-  }
 
   String get displayName {
     if (firstName != null && lastName != null) {

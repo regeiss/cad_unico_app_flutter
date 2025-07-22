@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -24,27 +23,23 @@ class ApiResponse {
     String? message,
     Map<String, dynamic>? data,
     int? statusCode,
-  }) {
-    return ApiResponse(
+  }) => ApiResponse(
       success: true,
       message: message,
       data: data,
       statusCode: statusCode,
     );
-  }
 
   factory ApiResponse.error({
     required String message,
     int? statusCode,
     dynamic error,
-  }) {
-    return ApiResponse(
+  }) => ApiResponse(
       success: false,
       message: message,
       statusCode: statusCode,
       error: error,
     );
-  }
 }
 
 class ApiService {

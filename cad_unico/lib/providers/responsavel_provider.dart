@@ -33,8 +33,7 @@ class Responsavel {
     this.codRge,
   });
 
-  factory Responsavel.fromJson(Map<String, dynamic> json) {
-    return Responsavel(
+  factory Responsavel.fromJson(Map<String, dynamic> json) => Responsavel(
       cpf: json['cpf'],
       nome: json['nome'],
       cep: json['cep'],
@@ -49,10 +48,8 @@ class Responsavel {
       status: json['status'],
       codRge: json['cod_rge'],
     );
-  }
 
-  Map<String, dynamic> toJson() {
-    return {
+  Map<String, dynamic> toJson() => {
       'cpf': cpf,
       'nome': nome,
       'cep': cep,
@@ -67,7 +64,6 @@ class Responsavel {
       'status': status,
       'cod_rge': codRge,
     };
-  }
 }
 
 class ResponsavelProvider extends ChangeNotifier {
@@ -183,11 +179,9 @@ class ResponsavelProvider extends ChangeNotifier {
   List<Responsavel> get responsaveisFiltrados {
     if (_searchQuery.isEmpty) return _responsaveis;
     
-    return _responsaveis.where((responsavel) {
-      return responsavel.nome.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+    return _responsaveis.where((responsavel) => responsavel.nome.toLowerCase().contains(_searchQuery.toLowerCase()) ||
              responsavel.cpf.contains(_searchQuery) ||
-             (responsavel.nomeMae?.toLowerCase().contains(_searchQuery.toLowerCase()) ?? false);
-    }).toList();
+             (responsavel.nomeMae?.toLowerCase().contains(_searchQuery.toLowerCase()) ?? false)).toList();
   }
 
   void _setLoading(bool loading) {
@@ -201,9 +195,7 @@ class ResponsavelProvider extends ChangeNotifier {
   }
 
   // Gerar dados mock para teste
-  List<Responsavel> _generateMockData() {
-    return List.generate(10, (index) {
-      return Responsavel(
+  List<Responsavel> _generateMockData() => List.generate(10, (index) => Responsavel(
         cpf: '123456789${index.toString().padLeft(2, '0')}',
         nome: 'Responsável $index',
         cep: '93000000',
@@ -212,7 +204,5 @@ class ResponsavelProvider extends ChangeNotifier {
         logradouro: 'Rua das Flores',
         status: index % 3 == 0 ? 'I' : 'A',
         timestamp: DateTime.now().subtract(Duration(days: index)),
-      );
-    });
-  }
+      ));
 }

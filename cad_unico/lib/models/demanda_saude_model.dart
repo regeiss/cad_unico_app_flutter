@@ -29,8 +29,7 @@ class DemandaSaude {
     this.evolucao,
   });
 
-  factory DemandaSaude.fromJson(Map<String, dynamic> json) {
-    return DemandaSaude(
+  factory DemandaSaude.fromJson(Map<String, dynamic> json) => DemandaSaude(
       cpf: json['cpf'] ?? '',
       genero: json['genero'],
       saudeCid: json['saude_cid'],
@@ -47,10 +46,8 @@ class DemandaSaude {
       localRef: json['local_ref'],
       evolucao: json['evolucao'],
     );
-  }
 
-  Map<String, dynamic> toJson() {
-    return {
+  Map<String, dynamic> toJson() => {
       'cpf': cpf,
       'genero': genero,
       'saude_cid': saudeCid,
@@ -65,7 +62,6 @@ class DemandaSaude {
       'local_ref': localRef,
       'evolucao': evolucao,
     };
-  }
 
   // Getters utilitários
   bool get isPrioritario =>

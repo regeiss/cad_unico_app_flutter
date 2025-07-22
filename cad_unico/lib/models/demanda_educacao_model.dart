@@ -23,8 +23,7 @@ class DemandaEducacao {
     required this.cpf,
   });
 
-  factory DemandaEducacao.fromJson(Map<String, dynamic> json) {
-    return DemandaEducacao(
+  factory DemandaEducacao.fromJson(Map<String, dynamic> json) => DemandaEducacao(
       cpfResponsavel: json['cpf_responsavel'] ?? '',
       nome: json['nome'] ?? '',
       genero: json['genero'],
@@ -38,10 +37,8 @@ class DemandaEducacao {
       evolucao: json['evolucao'],
       cpf: json['cpf'] ?? '',
     );
-  }
 
-  Map<String, dynamic> toJson() {
-    return {
+  Map<String, dynamic> toJson() => {
       'cpf_responsavel': cpfResponsavel,
       'nome': nome,
       'genero': genero,
@@ -53,7 +50,6 @@ class DemandaEducacao {
       'evolucao': evolucao,
       'cpf': cpf,
     };
-  }
 
   // Getters utilitários
   int get idade {

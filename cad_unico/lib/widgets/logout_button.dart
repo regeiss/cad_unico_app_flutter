@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:go_router/go_router.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+
 import '../providers/auth_provider.dart';
 
 class LogoutButton extends StatefulWidget {
@@ -77,12 +78,10 @@ class _LogoutButtonState extends State<LogoutButton> {
     }
   }
 
-  Future<bool?> _showLogoutConfirmDialog() {
-    return showDialog<bool>(
+  Future<bool?> _showLogoutConfirmDialog() => showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
+      builder: (BuildContext context) => AlertDialog(
           title: const Row(
             children: [
               Icon(Icons.logout, color: Colors.orange),
@@ -126,14 +125,11 @@ class _LogoutButtonState extends State<LogoutButton> {
                   : const Text('Sair'),
             ),
           ],
-        );
-      },
+        ),
     );
-  }
 
   @override
-  Widget build(BuildContext context) {
-    return Consumer<AuthProvider>(
+  Widget build(BuildContext context) => Consumer<AuthProvider>(
       builder: (context, authProvider, child) {
         if (widget.isIconButton) {
           return IconButton(
@@ -186,7 +182,6 @@ class _LogoutButtonState extends State<LogoutButton> {
         );
       },
     );
-  }
 }
 
 // Widget para uso rápido na AppBar
@@ -194,14 +189,12 @@ class AppBarLogoutButton extends StatelessWidget {
   const AppBarLogoutButton({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return const LogoutButton(
+  Widget build(BuildContext context) => const LogoutButton(
       isIconButton: true,
       icon: Icons.logout,
       color: Colors.white,
       showConfirmDialog: true,
     );
-  }
 }
 
 // Widget para uso em menus/sidebar
@@ -214,15 +207,13 @@ class MenuLogoutButton extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return LogoutButton(
+  Widget build(BuildContext context) => LogoutButton(
       text: 'Sair do Sistema',
       icon: showIcon ? Icons.logout : null,
       color: Colors.red[600],
       textColor: Colors.white,
       showConfirmDialog: true,
     );
-  }
 }
 
 // Widget para uso em cards/dashboard
@@ -230,13 +221,11 @@ class CardLogoutButton extends StatelessWidget {
   const CardLogoutButton({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return LogoutButton(
+  Widget build(BuildContext context) => LogoutButton(
       text: 'Logout',
       icon: Icons.exit_to_app,
       color: Colors.orange[600],
       textColor: Colors.white,
       showConfirmDialog: false,
     );
-  }
 }

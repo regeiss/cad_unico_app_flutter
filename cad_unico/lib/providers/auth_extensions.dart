@@ -5,16 +5,12 @@ import 'auth_provider.dart';
 /// Extensions para AuthProvider com funcionalidades adicionais
 extension AuthProviderExtensions on AuthProvider {
   /// Verifica se o usuário está logado e tem dados válidos
-  bool get hasValidUser {
-    return currentUser != null && 
+  bool get hasValidUser => currentUser != null && 
            currentUser!.id != null && 
            currentUser!.username.isNotEmpty;
-  }
 
   /// Verifica se o usuário é administrador
-  bool get isAdmin {
-    return currentUser != null && currentUser!.isStaff == true;
-  }
+  bool get isAdmin => currentUser != null && currentUser!.isStaff == true;
 
   /// Obtém o nome de exibição do usuário
   String get displayName {
@@ -54,12 +50,10 @@ extension AuthProviderExtensions on AuthProvider {
   }
 
   /// Verifica se o usuário tem email válido
-  bool get hasValidEmail {
-    return currentUser != null && 
+  bool get hasValidEmail => currentUser != null && 
            currentUser!.email != null && 
            currentUser!.email!.isNotEmpty &&
            currentUser!.email!.contains('@');
-  }
 
   /// Verifica se o perfil do usuário está completo
   bool get isProfileComplete {
@@ -82,9 +76,7 @@ extension AuthProviderExtensions on AuthProvider {
   }
 
   /// Verifica se o usuário está ativo
-  bool get isUserActive {
-    return currentUser?.isActive == true;
-  }
+  bool get isUserActive => currentUser?.isActive == true;
 
   /// Obtém informações resumidas do usuário
   Map<String, dynamic> get userSummary {
@@ -135,16 +127,14 @@ extension AuthProviderExtensions on AuthProvider {
     
     return colors[hash % colors.length];
   }
+  
+  get currentUser => null;
 
   /// Verifica se pode acessar funcionalidades administrativas
-  bool canAccessAdmin() {
-    return isAuthenticated && isUserActive && isAdmin;
-  }
+  bool canAccessAdmin() => isAuthenticated && isUserActive && isAdmin;
 
   /// Verifica se precisa completar o perfil
-  bool needsProfileCompletion() {
-    return isAuthenticated && !isProfileComplete;
-  }
+  bool needsProfileCompletion() => isAuthenticated && !isProfileComplete;
 
   /// Obtém saudação personalizada baseada no horário
   String getPersonalizedGreeting() {
@@ -185,33 +175,31 @@ extension AuthProviderExtensions on AuthProvider {
 extension UserValidation on UserModel {
   /// Valida se o email tem formato correto
   bool get isEmailValid {
-    if (this.email == null || this.email!.isEmpty) return false;
+    if (email.isEmpty) return false;
     return true;
   }
 
   // Verifica se o usuário tem nome completo
-  bool get hasFullName {
-    return this.firstName != null && 
-           this.firstName!.isNotEmpty && 
-           this.lastName != null && 
-           this.lastName!.isNotEmpty;
-  }
+  bool get hasFullName => firstName != null && 
+           firstName!.isNotEmpty && 
+           lastName != null && 
+           lastName!.isNotEmpty;
 
   // Verifica se é um usuário recém-criado (menos de 7 dias)
   bool get isNewUser {
-    if (this.dateJoined == null) return false;
+    if (dateJoined == null) return false;
     
     final now = DateTime.now();
-    final difference = now.difference(this.dateJoined!);
+    final difference = now.difference(dateJoined!);
     return difference.inDays < 7;
   }
 
   // Obtém o tempo desde o cadastro
   String get timeSinceJoined {
-    if (this.dateJoined == null) return 'Data desconhecida';
+    if (dateJoined == null) return 'Data desconhecida';
     
     final now = DateTime.now();
-    final difference = now.difference(this.dateJoined!);
+    final difference = now.difference(dateJoined!);
     
     if (difference.inDays > 365) {
       final years = (difference.inDays / 365).floor();

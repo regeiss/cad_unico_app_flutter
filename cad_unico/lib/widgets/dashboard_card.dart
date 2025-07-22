@@ -61,8 +61,7 @@ class _DashboardCardState extends State<DashboardCard>
   }
 
   @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
+  Widget build(BuildContext context) => MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
       child: GestureDetector(
@@ -72,8 +71,7 @@ class _DashboardCardState extends State<DashboardCard>
         onTap: widget.onTap,
         child: AnimatedBuilder(
           animation: _scaleAnimation,
-          builder: (context, child) {
-            return Transform.scale(
+          builder: (context, child) => Transform.scale(
               scale: _scaleAnimation.value,
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
@@ -99,15 +97,12 @@ class _DashboardCardState extends State<DashboardCard>
                 ),
                 child: widget.isLoading ? _buildLoadingState() : _buildContent(),
               ),
-            );
-          },
+            ),
         ),
       ),
     );
-  }
 
-  Widget _buildLoadingState() {
-    return Column(
+  Widget _buildLoadingState() => Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -164,7 +159,6 @@ class _DashboardCardState extends State<DashboardCard>
         ],
       ],
     );
-  }
 
   Widget _buildContent() {
     if (widget.isCompact) {
@@ -174,8 +168,7 @@ class _DashboardCardState extends State<DashboardCard>
     }
   }
 
-  Widget _buildCompactContent() {
-    return Column(
+  Widget _buildCompactContent() => Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -232,10 +225,8 @@ class _DashboardCardState extends State<DashboardCard>
         ),
       ],
     );
-  }
 
-  Widget _buildFullContent() {
-    return Column(
+  Widget _buildFullContent() => Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -302,7 +293,6 @@ class _DashboardCardState extends State<DashboardCard>
         ],
       ],
     );
-  }
 
   Widget _buildTrendIndicator() {
     if (widget.trend == null) return const SizedBox.shrink();
@@ -371,8 +361,7 @@ class DashboardCardGrid extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return GridView.count(
+  Widget build(BuildContext context) => GridView.count(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       crossAxisCount: crossAxisCount,
@@ -381,7 +370,6 @@ class DashboardCardGrid extends StatelessWidget {
       childAspectRatio: childAspectRatio,
       children: cards,
     );
-  }
 }
 
 // Widget para cards em linha
@@ -396,8 +384,7 @@ class DashboardCardRow extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return Row(
+  Widget build(BuildContext context) => Row(
       mainAxisAlignment: mainAxisAlignment,
       children: cards
           .map((card) => Expanded(
@@ -408,5 +395,4 @@ class DashboardCardRow extends StatelessWidget {
               ))
           .toList(),
     );
-  }
 }

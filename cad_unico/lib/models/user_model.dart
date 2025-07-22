@@ -57,8 +57,7 @@ class UserModel {
     DateTime? dateJoined,
     String? token,
     String? refreshToken,
-  }) {
-    return UserModel(
+  }) => UserModel(
       id: id ?? this.id,
       username: username ?? this.username,
       email: email ?? this.email,
@@ -70,27 +69,21 @@ class UserModel {
       token: token ?? this.token,
       refreshToken: refreshToken ?? this.refreshToken,
     );
-  }
 
   /// Cria um modelo sem token (para logout)
-  UserModel withoutToken() {
-    return copyWith(
+  UserModel withoutToken() => copyWith(
       token: null,
       refreshToken: null,
     );
-  }
 
   /// Atualiza apenas o token
-  UserModel withToken(String newToken, {String? newRefreshToken}) {
-    return copyWith(
+  UserModel withToken(String newToken, {String? newRefreshToken}) => copyWith(
       token: newToken,
       refreshToken: newRefreshToken ?? refreshToken,
     );
-  }
 
   /// Converte o modelo para JSON
-  Map<String, dynamic> toJson() {
-    return {
+  Map<String, dynamic> toJson() => {
       'id': id,
       'username': username,
       'email': email,
@@ -102,11 +95,9 @@ class UserModel {
       'token': token,
       'refresh_token': refreshToken,
     };
-  }
 
   /// Cria um modelo a partir do JSON
-  factory UserModel.fromJson(Map<String, dynamic> json) {
-    return UserModel(
+  factory UserModel.fromJson(Map<String, dynamic> json) => UserModel(
       id: json['id'] as int,
       username: json['username'] as String,
       email: json['email'] as String,
@@ -120,7 +111,6 @@ class UserModel {
       token: json['token'] as String?,
       refreshToken: json['refresh_token'] as String?,
     );
-  }
 
   /// Cria um modelo a partir da resposta de login da API
   factory UserModel.fromLoginResponse(Map<String, dynamic> json) {
@@ -145,8 +135,7 @@ class UserModel {
   }
 
   /// Converte para JSON para armazenamento local
-  Map<String, dynamic> toStorageJson() {
-    return {
+  Map<String, dynamic> toStorageJson() => {
       'id': id,
       'username': username,
       'email': email,
@@ -158,12 +147,9 @@ class UserModel {
       'token': token,
       'refresh_token': refreshToken,
     };
-  }
 
   /// Cria um modelo a partir do JSON do armazenamento local
-  factory UserModel.fromStorageJson(Map<String, dynamic> json) {
-    return UserModel.fromJson(json);
-  }
+  factory UserModel.fromStorageJson(Map<String, dynamic> json) => UserModel.fromJson(json);
 
   @override
   bool operator ==(Object other) {
@@ -183,8 +169,7 @@ class UserModel {
   }
 
   @override
-  int get hashCode {
-    return Object.hash(
+  int get hashCode => Object.hash(
       id,
       username,
       email,
@@ -196,11 +181,9 @@ class UserModel {
       token,
       refreshToken,
     );
-  }
 
   @override
-  String toString() {
-    return 'UserModel('
+  String toString() => 'UserModel('
         'id: $id, '
         'username: $username, '
         'email: $email, '
@@ -212,5 +195,4 @@ class UserModel {
         'hasToken: ${token != null}, '
         'hasRefreshToken: ${refreshToken != null}'
         ')';
-  }
 }

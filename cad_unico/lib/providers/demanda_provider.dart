@@ -2,140 +2,9 @@
 
 import 'package:flutter/material.dart';
 
-class DemandaSaude {
-  final String cpf;
-  final String? genero;
-  final String? saudeCid;
-  final DateTime? dataNasc;
-  final String gestPuerNutriz;
-  final String mobReduzida;
-  final String cuidaOutrem;
-  final String pcdOuMental;
-  final String? alergiaIntol;
-  final String? subsPsicoativas;
-  final String? medControlada;
-  final String? localRef;
-  final String? evolucao;
-
-  DemandaSaude({
-    required this.cpf,
-    this.genero,
-    this.saudeCid,
-    this.dataNasc,
-    required this.gestPuerNutriz,
-    required this.mobReduzida,
-    required this.cuidaOutrem,
-    required this.pcdOuMental,
-    this.alergiaIntol,
-    this.subsPsicoativas,
-    this.medControlada,
-    this.localRef,
-    this.evolucao,
-  });
-
-  factory DemandaSaude.fromJson(Map<String, dynamic> json) {
-    return DemandaSaude(
-      cpf: json['cpf'],
-      genero: json['genero'],
-      saudeCid: json['saude_cid'],
-      dataNasc: json['data_nasc'] != null ? DateTime.parse(json['data_nasc']) : null,
-      gestPuerNutriz: json['gest_puer_nutriz'],
-      mobReduzida: json['mob_reduzida'],
-      cuidaOutrem: json['cuida_outrem'],
-      pcdOuMental: json['pcd_ou_mental'],
-      alergiaIntol: json['alergia_intol'],
-      subsPsicoativas: json['subs_psicoativas'],
-      medControlada: json['med_controlada'],
-      localRef: json['local_ref'],
-      evolucao: json['evolucao'],
-    );
-  }
-}
-
-class DemandaEducacao {
-  final String cpfResponsavel;
-  final String nome;
-  final String? genero;
-  final int? alojamento;
-  final DateTime? dataNasc;
-  final int? unidadeEnsino;
-  final String? turno;
-  final String? demanda;
-  final String? evolucao;
-  final String cpf;
-
-  DemandaEducacao({
-    required this.cpfResponsavel,
-    required this.nome,
-    this.genero,
-    this.alojamento,
-    this.dataNasc,
-    this.unidadeEnsino,
-    this.turno,
-    this.demanda,
-    this.evolucao,
-    required this.cpf,
-  });
-
-  factory DemandaEducacao.fromJson(Map<String, dynamic> json) {
-    return DemandaEducacao(
-      cpfResponsavel: json['cpf_responsavel'],
-      nome: json['nome'],
-      genero: json['genero'],
-      alojamento: json['alojamento'],
-      dataNasc: json['data_nasc'] != null ? DateTime.parse(json['data_nasc']) : null,
-      unidadeEnsino: json['unidade_ensino'],
-      turno: json['turno'],
-      demanda: json['demanda'],
-      evolucao: json['evolucao'],
-      cpf: json['cpf'],
-    );
-  }
-}
-
-class DemandaAmbiente {
-  final String cpf;
-  final int? quantidade;
-  final String? especie;
-  final String acompanhaTutor;
-  final String? vacinado;
-  final String? vacRaiva;
-  final String? vacV8v10;
-  final String? necRacao;
-  final String? castrado;
-  final String? porte;
-  final String? evolucao;
-
-  DemandaAmbiente({
-    required this.cpf,
-    this.quantidade,
-    this.especie,
-    required this.acompanhaTutor,
-    this.vacinado,
-    this.vacRaiva,
-    this.vacV8v10,
-    this.necRacao,
-    this.castrado,
-    this.porte,
-    this.evolucao,
-  });
-
-  factory DemandaAmbiente.fromJson(Map<String, dynamic> json) {
-    return DemandaAmbiente(
-      cpf: json['cpf'],
-      quantidade: json['quantidade'],
-      especie: json['especie'],
-      acompanhaTutor: json['acompanha_tutor'],
-      vacinado: json['vacinado'],
-      vacRaiva: json['vac_raiva'],
-      vacV8v10: json['vac_v8v10'],
-      necRacao: json['nec_racao'],
-      castrado: json['castrado'],
-      porte: json['porte'],
-      evolucao: json['evolucao'],
-    );
-  }
-}
+import '../models/demanda_ambiente.model.dart';
+import '../models/demanda_educacao_model.dart';
+import '../models/demanda_saude_model.dart';
 
 class DemandaProvider extends ChangeNotifier {
   List<DemandaSaude> _demandasSaude = [];
@@ -157,13 +26,11 @@ class DemandaProvider extends ChangeNotifier {
   int get totalDemandasAmbiente => _demandasAmbiente.length;
   
   // Grupos prioritários (pessoas com necessidades especiais)
-  int get totalGruposPrioritarios {
-    return _demandasSaude.where((d) => 
+  int get totalGruposPrioritarios => _demandasSaude.where((d) => 
       d.gestPuerNutriz == 'S' || 
       d.mobReduzida == 'S' || 
       d.pcdOuMental == 'S'
     ).length;
-  }
 
   // Total geral de demandas
   int get totalDemandas => totalDemandasSaude + totalDemandasEducacao + totalDemandasAmbiente;
@@ -248,9 +115,7 @@ class DemandaProvider extends ChangeNotifier {
   }
 
   // Gerar dados mock para teste - Saúde
-  List<DemandaSaude> _generateMockSaudeData() {
-    return List.generate(25, (index) {
-      return DemandaSaude(
+  List<DemandaSaude> _generateMockSaudeData() => List.generate(25, (index) => DemandaSaude(
         cpf: '11122233344$index',
         genero: index % 2 == 0 ? 'M' : 'F',
         saudeCid: 'CID${index + 10}',
@@ -261,14 +126,10 @@ class DemandaProvider extends ChangeNotifier {
         pcdOuMental: index % 12 == 0 ? 'S' : 'N',
         alergiaIntol: index % 5 == 0 ? 'Alergia a medicamentos' : null,
         evolucao: 'Acompanhamento regular',
-      );
-    });
-  }
+      ));
 
   // Gerar dados mock para teste - Educação
-  List<DemandaEducacao> _generateMockEducacaoData() {
-    return List.generate(18, (index) {
-      return DemandaEducacao(
+  List<DemandaEducacao> _generateMockEducacaoData() => List.generate(18, (index) => DemandaEducacao(
         cpf: '22233344455$index',
         cpfResponsavel: '12345678900',
         nome: 'Estudante $index',
@@ -278,14 +139,10 @@ class DemandaProvider extends ChangeNotifier {
         unidadeEnsino: (index % 3) + 1,
         turno: index % 2 == 0 ? 'Manhã' : 'Tarde',
         demanda: 'Necessidade de material escolar',
-      );
-    });
-  }
+      ));
 
   // Gerar dados mock para teste - Ambiente
-  List<DemandaAmbiente> _generateMockAmbienteData() {
-    return List.generate(12, (index) {
-      return DemandaAmbiente(
+  List<DemandaAmbiente> _generateMockAmbienteData() => List.generate(12, (index) => DemandaAmbiente(
         cpf: '33344455566$index',
         quantidade: (index % 3) + 1,
         especie: index % 2 == 0 ? 'Cão' : 'Gato',
@@ -296,7 +153,5 @@ class DemandaProvider extends ChangeNotifier {
         necRacao: index % 2 == 0 ? 'S' : 'N',
         castrado: index % 5 == 0 ? 'N' : 'S',
         porte: index % 3 == 0 ? 'Pequeno' : (index % 3 == 1 ? 'Médio' : 'Grande'),
-      );
-    });
-  }
+      ));
 }

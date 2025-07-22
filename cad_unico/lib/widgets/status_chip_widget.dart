@@ -8,13 +8,13 @@ class StatusChipWidget extends StatelessWidget {
   final EdgeInsetsGeometry? padding;
 
   const StatusChipWidget({
-    Key? key,
+    super.key,
     required this.status,
     this.label,
     this.showIcon = true,
     this.fontSize,
     this.padding,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -158,53 +158,41 @@ class StatusChipWidget extends StatelessWidget {
 
 // Widget helper para diferentes tipos de status
 class StatusChip {
-  static Widget ativo({String? label, bool showIcon = true}) {
-    return StatusChipWidget(
+  static Widget ativo({String? label, bool showIcon = true}) => StatusChipWidget(
       status: 'A',
       label: label,
       showIcon: showIcon,
     );
-  }
 
-  static Widget inativo({String? label, bool showIcon = true}) {
-    return StatusChipWidget(
+  static Widget inativo({String? label, bool showIcon = true}) => StatusChipWidget(
       status: 'I',
       label: label,
       showIcon: showIcon,
     );
-  }
 
-  static Widget pendente({String? label, bool showIcon = true}) {
-    return StatusChipWidget(
+  static Widget pendente({String? label, bool showIcon = true}) => StatusChipWidget(
       status: 'P',
       label: label,
       showIcon: showIcon,
     );
-  }
 
-  static Widget bloqueado({String? label, bool showIcon = true}) {
-    return StatusChipWidget(
+  static Widget bloqueado({String? label, bool showIcon = true}) => StatusChipWidget(
       status: 'B',
       label: label,
       showIcon: showIcon,
     );
-  }
 
-  static Widget concluido({String? label, bool showIcon = true}) {
-    return StatusChipWidget(
+  static Widget concluido({String? label, bool showIcon = true}) => StatusChipWidget(
       status: 'C',
       label: label,
       showIcon: showIcon,
     );
-  }
 
-  static Widget emAndamento({String? label, bool showIcon = true}) {
-    return StatusChipWidget(
+  static Widget emAndamento({String? label, bool showIcon = true}) => StatusChipWidget(
       status: 'E',
       label: label,
       showIcon: showIcon,
     );
-  }
 
   static Widget custom({
     required String status,
@@ -212,15 +200,13 @@ class StatusChip {
     bool showIcon = true,
     double? fontSize,
     EdgeInsetsGeometry? padding,
-  }) {
-    return StatusChipWidget(
+  }) => StatusChipWidget(
       status: status,
       label: label,
       showIcon: showIcon,
       fontSize: fontSize,
       padding: padding,
     );
-  }
 }
 
 // Extension para facilitar o uso com strings
@@ -230,13 +216,11 @@ extension StatusChipExtension on String {
     bool showIcon = true,
     double? fontSize,
     EdgeInsetsGeometry? padding,
-  }) {
-    return StatusChipWidget(
+  }) => StatusChipWidget(
       status: this,
       label: customLabel,
       showIcon: showIcon,
       fontSize: fontSize,
       padding: padding,
     );
-  }
 }
