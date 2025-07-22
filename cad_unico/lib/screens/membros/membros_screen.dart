@@ -58,9 +58,9 @@ class _MembrosScreenState extends State<MembrosScreen> {
         final width = constraints.maxWidth;
         
         // Usando sua classe Responsive
-        if (Responsive.isDesktop(width)) {
+        if (Responsive.isDesktop(context)) {
           return _buildDesktopLayout();
-        } else if (Responsive.isTablet(width)) {
+        } else if (Responsive.isTablet(context)) {
           return _buildTabletLayout();
         } else {
           return _buildMobileLayout();
@@ -106,11 +106,11 @@ class _MembrosScreenState extends State<MembrosScreen> {
         color: Theme.of(context).colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: (0.1),
+            color: Colors.black.withValues(alpha: (0.1)),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
-        ],
+      ],
       ),
       child: Row(
         children: [
