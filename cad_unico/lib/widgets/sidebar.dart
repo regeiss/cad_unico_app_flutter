@@ -1,304 +1,461 @@
+// lib/widgets/sidebar.dart
+
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../constants/constants.dart';
 import '../providers/auth_provider.dart';
+import '../utils/responsive.dart';
 
-class SideBar extends StatelessWidget {
+class NavigationItem {
+  final String title;
+  final String route;
+  final IconData icon;
+  final List<NavigationItem>? children;
+
+  NavigationItem({
+    required this.title,
+    required this.route,
+    required this.icon,
+    this.children,
+  });
+}
+
+class SideBar extends StatefulWidget {
   final int selectedIndex;
   final Function(int) onItemTapped;
-  final List<Map<String, dynamic>> navigationItems;
-  final bool isCollapsed;
+  final List<NavigationItem> navigationItems;
 
   const SideBar({
     super.key,
-    required this.selectedIndex,
+    this.selectedIndex = 0,
     required this.onItemTapped,
     required this.navigationItems,
-    this.isCollapsed = false,
   });
 
-  @override
-  Widget build(BuildContext context) {
-    final width = isCollapsed 
-        ? AppConstants.sidebarCollapsedWidth 
-        : AppConstants.sidebarWidth;
+  // Construtor padrão para uso sem parâmetros obrigatórios
+  const SideBar.defaultItems({
+    super.key,
+  }) : selectedIndex = 0,
+        onItemTapped = _defaultOnItemTapped,
+        navigationItems = _defaultNavigationItems;
 
-    return Container(
-      width: width,
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        border: Border(
-          right: BorderSide(
-            color: Theme.of(context).dividerColor,
-            width: 1,
+  static void _defaultOnItemTapped(int index) {
+    // Implementação padrão vazia
+  }
+
+  static final List<NavigationItem> _defaultNavigationItems = [
+    NavigationItem(
+      title: 'Dashboard',
+      route: '/home',
+      icon: Icons.dashboard,
+    ),
+    NavigationItem(
+      title: 'Responsáveis',
+      route: '/responsaveis',
+      icon: Icons.person,
+    ),
+    NavigationItem(
+      title: 'Membros',
+      route: '/membros',
+      icon: Icons.group,
+    ),
+    NavigationItem(
+      title: 'Demandas',
+      route: '/demandas',
+      icon: Icons.assignment,
+    ),
+  ];
+
+  @override
+  State<SideBar> createState() => _SideBarState();
+}
+
+class _SideBarState extends State<SideBar> {
+  int _selectedIndex = 0;
+  String _currentRoute = '/home';
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.selectedIndex;
+    _currentRoute = GoRouter.of(context).routeInformationProvider.value.uri.path;
+  }
+
+  List<NavigationItem> get _navigationItems => widget.navigationItems.isNotEmpty 
+        ? widget.navigationItems 
+        : _getDefaultNavigationItems();
+
+  List<NavigationItem> _getDefaultNavigationItems() => [
+      NavigationItem(
+        title: 'Dashboard',
+        route: '/home',
+        icon: Icons.dashboard,
+      ),
+      NavigationItem(
+        title: 'Responsáveis',
+        route: '/responsaveis',
+        icon: Icons.person,
+        children: [
+          NavigationItem(
+            title: 'Lista',
+            route: '/responsaveis',
+            icon: Icons.list,
           ),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(2, 0),
+          NavigationItem(
+            title: 'Novo',
+            route: '/responsaveis/novo',
+            icon: Icons.person_add,
           ),
         ],
       ),
+      NavigationItem(
+        title: 'Membros',
+        route: '/membros',
+        icon: Icons.group,
+        children: [
+          NavigationItem(
+            title: 'Lista',
+            route: '/membros',
+            icon: Icons.list,
+          ),
+          NavigationItem(
+            title: 'Novo',
+            route: '/membros/novo',
+            icon: Icons.group_add,
+          ),
+        ],
+      ),
+      NavigationItem(
+        title: 'Demandas',
+        route: '/demandas',
+        icon: Icons.assignment,
+        children: [
+          NavigationItem(
+            title: 'Saúde',
+            route: '/demandas/saude',
+            icon: Icons.health_and_safety,
+          ),
+          NavigationItem(
+            title: 'Educação',
+            route: '/demandas/educacao',
+            icon: Icons.school,
+          ),
+          NavigationItem(
+            title: 'Ambiente',
+            route: '/demandas/ambiente',
+            icon: Icons.pets,
+          ),
+        ],
+      ),
+      NavigationItem(
+        title: 'Relatórios',
+        route: '/relatorios',
+        icon: Icons.analytics,
+      ),
+      NavigationItem(
+        title: 'Configurações',
+        route: '/configuracoes',
+        icon: Icons.settings,
+      ),
+    ];
+
+  @override
+  Widget build(BuildContext context) {
+    final isDesktop = Responsive.isDesktop(context);
+    final theme = Theme.of(context);
+
+    return Container(
+      width: isDesktop ? 260 : 280,
+      height: double.infinity,
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        border: Border(
+          right: BorderSide(
+            color: theme.dividerColor,
+            width: 1,
+          ),
+        ),
+        boxShadow: isDesktop
+            ? []
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.1),
+                  blurRadius: 10,
+                  offset: const Offset(2, 0),
+                ),
+              ],
+      ),
       child: Column(
         children: [
-          _buildHeader(context),
-          const Divider(height: 1),
+          // Header
+          _buildHeader(),
+
+          // Navigation Items
           Expanded(
-            child: _buildNavigation(context),
+            child: ListView(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              children: [
+                ..._navigationItems.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final item = entry.value;
+                  return _buildNavigationItem(item, index);
+                }),
+              ],
+            ),
           ),
-          const Divider(height: 1),
-          _buildFooter(context),
+
+          // Footer
+          _buildFooter(),
         ],
       ),
     );
   }
 
-  Widget _buildHeader(BuildContext context) => Consumer<AuthProvider>(
-      builder: (context, authProvider, child) => Container(
-          padding: const EdgeInsets.all(16),
-          child: Column(
+  Widget _buildHeader() => Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: Theme.of(context).dividerColor,
+            width: 1,
+          ),
+        ),
+      ),
+      child: Column(
+        children: [
+          // Logo e nome do app
+          Row(
             children: [
-              if (!isCollapsed) ...[
-                Row(
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.account_balance,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Icon(
-                        Icons.admin_panel_settings,
-                        color: Colors.white,
-                        size: 24,
+                    Text(
+                      AppConstants.appName,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    Text(
+                      'v${AppConstants.appVersion}',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 16),
+
+          // Informações do usuário
+          Consumer<AuthProvider>(
+            builder: (context, auth, child) {
+              final user = auth.user;
+              return Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 16,
+                      backgroundColor: Theme.of(context).primaryColor,
+                      child: Text(
+                        user?.username?.substring(0, 1).toUpperCase() ?? 'U',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            AppConstants.appName,
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
+                            user?.displayName ?? 'Usuário',
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w500,
                             ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                           Text(
-                            'v${AppConstants.appVersion}',
+                            user?.email ?? '',
                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              color: Colors.grey[600],
                             ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ],
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                // User info
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 20,
-                        backgroundColor: Theme.of(context).colorScheme.primary,
-                        child: Text(
-                          authProvider.userInitials,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              authProvider.userInitials ?? 'Usuário',
-                              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            Text(
-                              authProvider.userEmail ?? 'email@exemplo.com',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ] else ...[
-                // Collapsed header
-                CircleAvatar(
-                  radius: 20,
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  child: Text(
-                    authProvider.userInitials,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
-    );
-
-  Widget _buildNavigation(BuildContext context) => ListView.builder(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      itemCount: navigationItems.length,
-      itemBuilder: (context, index) {
-        final item = navigationItems[index];
-        final isSelected = index == selectedIndex;
-        
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: _buildNavigationItem(
-            context,
-            icon: item['icon'] as IconData,
-            label: item['label'] as String,
-            isSelected: isSelected,
-            onTap: () => onItemTapped(index),
-          ),
-        );
-      },
-    );
-
-  Widget _buildNavigationItem(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) => Container(
-      margin: const EdgeInsets.only(bottom: 4),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(12),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: isSelected 
-                  ? Theme.of(context).colorScheme.primaryContainer
-                  : null,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  icon,
-                  color: isSelected
-                      ? Theme.of(context).colorScheme.onPrimaryContainer
-                      : Theme.of(context).colorScheme.onSurfaceVariant,
-                  size: 24,
-                ),
-                if (!isCollapsed) ...[
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Text(
-                      label,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: isSelected
-                            ? Theme.of(context).colorScheme.onPrimaryContainer
-                            : Theme.of(context).colorScheme.onSurfaceVariant,
-                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-
-  Widget _buildFooter(BuildContext context) => Container(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          if (!isCollapsed) ...[
-            _buildFooterItem(
-              context,
-              icon: AppConstants.settingsIcon,
-              label: 'Configurações',
-              onTap: () {
-                // TODO: Navigate to settings
-              },
-            ),
-            const SizedBox(height: 8),
-          ],
-          _buildFooterItem(
-            context,
-            icon: AppConstants.logoutIcon,
-            label: isCollapsed ? '' : 'Sair',
-            onTap: () => _showLogoutDialog(context),
+              );
+            },
           ),
         ],
       ),
     );
 
-  Widget _buildFooterItem(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-  }) => Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          child: Row(
-            children: [
-              Icon(
-                icon,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                size: 20,
+  Widget _buildNavigationItem(NavigationItem item, int index) {
+    final isSelected = _currentRoute == item.route || _selectedIndex == index;
+    final hasChildren = item.children != null && item.children!.isNotEmpty;
+
+    if (hasChildren) {
+      return ExpansionTile(
+        leading: Icon(
+          item.icon,
+          color: isSelected 
+              ? Theme.of(context).primaryColor
+              : Colors.grey[600],
+        ),
+        title: Text(
+          item.title,
+          style: TextStyle(
+            color: isSelected 
+                ? Theme.of(context).primaryColor
+                : Theme.of(context).textTheme.bodyMedium?.color,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+          ),
+        ),
+        children: item.children!.map((child) {
+          final isChildSelected = _currentRoute == child.route;
+          return ListTile(
+            contentPadding: const EdgeInsets.only(left: 56, right: 16),
+            leading: Icon(
+              child.icon,
+              size: 20,
+              color: isChildSelected 
+                  ? Theme.of(context).primaryColor
+                  : Colors.grey[600],
+            ),
+            title: Text(
+              child.title,
+              style: TextStyle(
+                color: isChildSelected 
+                    ? Theme.of(context).primaryColor
+                    : Theme.of(context).textTheme.bodyMedium?.color,
+                fontWeight: isChildSelected ? FontWeight.w600 : FontWeight.normal,
+                fontSize: 14,
               ),
-              if (!isCollapsed && label.isNotEmpty) ...[
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    label,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-              ],
-            ],
+            ),
+            onTap: () {
+              _onItemTap(child.route, index);
+            },
+          );
+        }).toList(),
+      );
+    }
+
+    return ListTile(
+      leading: Icon(
+        item.icon,
+        color: isSelected 
+            ? Theme.of(context).primaryColor
+            : Colors.grey[600],
+      ),
+      title: Text(
+        item.title,
+        style: TextStyle(
+          color: isSelected 
+              ? Theme.of(context).primaryColor
+              : Theme.of(context).textTheme.bodyMedium?.color,
+          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+        ),
+      ),
+      selected: isSelected,
+      onTap: () {
+        _onItemTap(item.route, index);
+      },
+    );
+  }
+
+  Widget _buildFooter() => Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        border: Border(
+          top: BorderSide(
+            color: Theme.of(context).dividerColor,
+            width: 1,
           ),
         ),
       ),
+      child: Column(
+        children: [
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.help_outline),
+            title: const Text('Ajuda'),
+            onTap: () {
+              // TODO: Implementar página de ajuda
+            },
+          ),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.info_outline),
+            title: const Text('Sobre'),
+            onTap: () {
+              _showAboutDialog();
+            },
+          ),
+          const Divider(),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.logout, color: Colors.red),
+            title: const Text(
+              'Sair',
+              style: TextStyle(color: Colors.red),
+            ),
+            onTap: () {
+              _logout();
+            },
+          ),
+        ],
+      ),
     );
 
-  void _showLogoutDialog(BuildContext context) {
+  void _onItemTap(String route, int index) {
+    setState(() {
+      _selectedIndex = index;
+      _currentRoute = route;
+    });
+
+    widget.onItemTapped(index);
+    context.go(route);
+
+    // Fechar drawer no mobile
+    if (!Responsive.isDesktop(context)) {
+      Navigator.of(context).pop();
+    }
+  }
+
+  void _logout() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -310,15 +467,14 @@ class SideBar extends StatelessWidget {
             child: const Text('Cancelar'),
           ),
           ElevatedButton(
-            onPressed: () async {
+            onPressed: () {
               Navigator.of(context).pop();
-              final authProvider = Provider.of<AuthProvider>(context, listen: false);
-              await authProvider.logout();
-              // Navigation will be handled by the router redirect
+              context.read<AuthProvider>().logout();
+              context.go('/login');
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.error,
-              foregroundColor: Theme.of(context).colorScheme.onError,
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
             ),
             child: const Text('Sair'),
           ),
@@ -326,93 +482,30 @@ class SideBar extends StatelessWidget {
       ),
     );
   }
-}
 
-// Collapsible Sidebar (for desktop with toggle)
-class CollapsibleSidebar extends StatefulWidget {
-  final int selectedIndex;
-  final Function(int) onItemTapped;
-  final List<Map<String, dynamic>> navigationItems;
-
-  const CollapsibleSidebar({
-    super.key,
-    required this.selectedIndex,
-    required this.onItemTapped,
-    required this.navigationItems,
-  });
-
-  @override
-  State<CollapsibleSidebar> createState() => _CollapsibleSidebarState();
-}
-
-class _CollapsibleSidebarState extends State<CollapsibleSidebar>
-    with SingleTickerProviderStateMixin {
-  bool _isCollapsed = false;
-  late AnimationController _animationController;
-  late Animation<double> _animation;
-
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      duration: AppConstants.mediumAnimation,
-      vsync: this,
-    );
-    _animation = Tween<double>(
-      begin: AppConstants.sidebarWidth,
-      end: AppConstants.sidebarCollapsedWidth,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
-
-  void _toggleCollapse() {
-    setState(() {
-      _isCollapsed = !_isCollapsed;
-    });
-    
-    if (_isCollapsed) {
-      _animationController.forward();
-    } else {
-      _animationController.reverse();
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) => AnimatedBuilder(
-      animation: _animation,
-      builder: (context, child) => SizedBox(
-          width: _animation.value,
-          child: Stack(
-            children: [
-              SideBar(
-                selectedIndex: widget.selectedIndex,
-                onItemTapped: widget.onItemTapped,
-                navigationItems: widget.navigationItems,
-                isCollapsed: _isCollapsed,
-              ),
-              // Toggle button
-              Positioned(
-                top: 16,
-                right: 8,
-                child: IconButton(
-                  icon: Icon(
-                    _isCollapsed ? Icons.chevron_right : Icons.chevron_left,
-                    size: 20,
-                  ),
-                  onPressed: _toggleCollapse,
-                  tooltip: _isCollapsed ? 'Expandir' : 'Recolher',
-                ),
-              ),
-            ],
-          ),
+  void _showAboutDialog() {
+    showAboutDialog(
+      context: context,
+      applicationName: AppConstants.appName,
+      applicationVersion: AppConstants.appVersion,
+      applicationIcon: Container(
+        width: 64,
+        height: 64,
+        decoration: BoxDecoration(
+          color: Theme.of(context).primaryColor,
+          borderRadius: BorderRadius.circular(12),
         ),
+        child: const Icon(
+          Icons.account_balance,
+          color: Colors.white,
+          size: 32,
+        ),
+      ),
+      children: [
+        const Text('Sistema de gestão de cadastros e demandas sociais.'),
+        const SizedBox(height: 8),
+        const Text('Desenvolvido para auxiliar no controle e acompanhamento de responsáveis, membros e suas demandas.'),
+      ],
     );
+  }
 }

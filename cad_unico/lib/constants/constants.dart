@@ -27,6 +27,36 @@ class AppConstants {
   static const double tabletBreakpoint = 900;
   static const double desktopBreakpoint = 1200;
 
+  // ===== ROTAS =====
+  static const String homeRoute = '/';
+  static const String loginRoute = '/login';
+  static const String responsaveisRoute = '/responsaveis';
+  static const String responsavelDetalhesRoute = '/responsaveis/detalhes';
+  static const String responsavelFormRoute = '/responsaveis/form';
+  static const String membrosRoute = '/membros';
+  static const String membroFormRoute = '/membros/form';
+  static const String demandasSaudeRoute = '/demandas/saude';
+  static const String demandasEducacaoRoute = '/demandas/educacao';
+  static const String demandasAmbienteRoute = '/demandas/ambiente';
+  static const String demandasHabitacaoRoute = '/demandas/habitacao';
+  static const String demandasInternasRoute = '/demandas/internas';
+  static const String alojamentosRoute = '/alojamentos';
+  static const String desaparecidosRoute = '/desaparecidos';
+  static const String perfilRoute = '/perfil';
+  static const String configuracoesRoute = '/configuracoes';
+  static const String sobreRoute = '/sobre';
+  
+  // ===== CONFIGURAÇÕES DE DEBUG =====
+  static const bool enableDebugMode = false;
+  static const bool enableLogging = true;
+  static const bool enableAnalytics = false;
+  
+  // ===== LIMITES =====
+  static const int maxFileSize = 10 * 1024 * 1024; // 10MB
+  static const int maxImageSize = 5 * 1024 * 1024; // 5MB
+  static const List<String> allowedImageTypes = ['jpg', 'jpeg', 'png', 'gif'];
+  static const List<String> allowedDocumentTypes = ['pdf', 'doc', 'docx', 'xls', 'xlsx'];
+
   // Durações de animação
   static const Duration shortAnimationDuration = Duration(milliseconds: 200);
   static const Duration mediumAnimationDuration = Duration(milliseconds: 300);
@@ -206,6 +236,34 @@ class AppConstants {
     'B': Icons.block,
   };
 
+   // ===== ÍCONES =====
+  static const IconData dashboardIcon = Icons.dashboard;
+  static const IconData responsaveisIcon = Icons.people;
+  static const IconData membrosIcon = Icons.family_restroom;
+  static const IconData demandasIcon = Icons.assignment;
+  static const IconData saudeIcon = Icons.local_hospital;
+  static const IconData educacaoIcon = Icons.school;
+  static const IconData ambienteIcon = Icons.pets;
+  static const IconData habitacaoIcon = Icons.home;
+  static const IconData internasIcon = Icons.business;
+  static const IconData alojamentosIcon = Icons.hotel;
+  static const IconData desaparecidosIcon = Icons.search;
+  static const IconData configuracoesIcon = Icons.settings;
+  static const IconData perfilIcon = Icons.person;
+  static const IconData sairIcon = Icons.exit_to_app;
+  static const IconData sobreIcon = Icons.info;
+  static const IconData ajudaIcon = Icons.help;
+  static const IconData buscarIcon = Icons.search;
+  static const IconData filtrarIcon = Icons.filter_list;
+  static const IconData adicionarIcon = Icons.add;
+  static const IconData editarIcon = Icons.edit;
+  static const IconData excluirIcon = Icons.delete;
+  static const IconData visualizarIcon = Icons.visibility;
+  static const IconData imprimirIcon = Icons.print;
+  static const IconData exportarIcon = Icons.file_download;
+  static const IconData atualizarIcon = Icons.refresh;
+  
+  // ===== BREAKPOINTS RESPONSIVOS =====
   // Configurações de cache
   static const Duration cacheExpiration = Duration(minutes: 30);
   static const int maxCacheSize = 100; // MB
@@ -221,6 +279,10 @@ class AppConstants {
   static const double maxImageWidth = 1920;
   static const double maxImageHeight = 1080;
 
+  static const Duration defaultAnimationDuration = Duration(milliseconds: 300);
+  static const Duration fastAnimationDuration = Duration(milliseconds: 150);
+  static const Duration slowAnimationDuration = Duration(milliseconds: 500);
+  
   // Formatos de data
   static const String dateFormat = 'dd/MM/yyyy';
   static const String dateTimeFormat = 'dd/MM/yyyy HH:mm';

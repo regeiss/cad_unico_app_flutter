@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-
-import '../constants/constants.dart';
+import 'package:go_router/go_router.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import '../providers/auth_provider.dart';
 import '../providers/demanda_provider.dart';
 import '../providers/membro_provider.dart';
 import '../providers/responsavel_provider.dart';
+import '../utils/constants.dart';
 import '../utils/responsive.dart';
 import '../widgets/dashboard_card.dart';
 import '../widgets/sidebar.dart';
@@ -19,595 +19,721 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   int _selectedIndex = 0;
-
-  final List<Map<String, dynamic>> _navigationItems = [
-    {
-      'icon': AppConstants.homeIcon,
-      'label': 'Dashboard',
-      'route': '/home',
-    },
-    {
-      'icon': AppConstants.responsavelIcon,
-      'label': 'Responsáveis',
-      'route': '/home/responsaveis',
-    },
-    {
-      'icon': AppConstants.membroIcon,
-      'label': 'Membros',
-      'route': '/home/membros',
-    },
-    {
-      'icon': AppConstants.demandaIcon,
-      'label': 'Demandas',
-      'route': '/home/demandas',
-    },
-  ];
 
   @override
   void initState() {
     super.initState();
-    _loadInitialData();
+    _loadData();
   }
 
-  Future<void> _loadInitialData() async {
-    final responsavelProvider =
-        Provider.of<ResponsavelProvider>(context, listen: false);
-    final membroProvider = Provider.of<MembroProvider>(context, listen: false);
-    final demandaProvider =
-        Provider.of<DemandaProvider>(context, listen: false);
-
-    await Future.wait([
-      responsavelProvider.loadResponsaveis(),
-      membroProvider.loadMembros(),
-      demandaProvider.loadDemandas(),
-    ]);
+  Future<void> _loadData() async {
+    if (!mounted) return;
+    
+    try {
+      await Future.wait([
+        context.read<ResponsavelProvider>().loadResponsaveis(),
+        context.read<MembroProvider>().loadMembros(),
+        context.read<DemandaProvider>().loadAllDemandas(),
+      ]);
+    } catch (e) {
+      debugPrint('Erro ao carregar dados: $e');
+    }
   }
 
   void _onNavigationItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
+  }
 
-    if (Responsive.isMobile) {
-      Navigator.of(context).pop(); // Close drawer
-    }
-
-    context.go(_navigationItems[index]['route']);
+  List<NavigationItem> _getNavigationItems() {
+    return [
+      NavigationItem(
+        title: 'Dashboard',
+        route: '/home',
+        icon: Icons.dashboard,
+      ),
+      NavigationItem(
+        title: 'Responsáveis',
+        route: '/responsaveis',
+        icon: Icons.person,
+      ),
+      NavigationItem(
+        title: 'Membros',
+        route: '/membros',
+        icon: Icons.group,
+      ),
+      NavigationItem(
+        title: 'Demandas',
+        route: '/demandas',
+        icon: Icons.assignment,
+      ),
+    ];
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-        key: _scaffoldKey,
-        appBar: _buildAppBar(),
-        drawer: Responsive.isMobile ? _buildDrawer() : null,
-        body: ResponsiveBreakpoints(
-          mobile: _buildMobileLayout(),
-          desktop: _buildDesktopLayout(),
-        ),
-        floatingActionButton: _buildFloatingActionButton(),
-      );
-
-  PreferredSizeWidget _buildAppBar() => AppBar(
-        title: Text(AppConstants.appName),
-        leading: Responsive.isMobile
-            ? IconButton(
-                icon: const Icon(Icons.menu),
-                onPressed: () => _scaffoldKey.currentState?.openDrawer(),
-              )
-            : null,
-        automaticallyImplyLeading: false,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _loadInitialData,
-            tooltip: 'Atualizar dados',
-          ),
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined),
-            onPressed: () {
-              // TODO: Implement notifications
-            },
-            tooltip: 'Notificações',
-          ),
-          _buildUserMenu(),
-        ],
-      );
-
-  Widget _buildUserMenu() => Consumer<AuthProvider>(
-        builder: (context, authProvider, child) => PopupMenuButton<String>(
-          icon: CircleAvatar(
-            backgroundColor: Theme.of(context).colorScheme.primary,
-            child: Text(
-              authProvider.userInitials,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          onSelected: (value) async {
-            switch (value) {
-              case 'profile':
-                // TODO: Navigate to profile
-                break;
-              case 'settings':
-                // TODO: Navigate to settings
-                break;
-              case 'logout':
-                await authProvider.logout();
-                if (mounted) {
-                  context.go('/');
-                }
-                break;
-            }
-          },
-          itemBuilder: (context) => [
-            PopupMenuItem(
-              value: 'profile',
-              child: Row(
-                children: [
-                  const Icon(Icons.person_outline),
-                  const SizedBox(width: 12),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        authProvider.userName ?? 'Usuário',
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      Text(
-                        authProvider.userEmail ?? '',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const PopupMenuDivider(),
-            const PopupMenuItem(
-              value: 'settings',
-              child: Row(
-                children: [
-                  Icon(Icons.settings_outlined),
-                  SizedBox(width: 12),
-                  Text('Configurações'),
-                ],
-              ),
-            ),
-            const PopupMenuItem(
-              value: 'logout',
-              child: Row(
-                children: [
-                  Icon(Icons.exit_to_app),
-                  SizedBox(width: 12),
-                  Text('Sair'),
-                ],
-              ),
-            ),
-          ],
-        ),
-      );
-
-  Widget _buildDrawer() => SideBar(
+  Widget build(BuildContext context) {
+    final isDesktop = Responsive.isDesktop(context);
+    
+    return Scaffold(
+      drawer: isDesktop ? null : SideBar(
         selectedIndex: _selectedIndex,
         onItemTapped: _onNavigationItemTapped,
-        navigationItems: _navigationItems,
-      );
-
-  Widget _buildMobileLayout() => _buildDashboard();
-
-  Widget _buildDesktopLayout() => Row(
+        navigationItems: _getNavigationItems(),
+      ),
+      body: Row(
         children: [
-          SideBar(
-            selectedIndex: _selectedIndex,
-            onItemTapped: _onNavigationItemTapped,
-            navigationItems: _navigationItems,
-          ),
+          // Sidebar para desktop
+          if (isDesktop) 
+            SideBar(
+              selectedIndex: _selectedIndex,
+              onItemTapped: _onNavigationItemTapped,
+              navigationItems: _getNavigationItems(),
+            ),
+          
+          // Conteúdo principal
           Expanded(
-            child: _buildDashboard(),
-          ),
-        ],
-      );
-
-  Widget _buildDashboard() => RefreshIndicator(
-        onRefresh: _loadInitialData,
-        child: SingleChildScrollView(
-          padding: Responsive.padding(
-            mobile: const EdgeInsets.all(16),
-            desktop: const EdgeInsets.all(24),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildWelcomeSection(),
-              const SizedBox(height: 24),
-              _buildStatsCards(),
-              const SizedBox(height: 24),
-              _buildQuickActions(),
-              const SizedBox(height: 24),
-              _buildRecentActivity(),
-            ],
-          ),
-        ),
-      );
-
-  Widget _buildWelcomeSection() => Consumer<AuthProvider>(
-        builder: (context, authProvider, child) => Card(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Row(
+            child: Column(
               children: [
-                CircleAvatar(
-                  radius: 30,
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  child: Text(
-                    authProvider.userInitials,
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
+                // AppBar customizada
+                _buildAppBar(),
+                
+                // Conteúdo
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Bem-vindo, ${authProvider.userName ?? 'Usuário'}!',
-                        style:
-                            Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                  fontWeight: FontWeight.bold,
+                  child: RefreshIndicator(
+                    onRefresh: _loadData,
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Header de boas-vindas
+                          _buildWelcomeHeader(),
+                          
+                          const SizedBox(height: 24),
+                          
+                          // Cards de estatísticas
+                          _buildStatsCards(),
+                          
+                          const SizedBox(height: 24),
+                          
+                          // Gráficos e informações
+                          if (isDesktop) ...[
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  flex: 2,
+                                  child: _buildDemandasChart(),
                                 ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Aqui está um resumo das informações do sistema',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant,
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: _buildRecentActivities(),
+                                ),
+                              ],
                             ),
+                          ] else ...[
+                            _buildDemandasChart(),
+                            const SizedBox(height: 16),
+                            _buildRecentActivities(),
+                          ],
+                          
+                          const SizedBox(height: 24),
+                          
+                          // Ações rápidas
+                          _buildQuickActions(),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ],
             ),
           ),
-        ),
-      );
+        ],
+      ),
+    );
+  }
 
-  Widget _buildStatsCards() =>
-      Consumer3<ResponsavelProvider, MembroProvider, DemandaProvider>(
-        builder: (context, responsavelProvider, membroProvider, demandaProvider,
-            child) {
-          final stats = [
-            {
-              'title': 'Responsáveis',
-              'value': responsavelProvider.responsaveis.length.toString(),
-              'icon': AppConstants.responsavelIcon,
-              'color': Colors.blue,
-              'route': '/home/responsaveis',
-              'isLoading': responsavelProvider.isLoading,
+  Widget _buildAppBar() => Container(
+      height: 60,
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          if (!Responsive.isDesktop(context))
+            IconButton(
+              icon: const Icon(Icons.menu),
+              onPressed: () => Scaffold.of(context).openDrawer(),
+            ),
+          
+          const SizedBox(width: 16),
+          
+          Expanded(
+            child: Text(
+              'Dashboard',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          
+          // Ações da AppBar
+          IconButton(
+            icon: const Icon(Icons.notifications_outlined),
+            onPressed: () {
+              // TODO: Implementar notificações
             },
-            {
-              'title': 'Membros',
-              'value': membroProvider.membros.length.toString(),
-              'icon': AppConstants.membroIcon,
-              'color': Colors.green,
-              'route': '/home/membros',
-              'isLoading': membroProvider.isLoading,
-            },
-            {
-              'title': 'Demandas',
-              'value': demandaProvider.demandas.length.toString(),
-              'icon': AppConstants.demandaIcon,
-              'color': Colors.orange,
-              'route': '/home/demandas',
-              'isLoading': demandaProvider.isLoading,
-            },
-            {
-              'title': 'Pendentes',
-              'value': '0', // TODO: Calculate pending items
-              'icon': Icons.pending_actions,
-              'color': Colors.red,
-              'route': '/home/demandas',
-              'isLoading': false,
-            },
-          ];
+          ),
+          
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _loadData,
+          ),
+          
+          const SizedBox(width: 8),
+          
+          // Avatar do usuário
+          Consumer<AuthProvider>(
+            builder: (context, auth, child) => PopupMenuButton<String>(
+                child: CircleAvatar(
+                  backgroundColor: Theme.of(context).primaryColor,
+                  child: Text(
+                    auth.user?.username?.substring(0, 1).toUpperCase() ?? 'U',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                itemBuilder: (context) => <PopupMenuEntry<String>>[
+                  const PopupMenuItem<String>(
+                    value: 'perfil',
+                    child: Row(
+                      children: [
+                        Icon(Icons.person),
+                        SizedBox(width: 8),
+                        Text('Perfil'),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuItem<String>(
+                    value: 'configuracoes',
+                    child: Row(
+                      children: [
+                        Icon(Icons.settings),
+                        SizedBox(width: 8),
+                        Text('Configurações'),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuDivider(),
+                  const PopupMenuItem<String>(
+                    value: 'sair',
+                    child: Row(
+                      children: [
+                        Icon(Icons.logout, color: Colors.red),
+                        SizedBox(width: 8),
+                        Text('Sair', style: TextStyle(color: Colors.red)),
+                      ],
+                    ),
+                  ),
+                ],
+                onSelected: (String value) {
+                  switch (value) {
+                    case 'perfil':
+                      // TODO: Navegar para perfil
+                      break;
+                    case 'configuracoes':
+                      // TODO: Navegar para configurações
+                      break;
+                    case 'sair':
+                      context.read<AuthProvider>().logout();
+                      context.go('/login');
+                      break;
+                  }
+                },
+              ),
+          ),
+          
+          const SizedBox(width: 16),
+        ],
+      ),
+    );
 
-          return ResponsiveGrid(
-            mobileColumns: 2,
-            tabletColumns: 4,
-            desktopColumns: 4,
-            spacing: 16,
-            children: stats
-                .map((stat) => DashboardCard(
-                      title: stat['title'] as String,
-                      value: stat['value'] as String,
-                      icon: stat['icon'] as IconData,
-                      color: stat['color'] as Color,
-                      isLoading: stat['isLoading'] as bool,
-                      onTap: () => context.go(stat['route'] as String),
+  Widget _buildWelcomeHeader() {
+    return Consumer<AuthProvider>(
+      builder: (context, auth, child) {
+        final now = DateTime.now();
+        final hour = now.hour;
+        String greeting;
+        
+        if (hour < 12) {
+          greeting = 'Bom dia';
+        } else if (hour < 18) {
+          greeting = 'Boa tarde';
+        } else {
+          greeting = 'Boa noite';
+        }
+        
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '$greeting, ${auth.user?.username ?? 'Usuário'}!',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Aqui está o resumo das atividades do sistema',
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: Colors.grey[600],
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildStatsCards() {
+    return Consumer3<ResponsavelProvider, MembroProvider, DemandaProvider>(
+      builder: (context, responsavelProvider, membroProvider, demandaProvider, child) {
+        final isDesktop = Responsive.isDesktop(context);
+        
+        final cards = [
+          DashboardCard(
+            title: 'Responsáveis',
+            value: responsavelProvider.totalResponsaveis.toString(),
+            subtitle: 'Cadastrados',
+            icon: Icons.person,
+            color: Colors.blue,
+            onTap: () => context.go('/responsaveis'),
+            isCompact: !isDesktop,
+          ),
+          DashboardCard(
+            title: 'Membros',
+            value: membroProvider.totalMembros.toString(),
+            subtitle: 'Registrados',
+            icon: Icons.group,
+            color: Colors.green,
+            onTap: () => context.go('/membros'),
+            isCompact: !isDesktop,
+          ),
+          DashboardCard(
+            title: 'Demandas Saúde',
+            value: demandaProvider.totalDemandasSaude.toString(),
+            subtitle: 'Ativas',
+            icon: Icons.health_and_safety,
+            color: Colors.red,
+            onTap: () => context.go('/demandas'),
+            isCompact: !isDesktop,
+          ),
+          DashboardCard(
+            title: 'Demandas Educação',
+            value: demandaProvider.totalDemandasEducacao.toString(),
+            subtitle: 'Pendentes',
+            icon: Icons.school,
+            color: Colors.orange,
+            onTap: () => context.go('/demandas'),
+            isCompact: !isDesktop,
+          ),
+        ];
+        
+        if (isDesktop) {
+          return Row(
+            children: cards
+                .map((card) => Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 16),
+                        child: card,
+                      ),
                     ))
                 .toList(),
           );
-        },
-      );
+        } else {
+          return Column(
+            children: [
+              Row(
+                children: [
+                  Expanded(child: cards[0]),
+                  const SizedBox(width: 8),
+                  Expanded(child: cards[1]),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(child: cards[2]),
+                  const SizedBox(width: 8),
+                  Expanded(child: cards[3]),
+                ],
+              ),
+            ],
+          );
+        }
+      },
+    );
+  }
+
+  Widget _buildDemandasChart() {
+    return Consumer<DemandaProvider>(
+      builder: (context, demandaProvider, child) {
+        final totalDemandas = demandaProvider.totalDemandasSaude + 
+                             demandaProvider.totalDemandasEducacao + 
+                             demandaProvider.totalDemandasAmbiente;
+        
+        return Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Distribuição de Demandas',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.more_vert),
+                      onPressed: () => context.go('/demandas'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                
+                if (totalDemandas == 0)
+                  const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(32.0),
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.analytics_outlined,
+                            size: 48,
+                            color: Colors.grey,
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            'Nenhuma demanda encontrada',
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                else
+                  Column(
+                    children: [
+                      _buildDemandaItem(
+                        'Saúde',
+                        demandaProvider.totalDemandasSaude,
+                        totalDemandas,
+                        Colors.red,
+                        Icons.health_and_safety,
+                      ),
+                      _buildDemandaItem(
+                        'Educação',
+                        demandaProvider.totalDemandasEducacao,
+                        totalDemandas,
+                        Colors.blue,
+                        Icons.school,
+                      ),
+                      _buildDemandaItem(
+                        'Ambiente',
+                        demandaProvider.totalDemandasAmbiente,
+                        totalDemandas,
+                        Colors.green,
+                        Icons.pets,
+                      ),
+                      _buildDemandaItem(
+                        'Grupos Prioritários',
+                        demandaProvider.totalGruposPrioritarios,
+                        totalDemandas,
+                        Colors.orange,
+                        Icons.priority_high,
+                      ),
+                    ],
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildDemandaItem(
+    String label,
+    int value,
+    int total,
+    Color color,
+    IconData icon,
+  ) {
+    final percentage = total > 0 ? (value / total * 100) : 0.0;
+    
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12.0),
+      child: Row(
+        children: [
+          Icon(icon, color: color, size: 20),
+          const SizedBox(width: 8),
+          Expanded(
+            flex: 2,
+            child: Text(
+              label,
+              style: const TextStyle(fontWeight: FontWeight.w500),
+            ),
+          ),
+          Expanded(
+            flex: 3,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      value.toString(),
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      '${percentage.toStringAsFixed(1)}%',
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                LinearProgressIndicator(
+                  value: percentage / 100,
+                  backgroundColor: color.withValues(alpha: 0.2),
+                  valueColor: AlwaysStoppedAnimation<Color>(color),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRecentActivities() {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Atividades Recentes',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    // TODO: Ver todas as atividades
+                  },
+                  child: const Text('Ver todas'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            
+            // Lista de atividades
+            Column(
+              children: [
+                _buildActivityItem(
+                  'Novo responsável cadastrado',
+                  '2 horas atrás',
+                  Icons.person_add,
+                  Colors.green,
+                ),
+                _buildActivityItem(
+                  'Demanda de saúde atualizada',
+                  '4 horas atrás',
+                  Icons.health_and_safety,
+                  Colors.blue,
+                ),
+                _buildActivityItem(
+                  'Relatório gerado',
+                  '1 dia atrás',
+                  Icons.description,
+                  Colors.orange,
+                ),
+                _buildActivityItem(
+                  'Backup realizado',
+                  '2 dias atrás',
+                  Icons.backup,
+                  Colors.grey,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActivityItem(
+    String title,
+    String time,
+    IconData icon,
+    Color color,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12.0),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 16,
+            backgroundColor: color.withValues(alpha: 0.2),
+            child: Icon(
+              icon,
+              size: 16,
+              color: color,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 14,
+                  ),
+                ),
+                Text(
+                  time,
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildQuickActions() {
     final actions = [
       {
         'title': 'Novo Responsável',
-        'subtitle': 'Cadastrar nova pessoa',
         'icon': Icons.person_add,
         'color': Colors.blue,
-        'onTap': () {
-          // TODO: Navigate to new responsavel form
-          context.go('/home/responsaveis');
-        },
+        'route': '/responsaveis/novo',
       },
       {
-        'title': 'Nova Demanda',
-        'subtitle': 'Registrar demanda',
-        'icon': Icons.assignment_add,
+        'title': 'Novo Membro',
+        'icon': Icons.group_add,
         'color': Colors.green,
-        'onTap': () {
-          // TODO: Navigate to new demanda form
-          context.go('/home/demandas');
-        },
-      },
-      {
-        'title': 'Buscar CPF',
-        'subtitle': 'Localizar por CPF',
-        'icon': Icons.search,
-        'color': Colors.orange,
-        'onTap': _showSearchDialog,
+        'route': '/membros/novo',
       },
       {
         'title': 'Relatórios',
-        'subtitle': 'Gerar relatórios',
-        'icon': Icons.bar_chart,
+        'icon': Icons.analytics,
         'color': Colors.purple,
-        'onTap': () {
-          // TODO: Navigate to reports
-        },
+        'route': '/relatorios',
+      },
+      {
+        'title': 'Configurações',
+        'icon': Icons.settings,
+        'color': Colors.grey,
+        'route': '/configuracoes',
       },
     ];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Ações Rápidas',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-        const SizedBox(height: 16),
-        ResponsiveGrid(
-          mobileColumns: 2,
-          tabletColumns: 4,
-          desktopColumns: 4,
-          spacing: 16,
-          children: actions
-              .map((action) => _buildActionCard(
-                    title: action['title'] as String,
-                    subtitle: action['subtitle'] as String,
-                    icon: action['icon'] as IconData,
-                    color: action['color'] as Color,
-                    onTap: action['onTap'] as VoidCallback,
-                  ))
-              .toList(),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildActionCard({
-    required String title,
-    required String subtitle,
-    required IconData icon,
-    required Color color,
-    required VoidCallback onTap,
-  }) => Card(
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              CircleAvatar(
-                backgroundColor: color.withOpacity(0.1),
-                child: Icon(
-                  icon,
-                  color: color,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                title,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                subtitle,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-
-  Widget _buildRecentActivity() => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Atividade Recente',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-              TextButton(
-                onPressed: () {
-                  // TODO: Navigate to full activity log
-                },
-                child: const Text('Ver todas'),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  _buildActivityItem(
-                    icon: Icons.person_add,
-                    title: 'Novo responsável cadastrado',
-                    subtitle: 'João Silva - CPF: 123.456.789-00',
-                    time: '2 horas atrás',
-                  ),
-                  const Divider(),
-                  _buildActivityItem(
-                    icon: Icons.assignment,
-                    title: 'Nova demanda registrada',
-                    subtitle: 'Demanda de saúde - Maria Santos',
-                    time: '4 horas atrás',
-                  ),
-                  const Divider(),
-                  _buildActivityItem(
-                    icon: Icons.edit,
-                    title: 'Cadastro atualizado',
-                    subtitle: 'Pedro Oliveira - Dados atualizados',
-                    time: '6 horas atrás',
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      );
-
-  Widget _buildActivityItem({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required String time,
-  }) =>
-      ListTile(
-        leading: CircleAvatar(
-          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-          child: Icon(
-            icon,
-            color: Theme.of(context).colorScheme.onPrimaryContainer,
-          ),
-        ),
-        title: Text(title),
-        subtitle: Column(
+    
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(subtitle),
-            const SizedBox(height: 4),
             Text(
-              time,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+              'Ações Rápidas',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ],
-        ),
-        contentPadding: EdgeInsets.zero,
-      );
-
-  Widget? _buildFloatingActionButton() {
-    if (!Responsive.isMobile) return null;
-
-    return FloatingActionButton(
-      onPressed: _showQuickActionDialog,
-      child: const Icon(Icons.add),
-    );
-  }
-
-  void _showSearchDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Buscar por CPF'),
-        content: const TextField(
-          decoration: InputDecoration(
-            labelText: 'CPF',
-            hintText: 'Digite o CPF',
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              // TODO: Implement search
-            },
-            child: const Text('Buscar'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showQuickActionDialog() {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.person_add),
-              title: const Text('Novo Responsável'),
-              onTap: () {
-                Navigator.of(context).pop();
-                context.go('/home/responsaveis');
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.assignment_add),
-              title: const Text('Nova Demanda'),
-              onTap: () {
-                Navigator.of(context).pop();
-                context.go('/home/demandas');
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.search),
-              title: const Text('Buscar CPF'),
-              onTap: () {
-                Navigator.of(context).pop();
-                _showSearchDialog();
-              },
-            ),
+            const SizedBox(height: 16),
+            
+            if (Responsive.isDesktop(context))
+              Row(
+                children: actions
+                    .map((action) => Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: _buildActionButton(action),
+                          ),
+                        ))
+                    .toList(),
+              )
+            else
+              GridView.count(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisCount: 2,
+                crossAxisSpacing: 8,
+                mainAxisSpacing: 8,
+                childAspectRatio: 2.5,
+                children: actions
+                    .map((action) => _buildActionButton(action))
+                    .toList(),
+              ),
           ],
         ),
       ),
     );
   }
+
+  Widget _buildActionButton(Map<String, dynamic> action) => ElevatedButton.icon(
+      onPressed: () {
+        context.go(action['route']);
+      },
+      icon: Icon(
+        action['icon'],
+        color: action['color'],
+        size: 20,
+      ),
+      label: Text(
+        action['title'],
+        style: const TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: (action['color'] as Color).withValues(alpha: 0.1),
+        foregroundColor: action['color'],
+        elevation: 0,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      ),
+    );
 }
