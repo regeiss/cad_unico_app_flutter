@@ -81,5 +81,5 @@ class AppUtils {
   }
 
   // Capitalizar cada palavra
-  static String capitalizeWords(String text) => text.split(' ').map((word) => capitalize(word)).join(' ');
+  static String capitalizeWords(String text) => text.split(' ').map(capitalize).join(' ');
 }

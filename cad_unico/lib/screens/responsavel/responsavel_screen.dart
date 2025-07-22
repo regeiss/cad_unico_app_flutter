@@ -195,7 +195,7 @@ class _ResponsavelFormScreenState extends State<ResponsavelFormScreen> {
           textColor: Colors.white,
         );
       }
-    } on Exception catch (e) {
+    } on Exception   {
       Fluttertoast.showToast(
         msg: 'Erro ao salvar: $e',
         backgroundColor: Colors.red,
@@ -283,7 +283,7 @@ class _ResponsavelFormScreenState extends State<ResponsavelFormScreen> {
         color: Theme.of(context).colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: (0.1),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),

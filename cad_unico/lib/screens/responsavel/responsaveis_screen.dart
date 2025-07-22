@@ -10,7 +10,6 @@ import '../../providers/responsavel_provider.dart';
 import '../../utils/app_utils.dart';
 import '../../utils/responsive.dart';
 import '../../widgets/empty_state_widget.dart';
-import '../../widgets/error_widget.dart';
 import '../../widgets/filter_chip_widget.dart';
 import '../../widgets/loading_widget.dart';
 import '../../widgets/search_bar_widget.dart';
@@ -165,7 +164,7 @@ class _ResponsaveisScreenState extends State<ResponsaveisScreen> {
         color: Theme.of(context).colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: (0.1),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -257,7 +256,7 @@ class _ResponsaveisScreenState extends State<ResponsaveisScreen> {
                   _applyFilters();
                 },
               ),
-              ...AppConstants.statusOptions['general']!.entries.map(
+              ...AppConstants.statusOptions['general'].entries.map(
                   (entry) => FilterChip(
                     selected: filterStatuses.contains(entry.key),
                     label: Text(entry.value['label'] as String),
@@ -468,7 +467,7 @@ class _ResponsaveisScreenState extends State<ResponsaveisScreen> {
                     Text(
                       'Cadastrado em ${responsavel.timestamp!.day}/${responsavel.timestamp!.month}/${responsavel.timestamp!.year}',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7),
+                        color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: (0.7),
                       ),
                     ),
                   Row(
@@ -525,7 +524,7 @@ class _ResponsaveisScreenState extends State<ResponsaveisScreen> {
                       });
                     },
                   ),
-                  ...AppConstants.statusOptions['general']!.entries.map(
+                  ...AppConstants.statusOptions['general'].entries.map(
                   (entry) => FilterChip(
                     selected: filterStatuses.contains(entry.key),
                     label: Text(entry.value['label'] as String),

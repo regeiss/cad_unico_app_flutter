@@ -53,74 +53,62 @@ class Responsive {
     required double mobile,
     double? tablet,
     required double desktop,
-  }) {
-    return responsive<double>(
+  }) => responsive<double>(
       mobile: mobile,
       tablet: tablet,
       desktop: desktop,
     );
-  }
   
   // Responsive padding
   static EdgeInsets padding({
     required EdgeInsets mobile,
     EdgeInsets? tablet,
     required EdgeInsets desktop,
-  }) {
-    return responsive<EdgeInsets>(
+  }) => responsive<EdgeInsets>(
       mobile: mobile,
       tablet: tablet,
       desktop: desktop,
     );
-  }
   
   // Responsive margin
   static EdgeInsets margin({
     required EdgeInsets mobile,
     EdgeInsets? tablet,
     required EdgeInsets desktop,
-  }) {
-    return responsive<EdgeInsets>(
+  }) => responsive<EdgeInsets>(
       mobile: mobile,
       tablet: tablet,
       desktop: desktop,
     );
-  }
   
   // Get columns count for grids
   static int getColumns({
     int mobile = 1,
     int? tablet,
     int desktop = 2,
-  }) {
-    return responsive<int>(
+  }) => responsive<int>(
       mobile: mobile,
       tablet: tablet,
       desktop: desktop,
     );
-  }
   
   // Get card width
   static double getCardWidth({
     double? mobile,
     double? tablet,
     double? desktop,
-  }) {
-    return responsive<double>(
+  }) => responsive<double>(
       mobile: mobile ?? screenWidth * 0.9,
       tablet: tablet ?? 400,
       desktop: desktop ?? 320,
     );
-  }
   
   // Get sidebar width
-  static double getSidebarWidth() {
-    return responsive<double>(
+  static double getSidebarWidth() => responsive<double>(
       mobile: screenWidth * 0.8,
       tablet: 300,
       desktop: 280,
     );
-  }
   
   // Check if screen is small (mobile or small tablet)
   static bool get isSmallScreen => screenWidth < 900;
@@ -129,18 +117,14 @@ class Responsive {
   static bool get isLargeScreen => screenWidth >= 900;
   
   // Responsive AppBar height
-  static double get appBarHeight {
-    return responsive<double>(
+  static double get appBarHeight => responsive<double>(
       mobile: kToolbarHeight,
       tablet: kToolbarHeight + 8,
       desktop: kToolbarHeight + 16,
     );
-  }
   
   // Get bottom sheet height
-  static double getBottomSheetHeight({double factor = 0.9}) {
-    return screenHeight * factor;
-  }
+  static double getBottomSheetHeight({double factor = 0.9}) => screenHeight * factor;
   
   // Check if device is in portrait mode
   static bool get isPortrait => 
@@ -166,48 +150,40 @@ class Responsive {
   static double get devicePixelRatio => _mediaQuery.devicePixelRatio;
   
   // Responsive dialog width
-  static double getDialogWidth() {
-    return responsive<double>(
+  static double getDialogWidth() => responsive<double>(
       mobile: screenWidth * 0.9,
       tablet: 500,
       desktop: 600,
     );
-  }
   
   // Get max content width
-  static double getMaxContentWidth() {
-    return responsive<double>(
+  static double getMaxContentWidth() => responsive<double>(
       mobile: screenWidth,
       tablet: 800,
       desktop: 1200,
     );
-  }
   
   // Responsive grid crossAxisCount
   static int getGridColumns({
     int mobile = 1,
     int? tablet,
     int desktop = 3,
-  }) {
-    return responsive<int>(
+  }) => responsive<int>(
       mobile: mobile,
       tablet: tablet ?? (mobile + desktop) ~/ 2,
       desktop: desktop,
     );
-  }
   
   // Responsive grid childAspectRatio
   static double getGridAspectRatio({
     double mobile = 1.0,
     double? tablet,
     double desktop = 1.2,
-  }) {
-    return responsive<double>(
+  }) => responsive<double>(
       mobile: mobile,
       tablet: tablet ?? (mobile + desktop) / 2,
       desktop: desktop,
     );
-  }
   
   // Get navigation type
   static NavigationType get navigationType {
@@ -228,13 +204,11 @@ class Responsive {
     double mobile = 8.0,
     double? tablet,
     double desktop = 16.0,
-  }) {
-    return responsive<double>(
+  }) => responsive<double>(
       mobile: mobile,
       tablet: tablet ?? (mobile + desktop) / 2,
       desktop: desktop,
     );
-  }
   
   // Adaptive border radius
   static BorderRadius borderRadius({
@@ -255,39 +229,33 @@ class Responsive {
     required Widget mobile,
     Widget? tablet,
     required Widget desktop,
-  }) {
-    return responsive<Widget>(
+  }) => responsive<Widget>(
       mobile: mobile,
       tablet: tablet,
       desktop: desktop,
     );
-  }
   
   // Get icon size based on screen
   static double getIconSize({
     double mobile = 24.0,
     double? tablet,
     double desktop = 28.0,
-  }) {
-    return responsive<double>(
+  }) => responsive<double>(
       mobile: mobile,
       tablet: tablet ?? (mobile + desktop) / 2,
       desktop: desktop,
     );
-  }
   
   // Get button height
   static double getButtonHeight({
     double mobile = 48.0,
     double? tablet,
     double desktop = 52.0,
-  }) {
-    return responsive<double>(
+  }) => responsive<double>(
       mobile: mobile,
       tablet: tablet ?? (mobile + desktop) / 2,
       desktop: desktop,
     );
-  }
   
   // Get container constraints
   static BoxConstraints getContainerConstraints({
@@ -295,14 +263,12 @@ class Responsive {
     double? maxWidth,
     double? minHeight,
     double? maxHeight,
-  }) {
-    return BoxConstraints(
+  }) => BoxConstraints(
       minWidth: minWidth ?? 0,
       maxWidth: maxWidth ?? getMaxContentWidth(),
       minHeight: minHeight ?? 0,
       maxHeight: maxHeight ?? double.infinity,
     );
-  }
 }
 
 // Navigation type enum
@@ -326,8 +292,7 @@ class ResponsiveBreakpoints extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
+  Widget build(BuildContext context) => LayoutBuilder(
       builder: (context, constraints) {
         Responsive.init(context);
         
@@ -338,7 +303,6 @@ class ResponsiveBreakpoints extends StatelessWidget {
         );
       },
     );
-  }
 }
 
 // Responsive padding widget
@@ -357,8 +321,7 @@ class ResponsivePadding extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return Padding(
+  Widget build(BuildContext context) => Padding(
       padding: Responsive.padding(
         mobile: mobile ?? const EdgeInsets.all(16),
         tablet: tablet,
@@ -366,7 +329,6 @@ class ResponsivePadding extends StatelessWidget {
       ),
       child: child,
     );
-  }
 }
 
 // Responsive container widget
@@ -389,8 +351,7 @@ class ResponsiveContainer extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
+  Widget build(BuildContext context) => Container(
       width: Responsive.responsive<double?>(
         mobile: mobileWidth,
         tablet: tabletWidth,
@@ -400,7 +361,6 @@ class ResponsiveContainer extends StatelessWidget {
       margin: margin,
       child: child,
     );
-  }
 }
 
 // Responsive grid widget
@@ -423,8 +383,7 @@ class ResponsiveGrid extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return GridView.count(
+  Widget build(BuildContext context) => GridView.count(
       crossAxisCount: Responsive.getGridColumns(
         mobile: mobileColumns ?? 1,
         tablet: tabletColumns,
@@ -435,7 +394,6 @@ class ResponsiveGrid extends StatelessWidget {
       childAspectRatio: aspectRatio ?? 1.0,
       children: children,
     );
-  }
 }
 
 // Responsive text widget

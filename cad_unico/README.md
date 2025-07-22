@@ -23,17 +23,20 @@ Sistema de gestão de cadastros e demandas sociais desenvolvido em Flutter para 
 ## 🛠️ Instalação
 
 ### 1. Clone o repositório
+
 ```bash
 git clone <url-do-repositorio>
 cd cadastro_app
 ```
 
 ### 2. Instale as dependências
+
 ```bash
 flutter pub get
 ```
 
 ### 3. Configure a API
+
 Edite o arquivo `lib/utils/constants.dart` e configure a URL da sua API Django:
 
 ```dart
@@ -45,6 +48,7 @@ class AppConstants {
 ```
 
 ### 4. Execute o projeto
+
 ```bash
 # Para desenvolvimento
 flutter run -d chrome
@@ -87,11 +91,13 @@ lib/
 O app Flutter se conecta com a API Django através dos seguintes endpoints:
 
 ### Autenticação
+
 - `POST /auth/login/` - Login do usuário
 - `GET /auth/user/` - Dados do usuário logado
 - `POST /auth/logout/` - Logout
 
 ### Responsáveis
+
 - `GET /cadastro/api/responsaveis/` - Listar responsáveis
 - `POST /cadastro/api/responsaveis/` - Criar responsável
 - `GET /cadastro/api/responsaveis/{cpf}/` - Buscar responsável
@@ -99,16 +105,19 @@ O app Flutter se conecta com a API Django através dos seguintes endpoints:
 - `GET /cadastro/api/responsaveis/{cpf}/com_membros/` - Responsável com membros
 
 ### Membros
+
 - `GET /cadastro/api/membros/` - Listar membros
 - `POST /cadastro/api/membros/` - Criar membro
 
 ### Demandas
+
 - `GET /cadastro/api/demandas-saude/` - Listar demandas de saúde
 - `GET /cadastro/api/demandas-educacao/` - Listar demandas de educação
 
 ## 🎨 Personalização
 
 ### Tema
+
 Edite `lib/utils/app_theme.dart` para personalizar cores e estilos:
 
 ```dart
@@ -120,6 +129,7 @@ class AppTheme {
 ```
 
 ### Constantes
+
 Configure textos e comportamentos em `lib/utils/constants.dart`:
 
 ```dart
@@ -133,18 +143,21 @@ class AppConstants {
 ## 📱 Funcionalidades
 
 ### 🔐 Sistema de Login
+
 - Login com usuário e senha
 - Validação de campos
 - Persistência de sessão
 - Logout seguro
 
 ### 📊 Dashboard
+
 - Cards com estatísticas
 - Gráficos de demandas
 - Ações rápidas
 - Navegação intuitiva
 
 ### 👥 Gestão de Responsáveis
+
 - Lista paginada com filtros
 - Busca por nome/CPF
 - Formulário completo de cadastro
@@ -153,11 +166,13 @@ class AppConstants {
 - Visualização detalhada
 
 ### 👨‍👩‍👧‍👦 Membros
+
 - Lista de membros por responsável
 - Filtros por status
 - Cadastro de novos membros
 
 ### 📋 Demandas
+
 - Visualização por categoria (Saúde, Educação, Ambiente)
 - Filtros por prioridade
 - Identificação de grupos prioritários
@@ -165,6 +180,7 @@ class AppConstants {
 ## 🌐 Deploy para Produção
 
 ### Build para Web
+
 ```bash
 # Gerar build otimizado
 flutter build web --release
@@ -173,12 +189,15 @@ flutter build web --release
 ```
 
 ### Configurações de Produção
+
 1. Configure a URL da API de produção em `constants.dart`
 2. Atualize as configurações CORS no Django
 3. Configure HTTPS se necessário
 
 ### Hospedagem
+
 O build pode ser hospedado em:
+
 - **Firebase Hosting**
 - **Netlify**
 - **Vercel**
@@ -190,7 +209,9 @@ O build pode ser hospedado em:
 ### Problemas Comuns
 
 #### 1. Erro de CORS
+
 Configure CORS no Django:
+
 ```python
 # settings.py
 CORS_ALLOW_ALL_ORIGINS = True  # Apenas para desenvolvimento
@@ -200,12 +221,15 @@ CORS_ALLOWED_ORIGINS = [
 ```
 
 #### 2. API não conecta
+
 Verifique:
+
 - URL da API em `constants.dart`
 - Servidor Django rodando
 - Firewall/antivírus
 
 #### 3. Erro ao fazer build
+
 ```bash
 # Limpe o cache
 flutter clean
@@ -214,6 +238,7 @@ flutter build web
 ```
 
 #### 4. Problemas de dependências
+
 ```bash
 # Atualize as dependências
 flutter pub upgrade
@@ -253,6 +278,7 @@ Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalh
 ## 📞 Suporte
 
 Para dúvidas e suporte:
+
 - 📧 Email: suporte@example.com
 - 💬 Issues: [GitHub Issues](link-para-issues)
 - 📖 Documentação: [Wiki do Projeto](link-para-wiki)
@@ -279,6 +305,7 @@ Para dúvidas e suporte:
 ## 📋 Checklist de Produção
 
 ### ✅ Segurança
+
 - [ ] **Configurar HTTPS obrigatório**
 - [ ] **Implementar rate limiting na API**
 - [ ] **Validar todas as entradas do usuário**
@@ -289,6 +316,7 @@ Para dúvidas e suporte:
 - [ ] **Implementar rotação de tokens**
 
 ### ✅ Performance
+
 - [ ] **Otimizar imagens e assets**
 - [ ] **Implementar compressão gzip**
 - [ ] **Configurar cache adequado**
@@ -298,6 +326,7 @@ Para dúvidas e suporte:
 - [ ] **Implementar paginação eficiente**
 
 ### ✅ Monitoramento
+
 - [ ] **Configurar analytics**
 - [ ] **Implementar error tracking**
 - [ ] **Configurar logs de produção**
@@ -306,6 +335,7 @@ Para dúvidas e suporte:
 - [ ] **Monitorar performance**
 
 ### ✅ Backup e Recuperação
+
 - [ ] **Configurar backup automático**
 - [ ] **Testar restauração de backup**
 - [ ] **Implementar sincronização offline**
@@ -314,91 +344,108 @@ Para dúvidas e suporte:
 ## 🔧 Configurações de Build
 
 ### web/index.html
+
 ```html
 <!DOCTYPE html>
 <html>
-<head>
-  <base href="$FLUTTER_BASE_HREF">
-  <meta charset="UTF-8">
-  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="Sistema de Gestão de Cadastros e Demandas Sociais">
-  <meta name="keywords" content="cadastro, social, gestão, demandas">
-  <meta name="author" content="Sua Organização">
-  
-  <!-- PWA -->
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="Cadastro Unificado">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
-  
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
-  
-  <!-- Manifest -->
-  <link rel="manifest" href="manifest.json">
-  
-  <!-- SEO -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  
-  <!-- Security Headers -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https:;">
-  
-  <title>Cadastro Unificado</title>
-  
-  <!-- Loading Screen -->
-  <style>
-    .loading {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      background: linear-gradient(135deg, #1976d2, #1565c0);
-      color: white;
-      font-family: 'Roboto', sans-serif;
-    }
-    .loading-icon {
-      width: 80px;
-      height: 80px;
-      margin-bottom: 20px;
-    }
-    .loading-spinner {
-      border: 4px solid rgba(255,255,255,0.3);
-      border-top: 4px solid white;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 1s linear infinite;
-      margin-top: 20px;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-  </style>
-</head>
-<body>
-  <div id="loading" class="loading">
-    <svg class="loading-icon" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12 2L2 7v10c0 5.55 3.84 9.95 9 11 5.16-1.05 9-5.45 9-11V7l-10-5z"/>
-    </svg>
-    <h2>Cadastro Unificado</h2>
-    <p>Carregando sistema...</p>
-    <div class="loading-spinner"></div>
-  </div>
-  
-  <script>
-    window.addEventListener('flutter-first-frame', function () {
-      document.getElementById('loading').remove();
-    });
-  </script>
-  
-  <script src="main.dart.js" type="application/javascript"></script>
-</body>
+  <head>
+    <base href="$FLUTTER_BASE_HREF" />
+    <meta charset="UTF-8" />
+    <meta content="IE=Edge" http-equiv="X-UA-Compatible" />
+    <meta
+      name="description"
+      content="Sistema de Gestão de Cadastros e Demandas Sociais"
+    />
+    <meta name="keywords" content="cadastro, social, gestão, demandas" />
+    <meta name="author" content="Sua Organização" />
+
+    <!-- PWA -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="apple-mobile-web-app-title" content="Cadastro Unificado" />
+    <link rel="apple-touch-icon" href="icons/Icon-192.png" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="favicon.png" />
+
+    <!-- Manifest -->
+    <link rel="manifest" href="manifest.json" />
+
+    <!-- SEO -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+
+    <!-- Security Headers -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https:;"
+    />
+
+    <title>Cadastro Unificado</title>
+
+    <!-- Loading Screen -->
+    <style>
+      .loading {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background: linear-gradient(135deg, #1976d2, #1565c0);
+        color: white;
+        font-family: "Roboto", sans-serif;
+      }
+      .loading-icon {
+        width: 80px;
+        height: 80px;
+        margin-bottom: 20px;
+      }
+      .loading-spinner {
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        border-top: 4px solid white;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin-top: 20px;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="loading" class="loading">
+      <svg class="loading-icon" viewBox="0 0 24 24" fill="currentColor">
+        <path
+          d="M12 2L2 7v10c0 5.55 3.84 9.95 9 11 5.16-1.05 9-5.45 9-11V7l-10-5z"
+        />
+      </svg>
+      <h2>Cadastro Unificado</h2>
+      <p>Carregando sistema...</p>
+      <div class="loading-spinner"></div>
+    </div>
+
+    <script>
+      window.addEventListener("flutter-first-frame", function () {
+        document.getElementById("loading").remove();
+      });
+    </script>
+
+    <script src="main.dart.js" type="application/javascript"></script>
+  </body>
 </html>
 ```
 
 ### Dockerfile
+
 ```dockerfile
 # Build stage
 FROM ghcr.io/cirruslabs/flutter:stable AS build
@@ -433,6 +480,7 @@ CMD ["nginx", "-g", "daemon off;"]
 ```
 
 ### nginx.conf
+
 ```nginx
 server {
     listen 80;
@@ -498,8 +546,9 @@ server {
 ## 🐳 Docker Compose para desenvolvimento
 
 ### docker-compose.yml
+
 ```yaml
-version: '3.8'
+version: "3.8"
 
 services:
   web:
@@ -547,94 +596,96 @@ volumes:
 ## 🔄 CI/CD Pipeline
 
 ### .github/workflows/deploy.yml
+
 ```yaml
 name: Deploy to Production
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup Flutter
-      uses: subosito/flutter-action@v2
-      with:
-        flutter-version: '3.27.4'
-        channel: 'stable'
-        cache: true
+      - uses: actions/checkout@v4
 
-    - name: Install dependencies
-      run: flutter pub get
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.27.4"
+          channel: "stable"
+          cache: true
 
-    - name: Run analyzer
-      run: flutter analyze
+      - name: Install dependencies
+        run: flutter pub get
 
-    - name: Run tests
-      run: flutter test --coverage
+      - name: Run analyzer
+        run: flutter analyze
 
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
-      with:
-        files: coverage/lcov.info
+      - name: Run tests
+        run: flutter test --coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: coverage/lcov.info
 
   build:
     needs: test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
-    
+
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup Flutter
-      uses: subosito/flutter-action@v2
-      with:
-        flutter-version: '3.27.4'
-        channel: 'stable'
-        cache: true
+      - uses: actions/checkout@v4
 
-    - name: Install dependencies
-      run: flutter pub get
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.27.4"
+          channel: "stable"
+          cache: true
 
-    - name: Build web
-      run: flutter build web --release --web-renderer html
+      - name: Install dependencies
+        run: flutter pub get
 
-    - name: Build Docker image
-      run: |
-        docker build -t cadastro-app:${{ github.sha }} .
-        docker tag cadastro-app:${{ github.sha }} cadastro-app:latest
+      - name: Build web
+        run: flutter build web --release --web-renderer html
 
-    - name: Deploy to staging
-      if: github.event_name == 'pull_request'
-      run: |
-        echo "Deploy to staging environment"
-        # Adicionar comandos de deploy para staging
+      - name: Build Docker image
+        run: |
+          docker build -t cadastro-app:${{ github.sha }} .
+          docker tag cadastro-app:${{ github.sha }} cadastro-app:latest
 
-    - name: Deploy to production
-      if: github.ref == 'refs/heads/main'
-      run: |
-        echo "Deploy to production environment"
-        # Adicionar comandos de deploy para produção
+      - name: Deploy to staging
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "Deploy to staging environment"
+          # Adicionar comandos de deploy para staging
+
+      - name: Deploy to production
+        if: github.ref == 'refs/heads/main'
+        run: |
+          echo "Deploy to production environment"
+          # Adicionar comandos de deploy para produção
 
   security-scan:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Run security scan
-      uses: securecodewarrior/github-action-add-sarif@v1
-      with:
-        sarif-file: security-scan-results.sarif
+      - uses: actions/checkout@v4
+
+      - name: Run security scan
+        uses: securecodewarrior/github-action-add-sarif@v1
+        with:
+          sarif-file: security-scan-results.sarif
 ```
 
 ## 📊 Monitoramento e Analytics
 
 ### lib/services/analytics_service.dart (Implementação completa)
+
 ```dart
 import 'package:flutter/foundation.dart';
 
@@ -643,14 +694,14 @@ class AnalyticsService {
 
   static Future<void> init() async {
     if (_initialized) return;
-    
+
     try {
       // Inicializar Firebase Analytics ou outra solução
       if (kDebugMode) {
         debugPrint('Analytics initialized in debug mode');
       }
       _initialized = true;
-    } catch (e) {
+    } on Exception  {
       debugPrint('Error initializing analytics: $e');
     }
   }
@@ -715,13 +766,13 @@ class AnalyticsService {
 
   static Future<void> _logEvent(String eventName, [Map<String, dynamic>? parameters]) async {
     if (!_initialized) await init();
-    
+
     try {
       if (kDebugMode) {
         debugPrint('Analytics Event: $eventName ${parameters ?? ''}');
       }
       // Implementar envio real para o serviço de analytics
-    } catch (e) {
+    } on Exception  {
       debugPrint('Error logging analytics event: $e');
     }
   }
@@ -729,13 +780,13 @@ class AnalyticsService {
   // User properties
   static Future<void> setUserProperty(String name, String value) async {
     if (!_initialized) await init();
-    
+
     try {
       if (kDebugMode) {
         debugPrint('Analytics User Property: $name = $value');
       }
       // Implementar definição de propriedade do usuário
-    } catch (e) {
+    } on Exception  {
       debugPrint('Error setting user property: $e');
     }
   }
@@ -745,6 +796,7 @@ class AnalyticsService {
 ## 🔐 Configurações de Segurança
 
 ### Variáveis de Ambiente (.env)
+
 ```bash
 # API Configuration
 API_BASE_URL=https://api.cadastrounificado.com
@@ -771,11 +823,13 @@ ENABLE_CRASH_REPORTING=true
 ## 📈 Métricas de Performance
 
 ### Core Web Vitals
+
 - **LCP (Largest Contentful Paint)**: < 2.5s
 - **FID (First Input Delay)**: < 100ms
 - **CLS (Cumulative Layout Shift)**: < 0.1
 
 ### Metas de Performance
+
 - **Time to Interactive**: < 3s
 - **Bundle Size**: < 2MB
 - **API Response Time**: < 500ms
@@ -784,6 +838,7 @@ ENABLE_CRASH_REPORTING=true
 ## 🚀 Scripts de Deploy
 
 ### deploy.sh
+
 ```bash
 #!/bin/bash
 
@@ -819,21 +874,26 @@ echo "✅ Deploy concluído com sucesso!"
 ## 📝 Documentação de API
 
 ### API Endpoints Documentation
-```markdown
+
+````markdown
 ## Autenticação
 
 ### POST /auth/login/
+
 Login do usuário
 
 **Request:**
+
 ```json
 {
   "username": "string",
   "password": "string"
 }
 ```
+````
 
 **Response:**
+
 ```json
 {
   "token": "string",
@@ -848,15 +908,18 @@ Login do usuário
 ## Responsáveis
 
 ### GET /cadastro/api/responsaveis/
+
 Lista responsáveis com paginação
 
 **Query Parameters:**
+
 - `page`: número da página (padrão: 1)
 - `page_size`: itens por página (padrão: 20)
 - `search`: termo de busca
 - `status`: filtro por status (A, I, P, B)
 
 **Response:**
+
 ```json
 {
   "count": "number",
@@ -866,12 +929,13 @@ Lista responsáveis com paginação
     {
       "cpf": "string",
       "nome": "string",
-      "status": "string",
+      "status": "string"
       // ... outros campos
     }
   ]
 }
 ```
+
 ```
 
 ## 🎯 Próximos Passos
@@ -907,3 +971,4 @@ Lista responsáveis com paginação
 ---
 
 **Total estimado: 14-21 semanas para implementação completa**
+```

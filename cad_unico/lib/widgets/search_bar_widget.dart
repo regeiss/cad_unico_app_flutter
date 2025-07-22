@@ -1,6 +1,7 @@
 // lib/widgets/search_bar_widget.dart
-import 'package:flutter/material.dart';
 import 'dart:async';
+
+import 'package:flutter/material.dart';
 
 class SearchBarWidget extends StatefulWidget {
   final String? hintText;
@@ -16,7 +17,7 @@ class SearchBarWidget extends StatefulWidget {
   final TextCapitalization textCapitalization;
 
   const SearchBarWidget({
-    Key? key,
+    super.key,
     this.hintText = 'Pesquisar...',
     this.onSearch,
     this.onChanged,
@@ -28,7 +29,7 @@ class SearchBarWidget extends StatefulWidget {
     this.suffixIcon,
     this.keyboardType = TextInputType.text,
     this.textCapitalization = TextCapitalization.none,
-  }) : super(key: key);
+  });
 
   @override
   State<SearchBarWidget> createState() => _SearchBarWidgetState();
@@ -86,14 +87,13 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
+  Widget build(BuildContext context) => Container(
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: (0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -157,7 +157,6 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
         ),
       ),
     );
-  }
 
   Widget? _buildSuffixIcon() {
     if (widget.suffixIcon != null) {
@@ -193,7 +192,7 @@ class SearchBarWithFilters extends StatefulWidget {
   final int? filterCount;
 
   const SearchBarWithFilters({
-    Key? key,
+    super.key,
     this.hintText = 'Pesquisar...',
     this.onSearch,
     this.onChanged,
@@ -203,7 +202,7 @@ class SearchBarWithFilters extends StatefulWidget {
     this.enabled = true,
     this.hasActiveFilters = false,
     this.filterCount,
-  }) : super(key: key);
+  });
 
   @override
   State<SearchBarWithFilters> createState() => _SearchBarWithFiltersState();
@@ -211,8 +210,7 @@ class SearchBarWithFilters extends StatefulWidget {
 
 class _SearchBarWithFiltersState extends State<SearchBarWithFilters> {
   @override
-  Widget build(BuildContext context) {
-    return Row(
+  Widget build(BuildContext context) => Row(
       children: [
         Expanded(
           child: SearchBarWidget(
@@ -280,7 +278,6 @@ class _SearchBarWithFiltersState extends State<SearchBarWithFilters> {
         ),
       ],
     );
-  }
 }
 
 // Widget de pesquisa compacta para mobile
@@ -293,14 +290,14 @@ class CompactSearchBar extends StatefulWidget {
   final bool enabled;
 
   const CompactSearchBar({
-    Key? key,
+    super.key,
     this.hintText = 'Pesquisar...',
     this.onSearch,
     this.onChanged,
     this.onClear,
     this.initialValue,
     this.enabled = true,
-  }) : super(key: key);
+  });
 
   @override
   State<CompactSearchBar> createState() => _CompactSearchBarState();
@@ -347,8 +344,7 @@ class _CompactSearchBarState extends State<CompactSearchBar> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return AnimatedContainer(
+  Widget build(BuildContext context) => AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
       width: _isExpanded ? double.infinity : 48,
@@ -411,7 +407,6 @@ class _CompactSearchBarState extends State<CompactSearchBar> {
         ],
       ),
     );
-  }
 }
 
 // Widget de pesquisa com sugestões
@@ -426,7 +421,7 @@ class SearchBarWithSuggestions extends StatefulWidget {
   final int maxSuggestions;
 
   const SearchBarWithSuggestions({
-    Key? key,
+    super.key,
     this.hintText = 'Pesquisar...',
     this.onSearch,
     this.onChanged,
@@ -435,7 +430,7 @@ class SearchBarWithSuggestions extends StatefulWidget {
     this.initialValue,
     this.enabled = true,
     this.maxSuggestions = 5,
-  }) : super(key: key);
+  });
 
   @override
   State<SearchBarWithSuggestions> createState() =>
@@ -501,7 +496,7 @@ class _SearchBarWithSuggestionsState extends State<SearchBarWithSuggestions> {
         _suggestions = suggestions.take(widget.maxSuggestions).toList();
         _showSuggestions = _suggestions.isNotEmpty && _focusNode.hasFocus;
       });
-    } catch (e) {
+    } on Exception  {
       setState(() {
         _suggestions = [];
         _showSuggestions = false;
@@ -522,8 +517,7 @@ class _SearchBarWithSuggestionsState extends State<SearchBarWithSuggestions> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Column(
+  Widget build(BuildContext context) => Column(
       children: [
         SearchBarWidget(
           hintText: widget.hintText,
@@ -540,7 +534,7 @@ class _SearchBarWithSuggestionsState extends State<SearchBarWithSuggestions> {
               borderRadius: BorderRadius.circular(8),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: (0.1),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -573,5 +567,4 @@ class _SearchBarWithSuggestionsState extends State<SearchBarWithSuggestions> {
           ),
       ],
     );
-  }
 }

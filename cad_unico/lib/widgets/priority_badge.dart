@@ -6,11 +6,11 @@ class PriorityBadge extends StatelessWidget {
   final bool compact;
 
   const PriorityBadge({
-    Key? key,
+    super.key,
     required this.isPriority,
     this.reason,
     this.compact = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

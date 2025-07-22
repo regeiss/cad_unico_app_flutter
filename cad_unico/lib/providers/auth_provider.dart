@@ -6,7 +6,7 @@ import '../services/api_service.dart';
 
 class AuthProvider extends ChangeNotifier {
   final ApiService _apiService = ApiService();
-  
+
   UserModel? _user;
   bool _isLoading = false;
   bool _isAuthenticated = false;
@@ -32,7 +32,7 @@ class AuthProvider extends ChangeNotifier {
       if (_apiService.isAuthenticated) {
         await _loadUserProfile();
       }
-    } catch (e) {
+    } on Exception {
       debugPrint('Erro ao inicializar auth: $e');
       await logout();
     } finally {
@@ -48,7 +48,7 @@ class AuthProvider extends ChangeNotifier {
       _isAuthenticated = true;
       _clearError();
       notifyListeners();
-    } catch (e) {
+    } on Exception {
       debugPrint('Erro ao carregar perfil: $e');
       await logout();
     }
@@ -68,14 +68,14 @@ class AuthProvider extends ChangeNotifier {
 
       // Fazer login na API
       final response = await _apiService.login(username.trim(), password);
-      
+
       if (response['success'] == true) {
         _user = User.fromJson(response['user']);
         _isAuthenticated = true;
-        
+
         // Salvar dados localmente
         await _saveUserData();
-        
+
         _clearError();
         notifyListeners();
         return true;
@@ -83,7 +83,7 @@ class AuthProvider extends ChangeNotifier {
         _setError(response['message'] ?? 'Erro no login');
         return false;
       }
-    } catch (e) {
+    } on Exception {
       _setError(_getErrorMessage(e.toString()));
       return false;
     } finally {
@@ -94,22 +94,22 @@ class AuthProvider extends ChangeNotifier {
   // Logout
   Future<void> logout() async {
     _setLoading(true);
-    
+
     try {
       // Fazer logout na API
       await _apiService.logout();
-    } catch (e) {
+    } on Exception {
       debugPrint('Erro ao fazer logout na API: $e');
     }
 
     // Limpar dados locais
     await _clearUserData();
-    
+
     _user = null;
     _isAuthenticated = false;
     _clearError();
     _setLoading(false);
-    
+
     notifyListeners();
   }
 
@@ -157,12 +157,11 @@ class AuthProvider extends ChangeNotifier {
 
       _user = updatedUser;
       await _saveUserData();
-      
+
       _clearError();
       notifyListeners();
       return true;
-
-    } catch (e) {
+    } on Exception {
       _setError(_getErrorMessage(e.toString()));
       return false;
     } finally {
@@ -180,7 +179,7 @@ class AuthProvider extends ChangeNotifier {
     try {
       await _loadUserProfile();
       return true;
-    } catch (e) {
+    } on Exception {
       await logout();
       return false;
     }
@@ -189,12 +188,12 @@ class AuthProvider extends ChangeNotifier {
   // Salvar dados do usuário localmente
   Future<void> _saveUserData() async {
     if (_user == null) return;
-    
+
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('user_data', _user!.toJson().toString());
       await prefs.setBool('is_authenticated', true);
-    } catch (e) {
+    } on Exception {
       debugPrint('Erro ao salvar dados do usuário: $e');
     }
   }
@@ -205,7 +204,7 @@ class AuthProvider extends ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('user_data');
       await prefs.setBool('is_authenticated', false);
-    } catch (e) {
+    } on Exception {
       debugPrint('Erro ao limpar dados do usuário: $e');
     }
   }
@@ -244,11 +243,10 @@ class AuthProvider extends ChangeNotifier {
       // Aqui seria feita a chamada para API de alteração de senha
       // Como não existe endpoint específico no backend fornecido,
       // vamos simular o sucesso
-      
+
       _clearError();
       return true;
-
-    } catch (e) {
+    } on Exception {
       _setError(_getErrorMessage(e.toString()));
       return false;
     } finally {
@@ -262,7 +260,7 @@ class AuthProvider extends ChangeNotifier {
 
     try {
       await _loadUserProfile();
-    } catch (e) {
+    } on Exception {
       debugPrint('Erro ao recarregar usuário: $e');
     }
   }
@@ -308,7 +306,7 @@ class AuthProvider extends ChangeNotifier {
     try {
       final prefs = await SharedPreferences.getInstance();
       return !prefs.containsKey('has_logged_in_before');
-    } catch (e) {
+    } on Exception {
       return true;
     }
   }
@@ -318,20 +316,18 @@ class AuthProvider extends ChangeNotifier {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('has_logged_in_before', true);
-    } catch (e) {
+    } on Exception {
       debugPrint('Erro ao marcar primeira vez: $e');
     }
   }
 
   // Obter informações do dispositivo para logs
-  Map<String, dynamic> getDeviceInfo() {
-    return {
-      'user_id': _user?.id,
-      'username': _user?.username,
-      'is_staff': _user?.isStaff,
-      'login_time': DateTime.now().toIso8601String(),
-    };
-  }
+  Map<String, dynamic> getDeviceInfo() => {
+        'user_id': _user?.id,
+        'username': _user?.username,
+        'is_staff': _user?.isStaff,
+        'login_time': DateTime.now().toIso8601String(),
+      };
 }
 
 // import 'dart:async';
@@ -390,7 +386,7 @@ class AuthProvider extends ChangeNotifier {
 //       }
       
 //       notifyListeners();
-//     } catch (e) {
+//     } on Exception   {
 //       debugPrint('Error loading auth data from storage: $e');
 //     }
 //   }
@@ -417,7 +413,7 @@ class AuthProvider extends ChangeNotifier {
 //       } else {
 //         await prefs.remove(AppConstants.userKey);
 //       }
-//     } catch (e) {
+//     } on Exception   {
 //       debugPrint('Error saving auth data to storage: $e');
 //     }
 //   }
@@ -429,7 +425,7 @@ class AuthProvider extends ChangeNotifier {
 //       await prefs.remove(AppConstants.tokenKey);
 //       await prefs.remove(AppConstants.refreshTokenKey);
 //       await prefs.remove(AppConstants.userKey);
-//     } catch (e) {
+//     } on Exception   {
 //       debugPrint('Error clearing auth data from storage: $e');
 //     }
 //   }
@@ -495,7 +491,7 @@ class AuthProvider extends ChangeNotifier {
 //         _setLoading(false);
 //         return false;
 //       }
-//     } catch (e) {
+//     } on Exception   {
 //       _setError(AppConstants.networkErrorMessage);
 //       _setLoading(false);
 //       debugPrint('Login error: $e');
@@ -510,7 +506,7 @@ class AuthProvider extends ChangeNotifier {
 //       if (_token != null) {
 //         await _apiService.logout(_refreshToken);
 //       }
-//     } catch (e) {
+//     } on Exception   {
 //       debugPrint('Logout API error: $e');
 //     } finally {
 //       // Clear local data regardless of API call result
@@ -546,7 +542,7 @@ class AuthProvider extends ChangeNotifier {
 //         await logout();
 //         return false;
 //       }
-//     } catch (e) {
+//     } on Exception   {
 //       debugPrint('Token refresh error: $e');
 //       await logout();
 //       return false;
@@ -569,7 +565,7 @@ class AuthProvider extends ChangeNotifier {
 //         _setError(response.message);
 //         return false;
 //       }
-//     } catch (e) {
+//     } on Exception   {
 //       _setError(AppConstants.networkErrorMessage);
 //       debugPrint('Get profile error: $e');
 //       return false;
@@ -597,7 +593,7 @@ class AuthProvider extends ChangeNotifier {
 //         _setLoading(false);
 //         return false;
 //       }
-//     } catch (e) {
+//     } on Exception   {
 //       _setError(AppConstants.networkErrorMessage);
 //       _setLoading(false);
 //       debugPrint('Update profile error: $e');
@@ -627,7 +623,7 @@ class AuthProvider extends ChangeNotifier {
 //         _setLoading(false);
 //         return false;
 //       }
-//     } catch (e) {
+//     } on Exception   {
 //       _setError(AppConstants.networkErrorMessage);
 //       _setLoading(false);
 //       debugPrint('Change password error: $e');
@@ -642,7 +638,7 @@ class AuthProvider extends ChangeNotifier {
 //     try {
 //       final response = await _apiService.verifyToken(_token!);
 //       return response.success;
-//     } catch (e) {
+//     } on Exception   {
 //       debugPrint('Token validation error: $e');
 //       return false;
 //     }

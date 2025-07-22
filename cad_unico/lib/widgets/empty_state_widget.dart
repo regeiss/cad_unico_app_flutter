@@ -10,7 +10,7 @@ class EmptyStateWidget extends StatelessWidget {
   final bool compact;
 
   const EmptyStateWidget({
-    Key? key,
+    super.key,
     required this.title,
     this.subtitle,
     this.icon,
@@ -18,7 +18,7 @@ class EmptyStateWidget extends StatelessWidget {
     this.onAction,
     this.actionText,
     this.compact = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

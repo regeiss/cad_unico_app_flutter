@@ -12,19 +12,19 @@ import 'auth_provider.dart';
 extension BuildContextAuth on BuildContext {
   /// Obtém o AuthProvider
   AuthProvider get auth => Provider.of<AuthProvider>(this, listen: false);
-  
+
   /// Obtém o AuthProvider com listen
   AuthProvider get authWatch => Provider.of<AuthProvider>(this, listen: true);
-  
+
   /// Verifica se está autenticado
   bool get isAuthenticated => auth.isAuthenticated;
-  
+
   /// Obtém dados do usuário
   UserModel? get user => auth.user;
-  
+
   /// Obtém token de autorização
   String? get authToken => auth.token;
-  
+
   /// Faz logout
   Future<void> logout() => auth.logout();
 }
@@ -55,28 +55,28 @@ class AuthGuard extends StatelessWidget {
   final bool showLoading;
 
   const AuthGuard({
-    Key? key,
+    super.key,
     required this.child,
     this.fallback,
     this.showLoading = true,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) => Consumer<AuthProvider>(
-      builder: (context, auth, _) {
-        if (!auth.isInitialized && showLoading) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
-        }
-        
-        if (auth.isAuthenticated) {
-          return child;
-        }
-        
-        return fallback ?? const SizedBox.shrink();
-      },
-    );
+        builder: (context, auth, _) {
+          if (!auth.isInitialized && showLoading) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+
+          if (auth.isAuthenticated) {
+            return child;
+          }
+
+          return fallback ?? const SizedBox.shrink();
+        },
+      );
 }
 
 /// Widget que só exibe conteúdo se usuário for admin
@@ -85,21 +85,21 @@ class AdminGuard extends StatelessWidget {
   final Widget? fallback;
 
   const AdminGuard({
-    Key? key,
+    super.key,
     required this.child,
     this.fallback,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) => Consumer<AuthProvider>(
-      builder: (context, auth, _) {
-        if (auth.isAuthenticated && auth.isAdmin) {
-          return child;
-        }
-        
-        return fallback ?? const SizedBox.shrink();
-      },
-    );
+        builder: (context, auth, _) {
+          if (auth.isAuthenticated && auth.isAdmin) {
+            return child;
+          }
+
+          return fallback ?? const SizedBox.shrink();
+        },
+      );
 }
 
 /// Widget para exibir avatar do usuário
@@ -117,7 +117,7 @@ class UserAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Consumer<AuthProvider>(
-      builder: (context, auth, _) => CircleAvatar(
+        builder: (context, auth, _) => CircleAvatar(
           radius: radius,
           backgroundColor: backgroundColor ?? Theme.of(context).primaryColor,
           child: Text(
@@ -129,7 +129,7 @@ class UserAvatar extends StatelessWidget {
             ),
           ),
         ),
-    );
+      );
 }
 
 /// Widget para exibir nome do usuário
@@ -145,11 +145,11 @@ class UserNameDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Consumer<AuthProvider>(
-      builder: (context, auth, _) => Text(
+        builder: (context, auth, _) => Text(
           auth.fullName.isNotEmpty ? auth.fullName : (fallback ?? 'Usuário'),
           style: style,
         ),
-    );
+      );
 }
 
 /// Interceptor para requisições HTTP com token
@@ -181,22 +181,19 @@ class AuthInterceptor {
 /// Classe para validações de autenticação
 class AuthValidator {
   /// Valida formato de email
-  static bool isValidEmail(String email) => RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
+  static bool isValidEmail(String email) =>
+      RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
 
   /// Valida força da senha
-  static bool isStrongPassword(String password) {
-    // Pelo menos 8 caracteres, 1 maiúscula, 1 minúscula, 1 número
-    return password.length >= 8 &&
-           RegExp(r'[A-Z]').hasMatch(password) &&
-           RegExp(r'[a-z]').hasMatch(password) &&
-           RegExp(r'[0-9]').hasMatch(password);
-  }
+  /// Pelo menos 8 caracteres, 1 maiúscula, 1 minúscula, 1 número
+  static bool isStrongPassword(String password) => password.length >= 8 &&
+        RegExp(r'[A-Z]').hasMatch(password) &&
+        RegExp(r'[a-z]').hasMatch(password) &&
+        RegExp(r'[0-9]').hasMatch(password);
 
   /// Valida username
-  static bool isValidUsername(String username) {
-    // Entre 3 e 20 caracteres, apenas letras, números e underscore
-    return RegExp(r'^[a-zA-Z0-9_]{3,20}$').hasMatch(username);
-  }
+  /// // Entre 3 e 20 caracteres, apenas letras, números e underscore
+  static bool isValidUsername(String username) => RegExp(r'^[a-zA-Z0-9_]{3,20}$').hasMatch(username);
 
   /// Obtém mensagem de erro para senha fraca
   static String getPasswordStrengthMessage(String password) {
@@ -223,18 +220,18 @@ class JWTUtils {
     try {
       final parts = token.split('.');
       if (parts.length != 3) return null;
-      
+
       final payload = parts[1];
-      
+
       // Adiciona padding se necessário
       var paddedPayload = payload;
       while (paddedPayload.length % 4 != 0) {
         paddedPayload += '=';
       }
-      
+
       final decoded = utf8.decode(base64Url.decode(paddedPayload));
       return jsonDecode(decoded) as Map<String, dynamic>;
-    } catch (e) {
+    } on Exception {
       return null;
     }
   }
@@ -243,10 +240,10 @@ class JWTUtils {
   static bool isTokenExpired(String token) {
     final payload = decodePayload(token);
     if (payload == null) return true;
-    
+
     final exp = payload['exp'] as int?;
     if (exp == null) return true;
-    
+
     final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
     return now >= exp;
   }
@@ -255,13 +252,13 @@ class JWTUtils {
   static int? getTokenRemainingTime(String token) {
     final payload = decodePayload(token);
     if (payload == null) return null;
-    
+
     final exp = payload['exp'] as int?;
     if (exp == null) return null;
-    
+
     final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
     final remaining = exp - now;
-    
+
     return remaining > 0 ? remaining : 0;
   }
 }

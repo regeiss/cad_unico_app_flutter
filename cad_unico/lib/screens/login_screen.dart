@@ -79,7 +79,7 @@ class _LoginScreenState extends State<LoginScreen> {
           end: Alignment.bottomCenter,
           colors: [
             Theme.of(context).colorScheme.primary,
-            Theme.of(context).colorScheme.primary.withOpacity(0.8),
+            Theme.of(context).colorScheme.primary.withValues(alpha: (0.8),
           ],
         ),
       ),
@@ -112,7 +112,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 end: Alignment.bottomRight,
                 colors: [
                   Theme.of(context).colorScheme.primary,
-                  Theme.of(context).colorScheme.primary.withOpacity(0.8),
+                  Theme.of(context).colorScheme.primary.withValues(alpha: (0.8),
                 ],
               ),
             ),
@@ -136,7 +136,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       AppConstants.appDescription,
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Colors.white.withOpacity(0.9),
+                        color: Colors.white.withValues(alpha: (0.9),
                       ),
                     ),
                   ),
@@ -172,7 +172,7 @@ class _LoginScreenState extends State<LoginScreen> {
         borderRadius: BorderRadius.circular(size / 4),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withValues(alpha: (0.2),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),

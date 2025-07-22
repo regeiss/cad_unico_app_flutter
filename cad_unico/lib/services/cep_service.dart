@@ -96,7 +96,7 @@ class CepService {
       }
       
       return null;
-    } on DioException catch (e) {
+    } on DioException on Exception  {
       debugPrint('Erro ao buscar CEP: ${e.message}');
       if (e.type == DioExceptionType.connectionTimeout) {
         throw Exception('Tempo limite de conexão esgotado');
@@ -105,7 +105,7 @@ class CepService {
       } else {
         throw Exception('Erro de rede ao buscar CEP');
       }
-    } catch (e) {
+    } on Exception  {
       debugPrint('Erro inesperado ao buscar CEP: $e');
       throw Exception('Erro inesperado ao buscar CEP');
     }
@@ -143,10 +143,10 @@ class CepService {
       }
       
       return [];
-    } on DioException catch (e) {
+    } on DioException on Exception  {
       debugPrint('Erro ao buscar endereços: ${e.message}');
       throw Exception('Erro de rede ao buscar endereços');
-    } catch (e) {
+    } on Exception  {
       debugPrint('Erro inesperado ao buscar endereços: $e');
       rethrow;
     }

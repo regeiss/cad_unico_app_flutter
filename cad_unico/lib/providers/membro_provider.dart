@@ -35,7 +35,7 @@ class MembroProvider with ChangeNotifier {
 
       _membros = []; // Replace with actual API call
       _setLoading(false);
-    } catch (e) {
+    } on Exception {
       _setError(AppConstants.networkErrorMessage);
       _setLoading(false);
     }

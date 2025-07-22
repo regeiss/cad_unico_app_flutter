@@ -7,14 +7,14 @@ class AnalyticsService {
 
   static Future<void> init() async {
     if (_initialized) return;
-    
+
     try {
       // Inicializar Firebase Analytics ou outra solução
       if (kDebugMode) {
         debugPrint('Analytics initialized in debug mode');
       }
       _initialized = true;
-    } catch (e) {
+    } on Exception {
       debugPrint('Error initializing analytics: $e');
     }
   }
@@ -62,7 +62,8 @@ class AnalyticsService {
   }
 
   // Error tracking
-  static Future<void> logError(String error, Map<String, dynamic>? context) async {
+  static Future<void> logError(
+      String error, Map<String, dynamic>? context) async {
     await _logEvent('error_occurred', {
       'error_message': error,
       ...?context,
@@ -77,15 +78,16 @@ class AnalyticsService {
     });
   }
 
-  static Future<void> _logEvent(String eventName, [Map<String, dynamic>? parameters]) async {
+  static Future<void> _logEvent(String eventName,
+      [Map<String, dynamic>? parameters]) async {
     if (!_initialized) await init();
-    
+
     try {
       if (kDebugMode) {
         debugPrint('Analytics Event: $eventName ${parameters ?? ''}');
       }
       // Implementar envio real para o serviço de analytics
-    } catch (e) {
+    } on Exception {
       debugPrint('Error logging analytics event: $e');
     }
   }
@@ -93,13 +95,13 @@ class AnalyticsService {
   // User properties
   static Future<void> setUserProperty(String name, String value) async {
     if (!_initialized) await init();
-    
+
     try {
       if (kDebugMode) {
         debugPrint('Analytics User Property: $name = $value');
       }
       // Implementar definição de propriedade do usuário
-    } catch (e) {
+    } on Exception {
       debugPrint('Error setting user property: $e');
     }
   }

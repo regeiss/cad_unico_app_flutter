@@ -19,8 +19,7 @@ class DemandaModel {
     required this.responsavelCpf,
   });
   
-  factory DemandaModel.fromJson(Map<String, dynamic> json) {
-    return DemandaModel(
+  factory DemandaModel.fromJson(Map<String, dynamic> json) => DemandaModel(
       id: json['id'] ?? '',
       type: json['type'] ?? '',
       title: json['title'] ?? '',
@@ -32,10 +31,8 @@ class DemandaModel {
           : null,
       responsavelCpf: json['responsavel_cpf'] ?? '',
     );
-  }
   
-  Map<String, dynamic> toJson() {
-    return {
+  Map<String, dynamic> toJson() => {
       'id': id,
       'type': type,
       'title': title,
@@ -45,5 +42,4 @@ class DemandaModel {
       'updated_at': updatedAt?.toIso8601String(),
       'responsavel_cpf': responsavelCpf,
     };
-  }
 }

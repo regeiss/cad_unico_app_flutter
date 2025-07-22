@@ -62,7 +62,7 @@ class _ResponsavelDetailScreenState extends State<ResponsavelDetailScreen> {
             builder: (context, provider, child) {
               if (provider.selectedResponsavel != null) {
                 return PopupMenuButton<String>(
-                  onSelected: (value) => _handleMenuAction(value),
+                  onSelected: _handleMenuAction,
                   itemBuilder: (context) => [
                     const PopupMenuItem(
                       value: 'edit',
@@ -133,7 +133,7 @@ class _ResponsavelDetailScreenState extends State<ResponsavelDetailScreen> {
             color: Theme.of(context).colorScheme.surface,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withValues(alpha: (0.1),
                 blurRadius: 4,
                 offset: const Offset(0, 2),
               ),
@@ -302,8 +302,8 @@ class _ResponsavelDetailScreenState extends State<ResponsavelDetailScreen> {
 
   Widget _buildStatusCard(ResponsavelModel responsavel) => Card(
       color: responsavel.isAtivo 
-          ? Colors.green.withOpacity(0.1) 
-          : Colors.red.withOpacity(0.1),
+          ? Colors.green.withValues(alpha: (0.1) 
+          : Colors.red.withValues(alpha: (0.1),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(

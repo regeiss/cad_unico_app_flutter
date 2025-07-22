@@ -24,8 +24,7 @@ class UserModel {
   });
   
   // Create UserModel from JSON
-  factory UserModel.fromJson(Map<String, dynamic> json) {
-    return UserModel(
+  factory UserModel.fromJson(Map<String, dynamic> json) => UserModel(
       id: json['id'] ?? 0,
       username: json['username'] ?? '',
       email: json['email'] ?? '',
@@ -37,11 +36,9 @@ class UserModel {
       roles: json['roles'] != null ? List<String>.from(json['roles']) : [],
       permissions: json['permissions'] != null ? List<String>.from(json['permissions']) : [],
     );
-  }
   
   // Convert UserModel to JSON
-  Map<String, dynamic> toJson() {
-    return {
+  Map<String, dynamic> toJson() => {
       'id': id,
       'username': username,
       'email': email,
@@ -53,17 +50,12 @@ class UserModel {
       'roles': roles,
       'permissions': permissions,
     };
-  }
   
   // Check if user has specific role
-  bool hasRole(String role) {
-    return roles.contains(role);
-  }
+  bool hasRole(String role) => roles.contains(role);
   
   // Check if user has specific permission
-  bool hasPermission(String permission) {
-    return permissions.contains(permission);
-  }
+  bool hasPermission(String permission) => permissions.contains(permission);
   
   // Get full name
   String get fullName {
@@ -79,9 +71,7 @@ class UserModel {
   }
   
   // Get display name (first name or username)
-  String get displayName {
-    return firstName.isNotEmpty ? firstName : username;
-  }
+  String get displayName => firstName.isNotEmpty ? firstName : username;
   
   // Get initials
   String get initials {
@@ -114,8 +104,7 @@ class UserModel {
     DateTime? dateJoined,
     List<String>? roles,
     List<String>? permissions,
-  }) {
-    return UserModel(
+  }) => UserModel(
       id: id ?? this.id,
       username: username ?? this.username,
       email: email ?? this.email,
@@ -127,12 +116,9 @@ class UserModel {
       roles: roles ?? this.roles,
       permissions: permissions ?? this.permissions,
     );
-  }
   
   @override
-  String toString() {
-    return 'UserModel{id: $id, username: $username, email: $email, fullName: $fullName}';
-  }
+  String toString() => 'UserModel{id: $id, username: $username, email: $email, fullName: $fullName}';
   
   @override
   bool operator ==(Object other) {
@@ -145,9 +131,7 @@ class UserModel {
   }
   
   @override
-  int get hashCode {
-    return id.hashCode ^ username.hashCode ^ email.hashCode;
-  }
+  int get hashCode => id.hashCode ^ username.hashCode ^ email.hashCode;
 }
 
 // // ignore_for_file: type_annotate_public_apis

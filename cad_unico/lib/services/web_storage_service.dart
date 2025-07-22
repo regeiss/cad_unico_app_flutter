@@ -1,4 +1,6 @@
 // lib/services/web_storage_service.dart
+// ignore_for_file: avoid_classes_with_only_static_members, avoid_web_libraries_in_flutter
+
 import 'dart:convert';
 import 'dart:html' as html;
 import 'package:flutter/foundation.dart';
@@ -14,20 +16,20 @@ class WebStorageService {
   /// Salva token usando localStorage nativo
   static Future<bool> saveToken(String token) async {
     if (!kIsWeb) return false;
-    
+
     try {
       html.window.localStorage[_tokenKey] = token;
-      
+
       // Verificação
       final saved = html.window.localStorage[_tokenKey];
       final success = saved == token;
-      
+
       if (kDebugMode) {
         print('💾 Token salvo no localStorage: $success');
       }
-      
+
       return success;
-    } catch (e) {
+    } on Exception {
       if (kDebugMode) {
         print('❌ Erro ao salvar token no localStorage: $e');
       }
@@ -38,16 +40,17 @@ class WebStorageService {
   /// Recupera token do localStorage
   static String? getToken() {
     if (!kIsWeb) return null;
-    
+
     try {
       final token = html.window.localStorage[_tokenKey];
-      
+
       if (kDebugMode) {
-        print('🔍 Token do localStorage: ${token != null ? "encontrado" : "não encontrado"}');
+        print(
+            '🔍 Token do localStorage: ${token != null ? "encontrado" : "não encontrado"}');
       }
-      
+
       return token;
-    } catch (e) {
+    } on Exception {
       if (kDebugMode) {
         print('❌ Erro ao recuperar token do localStorage: $e');
       }
@@ -58,11 +61,11 @@ class WebStorageService {
   /// Salva refresh token
   static Future<bool> saveRefreshToken(String refreshToken) async {
     if (!kIsWeb) return false;
-    
+
     try {
       html.window.localStorage[_refreshTokenKey] = refreshToken;
       return html.window.localStorage[_refreshTokenKey] == refreshToken;
-    } catch (e) {
+    } on Exception {
       if (kDebugMode) {
         print('❌ Erro ao salvar refresh token: $e');
       }
@@ -73,10 +76,10 @@ class WebStorageService {
   /// Recupera refresh token
   static String? getRefreshToken() {
     if (!kIsWeb) return null;
-    
+
     try {
       return html.window.localStorage[_refreshTokenKey];
-    } catch (e) {
+    } on Exception {
       if (kDebugMode) {
         print('❌ Erro ao recuperar refresh token: $e');
       }
@@ -89,13 +92,13 @@ class WebStorageService {
   /// Salva dados do usuário
   static Future<bool> saveUser(Map<String, dynamic> userData) async {
     if (!kIsWeb) return false;
-    
+
     try {
       final userJson = jsonEncode(userData);
       html.window.localStorage[_userKey] = userJson;
-      
+
       return html.window.localStorage[_userKey] == userJson;
-    } catch (e) {
+    } on Exception {
       if (kDebugMode) {
         print('❌ Erro ao salvar usuário: $e');
       }
@@ -106,14 +109,14 @@ class WebStorageService {
   /// Recupera dados do usuário
   static Map<String, dynamic>? getUser() {
     if (!kIsWeb) return null;
-    
+
     try {
       final userJson = html.window.localStorage[_userKey];
       if (userJson != null) {
         return jsonDecode(userJson) as Map<String, dynamic>;
       }
       return null;
-    } catch (e) {
+    } on Exception {
       if (kDebugMode) {
         print('❌ Erro ao recuperar usuário: $e');
       }
@@ -126,11 +129,11 @@ class WebStorageService {
   /// Define status de login
   static Future<bool> setLoggedIn(bool isLoggedIn) async {
     if (!kIsWeb) return false;
-    
+
     try {
       html.window.localStorage[_isLoggedInKey] = isLoggedIn.toString();
       return html.window.localStorage[_isLoggedInKey] == isLoggedIn.toString();
-    } catch (e) {
+    } on Exception {
       if (kDebugMode) {
         print('❌ Erro ao definir status de login: $e');
       }
@@ -141,11 +144,11 @@ class WebStorageService {
   /// Verifica se está logado
   static bool isLoggedIn() {
     if (!kIsWeb) return false;
-    
+
     try {
       final value = html.window.localStorage[_isLoggedInKey];
       return value == 'true';
-    } catch (e) {
+    } on Exception {
       if (kDebugMode) {
         print('❌ Erro ao verificar status de login: $e');
       }
@@ -160,7 +163,7 @@ class WebStorageService {
     required Map<String, dynamic> userData,
   }) async {
     if (!kIsWeb) return false;
-    
+
     try {
       if (kDebugMode) {
         print('💾 Salvando sessão no localStorage...');
@@ -174,14 +177,16 @@ class WebStorageService {
       ]);
 
       final allSuccess = results.every((result) => result);
-      
+
       if (kDebugMode) {
-        print(allSuccess ? '✅ Sessão salva no localStorage' : '❌ Erro ao salvar sessão');
+        print(allSuccess
+            ? '✅ Sessão salva no localStorage'
+            : '❌ Erro ao salvar sessão');
         debugListAll();
       }
 
       return allSuccess;
-    } catch (e) {
+    } on Exception {
       if (kDebugMode) {
         print('❌ Erro ao salvar sessão: $e');
       }
@@ -194,19 +199,19 @@ class WebStorageService {
   /// Limpa dados de autenticação
   static Future<bool> clearAuth() async {
     if (!kIsWeb) return false;
-    
+
     try {
       html.window.localStorage.remove(_tokenKey);
       html.window.localStorage.remove(_refreshTokenKey);
       html.window.localStorage.remove(_userKey);
       html.window.localStorage.remove(_isLoggedInKey);
-      
+
       if (kDebugMode) {
         print('🧹 Dados de auth limpos do localStorage');
       }
-      
+
       return true;
-    } catch (e) {
+    } on Exception {
       if (kDebugMode) {
         print('❌ Erro ao limpar auth: $e');
       }
@@ -217,16 +222,16 @@ class WebStorageService {
   /// Limpa tudo
   static Future<bool> clearAll() async {
     if (!kIsWeb) return false;
-    
+
     try {
       html.window.localStorage.clear();
-      
+
       if (kDebugMode) {
         print('🧹 localStorage completamente limpo');
       }
-      
+
       return true;
-    } catch (e) {
+    } on Exception {
       if (kDebugMode) {
         print('❌ Erro ao limpar tudo: $e');
       }
@@ -239,33 +244,37 @@ class WebStorageService {
   /// Lista todos os dados salvos
   static void debugListAll() {
     if (!kDebugMode || !kIsWeb) return;
-    
+
     try {
-      print('🔍 localStorage contents:');
-      print('  Token: ${getToken()?.substring(0, 20)}...');
-      print('  RefreshToken: ${getRefreshToken()?.substring(0, 20)}...');
-      print('  User: ${getUser()?['username']}');
-      print('  IsLoggedIn: ${isLoggedIn()}');
-      
+      if (kDebugMode) {
+        print('🔍 localStorage contents:');
+
+        print('  Token: ${getToken()?.substring(0, 20)}...');
+        print('  RefreshToken: ${getRefreshToken()?.substring(0, 20)}...');
+        print('  User: ${getUser()?['username']}');
+        print('  IsLoggedIn: ${isLoggedIn()}');
+      }
       // Lista todas as chaves
       final keys = html.window.localStorage.keys.toList();
-      print('  Todas as chaves: $keys');
-    } catch (e) {
-      print('❌ Erro ao listar localStorage: $e');
+      if (kDebugMode) {
+        print('  Todas as chaves: $keys');
+      }
+    } on Exception {
+      debugPrint('❌ Erro ao listar localStorage: $e');
     }
   }
 
   /// Verifica se localStorage está disponível
   static bool isLocalStorageAvailable() {
     if (!kIsWeb) return false;
-    
+
     try {
       const testKey = 'test_storage';
       html.window.localStorage[testKey] = 'test';
       final result = html.window.localStorage[testKey] == 'test';
       html.window.localStorage.remove(testKey);
       return result;
-    } catch (e) {
+    } on Exception {
       return false;
     }
   }

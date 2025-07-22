@@ -8,34 +8,34 @@ class ResponsavelProvider with ChangeNotifier {
   List<ResponsavelModel> _responsaveis = [];
   bool _isLoading = false;
   String? _error;
-  
+
   final ApiService _apiService = ApiService();
-  
+
   List<ResponsavelModel> get responsaveis => _responsaveis;
   bool get isLoading => _isLoading;
   String? get error => _error;
-  
+
   void _setLoading(bool loading) {
     _isLoading = loading;
     notifyListeners();
   }
-  
+
   void _setError(String? error) {
     _error = error;
     notifyListeners();
   }
-  
+
   Future<void> loadResponsaveis() async {
     try {
       _setLoading(true);
       _setError(null);
-      
+
       // Simulate API call
       await Future.delayed(const Duration(seconds: 1));
-      
+
       _responsaveis = []; // Replace with actual API call
       _setLoading(false);
-    } catch (e) {
+    } on Exception {
       _setError(AppConstants.networkErrorMessage);
       _setLoading(false);
     }
@@ -105,7 +105,7 @@ class ResponsavelProvider with ChangeNotifier {
 //       _currentPage++;
 //       _hasNextPage = newResponsaveis.length == 20; // Assuming page size is 20
 
-//     } on Exception catch (e) {
+//     } on Exception   {
 //       _error = e.toString();
 //       debugPrint('Erro ao carregar responsáveis: $e');
 //     } finally {
@@ -124,7 +124,7 @@ class ResponsavelProvider with ChangeNotifier {
 //       final data = await _apiService.getResponsavel(cpf);
 //       _selectedResponsavel = ResponsavelModel.fromJson(data);
 //       return _selectedResponsavel;
-//     } on Exception catch (e) {
+//     } on Exception   {
 //       _error = e.toString();
 //       debugPrint('Erro ao buscar responsável: $e');
 //       return null;
@@ -228,7 +228,7 @@ class ResponsavelProvider with ChangeNotifier {
 //     try {
 //       _responsavelAtual = await _apiService.getResponsavelComMembros(cpf);
 //       _error = null;
-//     } on Exception catch (e) {
+//     } on Exception   {
 //       _error = e.toString();
 //       _responsavelAtual = null;
 //     } finally {
@@ -246,7 +246,7 @@ class ResponsavelProvider with ChangeNotifier {
 //     try {
 //       _responsavelAtual = await _apiService.getResponsavelComDemandas(cpf);
 //       _error = null;
-//     } on Exception catch (e) {
+//     } on Exception   {
 //       _error = e.toString();
 //       _responsavelAtual = null;
 //     } finally {

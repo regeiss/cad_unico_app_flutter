@@ -19,8 +19,7 @@ class StatisticsData {
     required this.lastUpdate,
   });
 
-  factory StatisticsData.fromJson(Map<String, dynamic> json) {
-    return StatisticsData(
+  factory StatisticsData.fromJson(Map<String, dynamic> json) => StatisticsData(
       totalResponsaveis: json['total_responsaveis'] ?? 0,
       totalMembros: json['total_membros'] ?? 0,
       totalDemandas: json['total_demandas'] ?? 0,
@@ -32,10 +31,8 @@ class StatisticsData {
         ? DateTime.parse(json['last_update'])
         : DateTime.now(),
     );
-  }
 
-  Map<String, dynamic> toJson() {
-    return {
+  Map<String, dynamic> toJson() => {
       'total_responsaveis': totalResponsaveis,
       'total_membros': totalMembros,
       'total_demandas': totalDemandas,
@@ -45,13 +42,10 @@ class StatisticsData {
       'grupos_prioritarios': gruposPrioritarios,
       'last_update': lastUpdate.toIso8601String(),
     };
-  }
 
-  bool get isEmpty {
-    return totalResponsaveis == 0 && 
+  bool get isEmpty => totalResponsaveis == 0 && 
            totalMembros == 0 && 
            totalDemandas == 0;
-  }
 
   String get lastUpdateFormatted {
     final now = DateTime.now();

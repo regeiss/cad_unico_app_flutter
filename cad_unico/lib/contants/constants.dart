@@ -322,39 +322,21 @@ class AppConstants {
     return width >= mobileBreakpoint && width < tabletBreakpoint;
   }
 
-  static bool isDesktop(BuildContext context) {
-    return MediaQuery.of(context).size.width >= tabletBreakpoint;
-  }
+  static bool isDesktop(BuildContext context) => MediaQuery.of(context).size.width >= tabletBreakpoint;
 
-  static bool isLargeDesktop(BuildContext context) {
-    return MediaQuery.of(context).size.width >= desktopBreakpoint;
-  }
+  static bool isLargeDesktop(BuildContext context) => MediaQuery.of(context).size.width >= desktopBreakpoint;
 
-  static String getStatusLabel(String status) {
-    return statusLabels[status] ?? status;
-  }
+  static String getStatusLabel(String status) => statusLabels[status] ?? status;
 
-  static Color getStatusColor(String status) {
-    return statusColors[status] ?? Colors.grey;
-  }
+  static Color getStatusColor(String status) => statusColors[status] ?? Colors.grey;
 
-  static String getGenderLabel(String gender) {
-    return genderLabels[gender] ?? gender;
-  }
+  static String getGenderLabel(String gender) => genderLabels[gender] ?? gender;
 
-  static String getDemandTypeLabel(String type) {
-    return demandTypeLabels[type] ?? type;
-  }
+  static String getDemandTypeLabel(String type) => demandTypeLabels[type] ?? type;
 
-  static IconData getDemandTypeIcon(String type) {
-    return demandTypeIcons[type] ?? Icons.help_outline;
-  }
+  static IconData getDemandTypeIcon(String type) => demandTypeIcons[type] ?? Icons.help_outline;
 
-  static IconData getStatusIcon(String status) {
-    return statusIcons[status] ?? Icons.help_outline;
-  }
+  static IconData getStatusIcon(String status) => statusIcons[status] ?? Icons.help_outline;
 
-  static String getStateName(String stateCode) {
-    return stateNames[stateCode] ?? stateCode;
-  }
+  static String getStateName(String stateCode) => stateNames[stateCode] ?? stateCode;
 }

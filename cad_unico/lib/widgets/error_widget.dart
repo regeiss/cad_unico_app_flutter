@@ -8,13 +8,13 @@ class ErrorDisplayWidget extends StatelessWidget {
   final bool compact;
 
   const ErrorDisplayWidget({
-    Key? key,
+    super.key,
     required this.message,
     this.onRetry,
     this.icon,
     this.retryText = 'Tentar novamente',
     this.compact = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

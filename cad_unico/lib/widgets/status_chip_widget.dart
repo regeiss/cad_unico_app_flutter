@@ -6,11 +6,11 @@ class StatusChip extends StatelessWidget {
   final bool compact;
 
   const StatusChip({
-    Key? key,
+    super.key,
     required this.status,
     this.label,
     this.compact = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -30,9 +30,9 @@ class StatusChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: config.color.withOpacity(0.1),
+        color: config.color.withValues(alpha: (0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: config.color.withOpacity(0.3)),
+        border: Border.all(color: config.color.withValues(alpha: (0.3)),
       ),
       child: Text(
         label ?? config.label,

@@ -36,7 +36,7 @@ class DemandaProvider with ChangeNotifier {
       
       _demandas = []; // Replace with actual API call
       _setLoading(false);
-    } catch (e) {
+    } on Exception   {
       _setError(AppConstants.networkErrorMessage);
       _setLoading(false);
     }
@@ -91,7 +91,7 @@ class DemandaProvider with ChangeNotifier {
           
 //       debugPrint('Carregadas ${_demandasSaude.length} demandas de saúde');
       
-//     } on Exception catch (e) {
+//     } on Exception   {
 //       _error = e.toString();
 //       debugPrint('Erro ao carregar demandas de saúde: $e');
 //     } finally {
@@ -118,7 +118,7 @@ class DemandaProvider with ChangeNotifier {
           
 //       debugPrint('Carregadas ${_demandasEducacao.length} demandas de educação');
       
-//     } on Exception catch (e) {
+//     } on Exception   {
 //       _error = e.toString();
 //       debugPrint('Erro ao carregar demandas de educação: $e');
 //     } finally {
@@ -145,7 +145,7 @@ class DemandaProvider with ChangeNotifier {
           
 //       debugPrint('Carregadas ${_demandasAmbiente.length} demandas de ambiente');
       
-//     } on Exception catch (e) {
+//     } on Exception   {
 //       _error = e.toString();
 //       debugPrint('Erro ao carregar demandas de ambiente: $e');
 //     } finally {
@@ -174,7 +174,7 @@ class DemandaProvider with ChangeNotifier {
 //           .map((json) => DemandaSaudeModel.fromJson(json as Map<String, dynamic>))
 //           .toList();
           
-//     } on Exception catch (e) {
+//     } on Exception   {
 //       debugPrint('Erro ao buscar demanda de saúde por CPF: $e');
 //       return [];
 //     }

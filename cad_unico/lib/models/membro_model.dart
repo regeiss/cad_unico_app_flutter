@@ -15,8 +15,7 @@ class Membro {
     this.status,
   });
 
-  factory Membro.fromJson(Map<String, dynamic> json) {
-    return Membro(
+  factory Membro.fromJson(Map<String, dynamic> json) => Membro(
       cpf: json['cpf'] ?? '',
       nome: json['nome'] ?? '',
       cpfResponsavel: json['cpf_responsavel'] ?? '',
@@ -24,16 +23,13 @@ class Membro {
       timestamp: json['timestamp'] != null ? DateTime.parse(json['timestamp']) : null,
       status: json['status'],
     );
-  }
 
-  Map<String, dynamic> toJson() {
-    return {
+  Map<String, dynamic> toJson() => {
       'cpf': cpf,
       'nome': nome,
       'cpf_responsavel': cpfResponsavel,
       'status': status,
     };
-  }
 
   String get statusDescricao {
     switch (status) {

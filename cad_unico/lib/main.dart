@@ -1,24 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Import your providers
+import 'contants/constants.dart';
 import 'providers/auth_provider.dart';
 import 'providers/demanda_provider.dart';
 import 'providers/membro_provider.dart';
 import 'providers/responsavel_provider.dart';
-
+import 'screens/demandas/demandas_screen.dart';
+import 'screens/home_screen.dart';
 // Import your screens
 import 'screens/login_screen.dart';
-import 'screens/home_screen.dart';
-import 'screens/responsaveis/responsaveis_screen.dart';
 import 'screens/membros/membros_screen.dart';
-import 'screens/demandas/demandas_screen.dart';
 
-// Import utils
-import 'utils/constants.dart';
 import 'utils/app_theme.dart';
+// Import utils
+
 import 'utils/responsive.dart';
 
 void main() async {
@@ -34,8 +33,7 @@ class CadastroUnificadoApp extends StatelessWidget {
   const CadastroUnificadoApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MultiProvider(
+  Widget build(BuildContext context) => MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => DemandaProvider()),
@@ -43,24 +41,19 @@ class CadastroUnificadoApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ResponsavelProvider()),
       ],
       child: Consumer<AuthProvider>(
-        builder: (context, authProvider, child) {
-          return MaterialApp.router(
+        builder: (context, authProvider, child) => MaterialApp.router(
             title: AppConstants.appName,
             debugShowCheckedModeBanner: false,
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,
             themeMode: ThemeMode.system,
             routerConfig: _router,
-            builder: (context, child) {
-              return ResponsiveWrapper(
+            builder: (context, child) => ResponsiveWrapper(
                 child: child ?? const SizedBox(),
-              );
-            },
-          );
-        },
+              ),
+          ),
       ),
     );
-  }
 }
 
 // Router configuration
@@ -131,8 +124,7 @@ class ResponsiveWrapper extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
+  Widget build(BuildContext context) => LayoutBuilder(
       builder: (context, constraints) {
         // Initialize responsive utils
         Responsive.init(context);
@@ -140,7 +132,6 @@ class ResponsiveWrapper extends StatelessWidget {
         return child;
       },
     );
-  }
 }
 
 // Error widget for router
@@ -153,8 +144,7 @@ class ErrorScreen extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
+  Widget build(BuildContext context) => Scaffold(
       appBar: AppBar(
         title: const Text('Erro'),
         backgroundColor: Colors.red,
@@ -193,7 +183,6 @@ class ErrorScreen extends StatelessWidget {
         ),
       ),
     );
-  }
 }
 
 // Loading screen
@@ -201,8 +190,7 @@ class LoadingScreen extends StatelessWidget {
   const LoadingScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
+  Widget build(BuildContext context) => Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: Center(
         child: Column(
@@ -212,13 +200,11 @@ class LoadingScreen extends StatelessWidget {
               'assets/images/logo.png',
               width: 120,
               height: 120,
-              errorBuilder: (context, error, stackTrace) {
-                return Icon(
+              errorBuilder: (context, error, stackTrace) => Icon(
                   Icons.admin_panel_settings,
                   size: 120,
                   color: Theme.of(context).colorScheme.primary,
-                );
-              },
+                ),
             ),
             const SizedBox(height: 32),
             Text(
@@ -243,7 +229,6 @@ class LoadingScreen extends StatelessWidget {
         ),
       ),
     );
-  }
 }
 
 // App lifecycle handler
@@ -320,9 +305,7 @@ class _AppLifecycleHandlerState extends State<AppLifecycleHandler>
   }
 
   @override
-  Widget build(BuildContext context) {
-    return widget.child;
-  }
+  Widget build(BuildContext context) => widget.child;
 }
 
 // import 'package:flutter/material.dart';

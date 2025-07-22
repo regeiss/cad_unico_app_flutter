@@ -47,8 +47,7 @@ class AppTheme {
   static const Color elevationColor = Color(0x0D000000);
 
   // Light Theme
-  static ThemeData get lightTheme {
-    return ThemeData(
+  static ThemeData get lightTheme => ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
       colorScheme: const ColorScheme.light(
@@ -317,11 +316,9 @@ class AppTheme {
         ),
       ),
     );
-  }
 
   // Dark Theme
-  static ThemeData get darkTheme {
-    return ThemeData(
+  static ThemeData get darkTheme => ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
       colorScheme: const ColorScheme.dark(
@@ -542,7 +539,6 @@ class AppTheme {
         ),
       ),
     );
-  }
 
   // Custom Colors
   static const MaterialColor primarySwatch = MaterialColor(
@@ -593,13 +589,11 @@ class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
     Color? success,
     Color? warning,
     Color? info,
-  }) {
-    return AppColorsExtension(
+  }) => AppColorsExtension(
       success: success ?? this.success,
       warning: warning ?? this.warning,
       info: info ?? this.info,
     );
-  }
 
   @override
   ThemeExtension<AppColorsExtension> lerp(

@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 
 import '../contants/constants.dart';
 import '../providers/auth_provider.dart';
-import '../utils/responsive.dart';
 
 class SideBar extends StatelessWidget {
   final int selectedIndex;
@@ -37,7 +36,7 @@ class SideBar extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: (0.05),
             blurRadius: 10,
             offset: const Offset(2, 0),
           ),
@@ -57,10 +56,8 @@ class SideBar extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
-    return Consumer<AuthProvider>(
-      builder: (context, authProvider, child) {
-        return Container(
+  Widget _buildHeader(BuildContext context) => Consumer<AuthProvider>(
+      builder: (context, authProvider, child) => Container(
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
@@ -107,7 +104,7 @@ class SideBar extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+                    color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: (0.3),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
@@ -166,13 +163,10 @@ class SideBar extends StatelessWidget {
               ],
             ],
           ),
-        );
-      },
+        ),
     );
-  }
 
-  Widget _buildNavigation(BuildContext context) {
-    return ListView.builder(
+  Widget _buildNavigation(BuildContext context) => ListView.builder(
       padding: const EdgeInsets.symmetric(vertical: 8),
       itemCount: navigationItems.length,
       itemBuilder: (context, index) {
@@ -191,7 +185,6 @@ class SideBar extends StatelessWidget {
         );
       },
     );
-  }
 
   Widget _buildNavigationItem(
     BuildContext context, {
@@ -199,8 +192,7 @@ class SideBar extends StatelessWidget {
     required String label,
     required bool isSelected,
     required VoidCallback onTap,
-  }) {
-    return Container(
+  }) => Container(
       margin: const EdgeInsets.only(bottom: 4),
       child: Material(
         color: Colors.transparent,
@@ -244,10 +236,8 @@ class SideBar extends StatelessWidget {
         ),
       ),
     );
-  }
 
-  Widget _buildFooter(BuildContext context) {
-    return Container(
+  Widget _buildFooter(BuildContext context) => Container(
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
@@ -271,15 +261,13 @@ class SideBar extends StatelessWidget {
         ],
       ),
     );
-  }
 
   Widget _buildFooterItem(
     BuildContext context, {
     required IconData icon,
     required String label,
     required VoidCallback onTap,
-  }) {
-    return Material(
+  }) => Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
@@ -309,7 +297,6 @@ class SideBar extends StatelessWidget {
         ),
       ),
     );
-  }
 
   void _showLogoutDialog(BuildContext context) {
     showDialog(
@@ -399,11 +386,9 @@ class _CollapsibleSidebarState extends State<CollapsibleSidebar>
   }
 
   @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
+  Widget build(BuildContext context) => AnimatedBuilder(
       animation: _animation,
-      builder: (context, child) {
-        return Container(
+      builder: (context, child) => SizedBox(
           width: _animation.value,
           child: Stack(
             children: [
@@ -428,10 +413,8 @@ class _CollapsibleSidebarState extends State<CollapsibleSidebar>
               ),
             ],
           ),
-        );
-      },
+        ),
     );
-  }
 }
 
 // import '../screens/home_screen.dart';
@@ -458,7 +441,7 @@ class _CollapsibleSidebarState extends State<CollapsibleSidebar>
 //         color: Theme.of(context).colorScheme.surface,
 //         boxShadow: [
 //           BoxShadow(
-//             color: Colors.black.withOpacity(0.1),
+//             color: Colors.black.withValues(alpha: (0.1),
 //             blurRadius: 4,
 //             offset: const Offset(2, 0),
 //           ),
@@ -531,7 +514,7 @@ class _CollapsibleSidebarState extends State<CollapsibleSidebar>
 //                       ),
 //                     ),
 //                     selected: isSelected,
-//                     selectedTileColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+//                     selectedTileColor: Theme.of(context).colorScheme.primary.withValues(alpha: (0.1),
 //                     shape: RoundedRectangleBorder(
 //                       borderRadius: BorderRadius.circular(AppConstants.borderRadius),
 //                     ),

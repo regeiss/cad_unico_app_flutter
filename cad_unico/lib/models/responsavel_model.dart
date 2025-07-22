@@ -29,8 +29,7 @@ class ResponsavelModel {
     this.codRge,
   });
   
-  factory ResponsavelModel.fromJson(Map<String, dynamic> json) {
-    return ResponsavelModel(
+  factory ResponsavelModel.fromJson(Map<String, dynamic> json) => ResponsavelModel(
       cpf: json['cpf'] ?? '',
       nome: json['nome'] ?? '',
       cep: json['cep'] ?? '',
@@ -49,10 +48,8 @@ class ResponsavelModel {
       status: json['status'],
       codRge: json['cod_rge'],
     );
-  }
   
-  Map<String, dynamic> toJson() {
-    return {
+  Map<String, dynamic> toJson() => {
       'cpf': cpf,
       'nome': nome,
       'cep': cep,
@@ -67,5 +64,4 @@ class ResponsavelModel {
       'status': status,
       'cod_rge': codRge,
     };
-  }
 }

@@ -10,18 +10,17 @@ class InfoCard extends StatelessWidget {
   final Widget? trailing;
 
   const InfoCard({
-    Key? key,
+    super.key,
     required this.title,
     required this.value,
     required this.icon,
     this.color,
     this.onTap,
     this.trailing,
-  }) : super(key: key);
+  });
 
   @override
-  Widget build(BuildContext context) {
-    return Card(
+  Widget build(BuildContext context) => Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
@@ -34,7 +33,7 @@ class InfoCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: (color ?? Theme.of(context).primaryColor).withOpacity(0.1),
+                  color: (color ?? Theme.of(context).primaryColor).withValues(alpha: (0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
@@ -73,5 +72,4 @@ class InfoCard extends StatelessWidget {
         ),
       ),
     );
-  }
 }

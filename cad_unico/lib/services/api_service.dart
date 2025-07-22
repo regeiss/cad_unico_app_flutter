@@ -60,7 +60,7 @@ class ApiService {
       // Test if _dio is initialized
       _dio.options;
       return _dio;
-    } catch (e) {
+    } on Exception {
       init();
       return _dio;
     }
@@ -105,7 +105,7 @@ class ApiService {
           message = 'Erro interno do servidor.';
         } else {
           message = error.response?.data?['message'] ??
-              'Erro na requisição (${statusCode})';
+              'Erro na requisição ($statusCode)';
         }
         break;
       case DioExceptionType.connectionError:
@@ -134,9 +134,9 @@ class ApiService {
       });
 
       return _handleResponse(response);
-    } on DioException catch (e) {
+    } on DioException on Exception  {
       return _handleError(e);
-    } catch (e) {
+    } on Exception  {
       return ApiResponse(
         success: false,
         message: 'Erro inesperado: $e',
@@ -150,9 +150,9 @@ class ApiService {
       final data = refreshToken != null ? {'refresh': refreshToken} : null;
       final response = await dio.post('/auth/logout/', data: data);
       return _handleResponse(response);
-    } on DioException catch (e) {
+    } on DioException on Exception  {
       return _handleError(e);
-    } catch (e) {
+    } on Exception  {
       return ApiResponse(
         success: false,
         message: 'Erro ao fazer logout: $e',
@@ -168,9 +168,9 @@ class ApiService {
       });
 
       return _handleResponse(response);
-    } on DioException catch (e) {
+    } on DioException on Exception  {
       return _handleError(e);
-    } catch (e) {
+    } on Exception  {
       return ApiResponse(
         success: false,
         message: 'Erro ao renovar token: $e',
@@ -186,9 +186,9 @@ class ApiService {
       });
 
       return _handleResponse(response);
-    } on DioException catch (e) {
+    } on DioException on Exception  {
       return _handleError(e);
-    } catch (e) {
+    } on Exception  {
       return ApiResponse(
         success: false,
         message: 'Erro ao verificar token: $e',
@@ -205,9 +205,9 @@ class ApiService {
       );
 
       return _handleResponse(response);
-    } on DioException catch (e) {
+    } on DioException on Exception  {
       return _handleError(e);
-    } catch (e) {
+    } on Exception  {
       return ApiResponse(
         success: false,
         message: 'Erro ao obter perfil: $e',
@@ -226,9 +226,9 @@ class ApiService {
       );
 
       return _handleResponse(response);
-    } on DioException catch (e) {
+    } on DioException on Exception  {
       return _handleError(e);
-    } catch (e) {
+    } on Exception  {
       return ApiResponse(
         success: false,
         message: 'Erro ao atualizar perfil: $e',
@@ -253,9 +253,9 @@ class ApiService {
       );
 
       return _handleResponse(response);
-    } on DioException catch (e) {
+    } on DioException on Exception  {
       return _handleError(e);
-    } catch (e) {
+    } on Exception  {
       return ApiResponse(
         success: false,
         message: 'Erro ao alterar senha: $e',
@@ -280,9 +280,9 @@ class ApiService {
       );
 
       return _handleResponse(response);
-    } on DioException catch (e) {
+    } on DioException on Exception  {
       return _handleError(e);
-    } catch (e) {
+    } on Exception  {
       return ApiResponse(
         success: false,
         message: 'Erro ao obter responsáveis: $e',
@@ -303,9 +303,9 @@ class ApiService {
       );
 
       return _handleResponse(response);
-    } on DioException catch (e) {
+    } on DioException on Exception  {
       return _handleError(e);
-    } catch (e) {
+    } on Exception  {
       return ApiResponse(
         success: false,
         message: 'Erro ao obter responsável: $e',
@@ -330,9 +330,9 @@ class ApiService {
       );
 
       return _handleResponse(response);
-    } on DioException catch (e) {
+    } on DioException on Exception  {
       return _handleError(e);
-    } catch (e) {
+    } on Exception  {
       return ApiResponse(
         success: false,
         message: 'Erro ao criar responsável: $e',
@@ -358,9 +358,9 @@ class ApiService {
       );
 
       return _handleResponse(response);
-    } on DioException catch (e) {
+    } on DioException on Exception  {
       return _handleError(e);
-    } catch (e) {
+    } on Exception  {
       return ApiResponse(
         success: false,
         message: 'Erro ao atualizar responsável: $e',
@@ -385,9 +385,9 @@ class ApiService {
       );
 
       return _handleResponse(response);
-    } on DioException catch (e) {
+    } on DioException on Exception  {
       return _handleError(e);
-    } catch (e) {
+    } on Exception  {
       return ApiResponse(
         success: false,
         message: 'Erro ao obter membros: $e',
@@ -413,9 +413,9 @@ class ApiService {
       );
 
       return _handleResponse(response);
-    } on DioException catch (e) {
+    } on DioException on Exception  {
       return _handleError(e);
-    } catch (e) {
+    } on Exception  {
       return ApiResponse(
         success: false,
         message: 'Erro ao obter demandas: $e',
@@ -441,9 +441,9 @@ class ApiService {
       );
 
       return _handleResponse(response);
-    } on DioException catch (e) {
+    } on DioException on Exception  {
       return _handleError(e);
-    } catch (e) {
+    } on Exception  {
       return ApiResponse(
         success: false,
         message: 'Erro na requisição: $e',
@@ -469,9 +469,9 @@ class ApiService {
       );
 
       return _handleResponse(response);
-    } on DioException catch (e) {
+    } on DioException on Exception  {
       return _handleError(e);
-    } catch (e) {
+    } on Exception  {
       return ApiResponse(
         success: false,
         message: 'Erro na requisição: $e',
@@ -497,9 +497,9 @@ class ApiService {
       );
 
       return _handleResponse(response);
-    } on DioException catch (e) {
+    } on DioException on Exception  {
       return _handleError(e);
-    } catch (e) {
+    } on Exception  {
       return ApiResponse(
         success: false,
         message: 'Erro na requisição: $e',
@@ -523,9 +523,9 @@ class ApiService {
       );
 
       return _handleResponse(response);
-    } on DioException catch (e) {
+    } on DioException on Exception  {
       return _handleError(e);
-    } catch (e) {
+    } on Exception  {
       return ApiResponse(
         success: false,
         message: 'Erro na requisição: $e',
@@ -674,7 +674,7 @@ class ApiService {
 
 //         return true;
 //       }
-//     } on Exception catch (e) {
+//     } on Exception   {
 //       debugPrint('Erro ao renovar token: $e');
 //     }
 
@@ -722,9 +722,9 @@ class ApiService {
 
 //         return {'success': true, 'data': data};
 //       }
-//     } on DioException catch (e) {
+//     } on DioException on Exception  {
 //       return _handleDioError(e);
-//     } on Exception catch (e) {
+//     } on Exception   {
 //       return {
 //         'success': false,
 //         'message': AppConstants.networkError,
@@ -744,9 +744,9 @@ class ApiService {
 //       if (response.statusCode == 201 || response.statusCode == 200) {
 //         return {'success': true, 'data': response.data};
 //       }
-//     } on DioException catch (e) {
+//     } on DioException on Exception  {
 //       return _handleDioError(e);
-//     } on Exception catch (e) {
+//     } on Exception   {
 //       return {
 //         'success': false,
 //         'message': 'Erro ao criar conta',
@@ -771,9 +771,9 @@ class ApiService {
 //       if (response.statusCode == 200) {
 //         return {'success': true, 'data': response.data};
 //       }
-//     } on DioException catch (e) {
+//     } on DioException on Exception  {
 //       return _handleDioError(e);
-//     } on Exception catch (e) {
+//     } on Exception   {
 //       return {
 //         'success': false,
 //         'message': 'Erro ao verificar token',
@@ -801,9 +801,9 @@ class ApiService {
 
 //         return {'success': true, 'data': data};
 //       }
-//     } on DioException catch (e) {
+//     } on DioException on Exception  {
 //       return _handleDioError(e);
-//     } on Exception catch (e) {
+//     } on Exception   {
 //       return {
 //         'success': false,
 //         'message': 'Erro ao renovar token',
@@ -823,7 +823,7 @@ class ApiService {
 //       if (response.statusCode == 200) {
 //         return {'success': true, 'data': response.data};
 //       }
-//     } on DioException catch (e) {
+//     } on DioException on Exception  {
 //       return _handleDioError(e);
 //     }
 
@@ -846,7 +846,7 @@ class ApiService {
 
 //         return {'success': true, 'data': response.data};
 //       }
-//     } on DioException catch (e) {
+//     } on DioException on Exception  {
 //       return _handleDioError(e);
 //     }
 
@@ -869,7 +869,7 @@ class ApiService {
 //       if (response.statusCode == 200) {
 //         return {'success': true, 'data': response.data};
 //       }
-//     } on DioException catch (e) {
+//     } on DioException on Exception  {
 //       return _handleDioError(e);
 //     }
 
@@ -884,7 +884,7 @@ class ApiService {
 //           data: {'refresh': _refreshToken},
 //         );
 //       }
-//     } on Exception catch (e) {
+//     } on Exception   {
 //       debugPrint('Erro no logout: $e');
 //     } finally {
 //       await _clearAuthData();
@@ -930,7 +930,7 @@ class ApiService {
 //       if (response.statusCode == 200) {
 //         return {'success': true, 'data': response.data};
 //       }
-//     } on DioException catch (e) {
+//     } on DioException on Exception  {
 //       return _handleDioError(e);
 //     }
 
@@ -964,7 +964,7 @@ class ApiService {
 //           statusCode: response.statusCode,
 //         );
 //       }
-//     } on DioException catch (e) {
+//     } on DioException on Exception  {
 //       // ... your existing DioError handling
 //       if (e.response?.statusCode == 404) {
 //         throw ApiException(
@@ -982,7 +982,7 @@ class ApiService {
 //           statusCode: e.response?.statusCode,
 //         );
 //       }
-//     } catch (e) {
+//     } on Exception  {
 //       if (e is ApiException) {
 //         rethrow;
 //       }
@@ -1023,7 +1023,7 @@ class ApiService {
 //           statusCode: response.statusCode,
 //         );
 //       }
-//     } on DioException catch (e) {
+//     } on DioException on Exception  {
 //       if (e.response?.statusCode == 404) {
 //         throw ApiException(
 //           'Responsável não encontrado',
@@ -1041,7 +1041,7 @@ class ApiService {
 //           statusCode: e.response?.statusCode,
 //         );
 //       }
-//     } catch (e) {
+//     } on Exception  {
 //       throw ApiException('Erro de conexão: ${e.toString()}');
 //     }
 //   }
@@ -1079,7 +1079,7 @@ class ApiService {
 //           statusCode: response.statusCode,
 //         );
 //       }
-//     } on DioException catch (e) {
+//     } on DioException on Exception  {
 //       if (e.response?.statusCode == 404) {
 //         throw ApiException(
 //           'Responsável não encontrado',
@@ -1097,7 +1097,7 @@ class ApiService {
 //           statusCode: e.response?.statusCode,
 //         );
 //       }
-//     } catch (e) {
+//     } on Exception  {
 //       throw ApiException('Erro de conexão: ${e.toString()}');
 //     }
 //   }
@@ -1135,7 +1135,7 @@ class ApiService {
 //           statusCode: response.statusCode,
 //         );
 //       }
-//     } on DioException catch (e) {
+//     } on DioException on Exception  {
 //       if (e.response?.statusCode == 404) {
 //         throw ApiException(
 //           'Responsável não encontrado',
@@ -1157,7 +1157,7 @@ class ApiService {
 //           statusCode: e.response?.statusCode,
 //         );
 //       }
-//     } catch (e) {
+//     } on Exception  {
 //       throw ApiException('Erro de conexão: ${e.toString()}');
 //     }
 //   }
@@ -1194,7 +1194,7 @@ class ApiService {
 //       if (response.statusCode == 200) {
 //         return {'success': true, 'data': response.data};
 //       }
-//     } on DioException catch (e) {
+//     } on DioException on Exception  {
 //       return _handleDioError(e);
 //     }
 
@@ -1211,7 +1211,7 @@ class ApiService {
 //       if (response.statusCode == 200) {
 //         return {'success': true, 'data': response.data};
 //       }
-//     } on DioException catch (e) {
+//     } on DioException on Exception  {
 //       return _handleDioError(e);
 //     }
 
@@ -1227,7 +1227,7 @@ class ApiService {
 //   //     if (response.statusCode == 200) {
 //   //       return {'success': true, 'data': response.data};
 //   //     }
-//   //   } on DioException catch (e) {
+//   //   } on DioException on Exception  {
 //   //     return _handleDioError(e);
 //   //   }
 
@@ -1250,7 +1250,7 @@ class ApiService {
 //           'message': AppConstants.responsavelCreatedSuccess,
 //         };
 //       }
-//     } on DioException catch (e) {
+//     } on DioException on Exception  {
 //       return _handleDioError(e);
 //     }
 
@@ -1273,7 +1273,7 @@ class ApiService {
 //           'message': AppConstants.responsavelUpdatedSuccess,
 //         };
 //       }
-//     } on DioException catch (e) {
+//     } on DioException on Exception  {
 //       return _handleDioError(e);
 //     }
 
@@ -1315,7 +1315,7 @@ class ApiService {
 //       if (response.statusCode == 200) {
 //         return {'success': true, 'data': response.data};
 //       }
-//     } on DioException catch (e) {
+//     } on DioException on Exception  {
 //       return _handleDioError(e);
 //     }
 
@@ -1336,7 +1336,7 @@ class ApiService {
 //           'message': AppConstants.membroCreatedSuccess,
 //         };
 //       }
-//     } on DioException catch (e) {
+//     } on DioException on Exception  {
 //       return _handleDioError(e);
 //     }
 
@@ -1374,7 +1374,7 @@ class ApiService {
 //       if (response.statusCode == 200) {
 //         return {'success': true, 'data': response.data};
 //       }
-//     } on DioException catch (e) {
+//     } on DioException on Exception  {
 //       return _handleDioError(e);
 //     }
 
@@ -1390,7 +1390,7 @@ class ApiService {
 //       if (response.statusCode == 200) {
 //         return {'success': true, 'data': response.data};
 //       }
-//     } on DioException catch (e) {
+//     } on DioException on Exception  {
 //       return _handleDioError(e);
 //     }
 
@@ -1431,7 +1431,7 @@ class ApiService {
 //       if (response.statusCode == 200) {
 //         return {'success': true, 'data': response.data};
 //       }
-//     } on DioException catch (e) {
+//     } on DioException on Exception  {
 //       return _handleDioError(e);
 //     }
 
@@ -1455,7 +1455,7 @@ class ApiService {
 //       if (response.statusCode == 200 && response.data['erro'] == null) {
 //         return {'success': true, 'data': response.data};
 //       }
-//     } catch (e) {
+//     } on Exception  {
 //       debugPrint('Erro ao buscar CEP: $e');
 //     }
 

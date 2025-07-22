@@ -8,12 +8,12 @@ class LoadingWidget extends StatelessWidget {
   final bool overlay;
 
   const LoadingWidget({
-    Key? key,
+    super.key,
     this.message,
     this.size = 40.0,
     this.color,
     this.overlay = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +42,7 @@ class LoadingWidget extends StatelessWidget {
 
     if (overlay) {
       return Container(
-        color: Colors.black.withOpacity(0.3),
+        color: Colors.black.withValues(alpha: (0.3),
         child: Center(child: widget),
       );
     }
@@ -56,37 +56,33 @@ class CompactLoadingWidget extends StatelessWidget {
   final Color? color;
 
   const CompactLoadingWidget({
-    Key? key,
+    super.key,
     this.size = 20.0,
     this.color,
-  }) : super(key: key);
+  });
 
   @override
-  Widget build(BuildContext context) {
-    return SpinKitThreeBounce(
+  Widget build(BuildContext context) => SpinKitThreeBounce(
       color: color ?? Theme.of(context).primaryColor,
       size: size,
     );
-  }
 }
 
 class ListLoadingWidget extends StatelessWidget {
   final int itemCount;
 
   const ListLoadingWidget({
-    Key? key,
+    super.key,
     this.itemCount = 5,
-  }) : super(key: key);
+  });
 
   @override
-  Widget build(BuildContext context) {
-    return ListView.builder(
+  Widget build(BuildContext context) => ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: itemCount,
       itemBuilder: (context, index) => const _SkeletonListItem(),
     );
-  }
 }
 
 class _SkeletonListItem extends StatefulWidget {
@@ -121,11 +117,9 @@ class _SkeletonListItemState extends State<_SkeletonListItem>
   }
 
   @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
+  Widget build(BuildContext context) => AnimatedBuilder(
       animation: _animation,
-      builder: (context, child) {
-        return Container(
+      builder: (context, child) => Container(
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -139,7 +133,7 @@ class _SkeletonListItemState extends State<_SkeletonListItem>
                 height: 20,
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: Colors.grey[300]!.withOpacity(_animation.value),
+                  color: Colors.grey[300]!.withValues(alpha: (_animation.value),
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),
@@ -148,7 +142,7 @@ class _SkeletonListItemState extends State<_SkeletonListItem>
                 height: 16,
                 width: MediaQuery.of(context).size.width * 0.6,
                 decoration: BoxDecoration(
-                  color: Colors.grey[300]!.withOpacity(_animation.value),
+                  color: Colors.grey[300]!.withValues(alpha: (_animation.value),
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),
@@ -157,14 +151,12 @@ class _SkeletonListItemState extends State<_SkeletonListItem>
                 height: 14,
                 width: MediaQuery.of(context).size.width * 0.4,
                 decoration: BoxDecoration(
-                  color: Colors.grey[300]!.withOpacity(_animation.value),
+                  color: Colors.grey[300]!.withValues(alpha: (_animation.value),
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),
             ],
           ),
-        );
-      },
+        ),
     );
-  }
 }

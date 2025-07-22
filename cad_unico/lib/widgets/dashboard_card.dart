@@ -37,8 +37,8 @@ class DashboardCard extends StatelessWidget {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                cardColor.withOpacity(0.1),
-                cardColor.withOpacity(0.05),
+                cardColor.withValues(alpha: (0.1),
+                cardColor.withValues(alpha: (0.05),
               ],
             ),
           ),

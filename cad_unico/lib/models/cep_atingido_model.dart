@@ -17,8 +17,7 @@ class CepInfo {
     this.numFinal,
   });
 
-  factory CepInfo.fromJson(Map<String, dynamic> json) {
-    return CepInfo(
+  factory CepInfo.fromJson(Map<String, dynamic> json) => CepInfo(
       cep: json['cep'] ?? '',
       logradouro: json['logradouro'] ?? '',
       bairro: json['bairro'],
@@ -27,10 +26,8 @@ class CepInfo {
       numInicial: json['num_inicial'],
       numFinal: json['num_final'],
     );
-  }
 
-  Map<String, dynamic> toJson() {
-    return {
+  Map<String, dynamic> toJson() => {
       'cep': cep,
       'logradouro': logradouro,
       'bairro': bairro,
@@ -39,7 +36,6 @@ class CepInfo {
       'num_inicial': numInicial,
       'num_final': numFinal,
     };
-  }
 
   String get cepFormatado {
     if (cep.length == 8) {

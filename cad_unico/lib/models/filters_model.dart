@@ -25,8 +25,7 @@ class FilterOptions {
     DateTime? dataInicio,
     DateTime? dataFim,
     Map<String, dynamic>? customFilters,
-  }) {
-    return FilterOptions(
+  }) => FilterOptions(
       search: search ?? this.search,
       status: status ?? this.status,
       bairro: bairro ?? this.bairro,
@@ -35,17 +34,14 @@ class FilterOptions {
       dataFim: dataFim ?? this.dataFim,
       customFilters: customFilters ?? this.customFilters,
     );
-  }
 
-  bool get hasFilters {
-    return (search?.isNotEmpty ?? false) ||
+  bool get hasFilters => (search?.isNotEmpty ?? false) ||
            status != null ||
            bairro != null ||
            genero != null ||
            dataInicio != null ||
            dataFim != null ||
            (customFilters?.isNotEmpty ?? false);
-  }
 
   int get activeFiltersCount {
     int count = 0;
