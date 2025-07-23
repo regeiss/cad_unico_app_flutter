@@ -50,7 +50,13 @@ class AppConstants {
   static const bool enableDebugMode = false;
   static const bool enableLogging = true;
   static const bool enableAnalytics = false;
-  
+
+  // URLs e links
+  static const String documentationUrl = 'https://docs.example.com';
+  static const String supportUrl = 'https://support.example.com';
+  static const String privacyPolicyUrl = 'https://example.com/privacy';
+  static const String termsOfServiceUrl = 'https://example.com/terms';
+
   // ===== LIMITES =====
   static const int maxFileSize = 10 * 1024 * 1024; // 10MB
   static const int maxImageSize = 5 * 1024 * 1024; // 5MB

@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/auth_provider.dart';
-import '../providers/demanda_provider.dart';
 import '../providers/responsavel_provider.dart';
 
 import '../utils/responsive.dart';

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:go_router/go_router.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:provider/provider.dart';
-import '../../models/demanda_ambiente.model.dart';
-import '../../models/demanda_educacao_model.dart';
-import '../../models/demanda_saude_model.dart';
-import '../../providers/demanda_provider.dart';
+
+import '../../constants/constants.dart';
 import '../../utils/responsive.dart';
 import '../../widgets/dashboard_card.dart';
+import '../../widgets/sidebar.dart';
 
 class DemandasScreen extends StatefulWidget {
   const DemandasScreen({super.key});
@@ -15,506 +17,886 @@ class DemandasScreen extends StatefulWidget {
 }
 
 class _DemandasScreenState extends State<DemandasScreen>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late TabController _tabController;
-  String _searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
+  String _currentFilter = '';
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
     
-    // Carregar dados ao inicializar
+    // Carregar dados iniciais
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<DemandaProvider>().loadAllDemandas();
+      _loadInitialData();
     });
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
+  void _loadInitialData() {
+    final demandaProvider = Provider.of<DemandaProvider>(context, listen: false);
+    // Assumindo que existem estes métodos no provider
+    demandaProvider.loadDemandasSaude();
+    demandaProvider.loadDemandasEducacao();
+    demandaProvider.loadDemandasAmbiente();
+  }
+
+  void _onSearchChanged(String query) {
+    setState(() {
+      _currentFilter = query;
+    });
+  }
+
+  void _clearSearch() {
+    _searchController.clear();
+    setState(() {
+      _currentFilter = '';
+    });
+  }
+
   @override
-  Widget build(BuildContext context) => Scaffold(
-      body: Consumer<DemandaProvider>(
-        builder: (context, demandaProvider, child) => RefreshIndicator(
-            onRefresh: () => demandaProvider.loadAllDemandas(),
-            child: Column(
-              children: [
-                // Header com estatísticas
-                _buildHeader(demandaProvider),
-                
-                // Barra de pesquisa
-                _buildSearchBar(),
-                
-                // Tabs
-                _buildTabBar(),
-                
-                // Conteúdo das tabs
-                Expanded(
-                  child: TabBarView(
-                    controller: _tabController,
-                    children: [
-                      _buildOverviewTab(demandaProvider),
-                      _buildSaudeTab(demandaProvider),
-                      _buildEducacaoTab(demandaProvider),
-                      _buildAmbienteTab(demandaProvider),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+  Widget build(BuildContext context) {
+    // Usar o widget Responsive existente
+    return Responsive.isMobile(context) 
+        ? _buildMobileLayout() 
+        : _buildDesktopLayout();
+  }
+
+  Widget _buildMobileLayout() => Scaffold(
+      appBar: AppBar(
+        title: const Text('Demandas'),
+        backgroundColor: AppConstants.primaryColor,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(100),
+          child: Column(
+            children: [
+              _buildSearchBar(),
+              _buildTabBar(),
+            ],
           ),
+        ),
+      ),
+      body: _buildTabBarView(),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => context.go('/demandas/nova'),
+        backgroundColor: AppConstants.primaryColor,
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
 
-  Widget _buildHeader(DemandaProvider provider) => Container(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildDesktopLayout() => Scaffold(
+      body: Row(
         children: [
-          Text(
-            'Demandas',
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.bold,
+          // Usar o SideBar existente
+          const SideBar(),
+          Expanded(
+            child: Column(
+              children: [
+                _buildDesktopHeader(),
+                Expanded(child: _buildTabBarView()),
+              ],
             ),
           ),
-          const SizedBox(height: 16),
-          
-          // Cards de estatísticas
-          if (Responsive.isDesktop(context))
-            Row(
-              children: [
-                Expanded(
-                  child: DashboardCard(
-                    title: 'Total Saúde',
-                    value: provider.totalDemandasSaude.toString(),
-                    icon: Icons.health_and_safety,
-                    color: Colors.red,
-                    subtitle: '',
-                    isCompact: true,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: DashboardCard(
-                    title: 'Total Educação',
-                    value: provider.totalDemandasEducacao.toString(),
-                    icon: Icons.school,
-                    color: Colors.blue,
-                    subtitle: '',
-                    isCompact: true,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: DashboardCard(
-                    title: 'Total Ambiente',
-                    value: provider.totalDemandasAmbiente.toString(),
-                    icon: Icons.pets,
-                    color: Colors.green,
-                    subtitle: '',
-                    isCompact: true,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: DashboardCard(
-                    title: 'Grupos Prioritários',
-                    value: provider.totalGruposPrioritarios.toString(),
-                    icon: Icons.priority_high,
-                    color: Colors.orange,
-                    subtitle: '',
-                    isCompact: true,
-                  ),
-                ),
-              ],
-            )
-          else
-            Column(
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: DashboardCard(
-                        title: 'Saúde',
-                        value: provider.totalDemandasSaude.toString(),
-                        icon: Icons.health_and_safety,
-                        color: Colors.red,
-                        isCompact: true,
-                        subtitle: '',
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: DashboardCard(
-                        title: 'Educação',
-                        value: provider.totalDemandasEducacao.toString(),
-                        icon: Icons.school,
-                        color: Colors.blue, subtitle: '',
-                        isCompact: true,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: DashboardCard(
-                        title: 'Ambiente',
-                        value: provider.totalDemandasAmbiente.toString(),
-                        icon: Icons.pets,
-                        color: Colors.green, subtitle: '',
-                        isCompact: true,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: DashboardCard(
-                        title: 'Prioritários',
-                        value: provider.totalGruposPrioritarios.toString(),
-                        icon: Icons.priority_high,
-                        color: Colors.orange, subtitle: '',
-                        isCompact: true,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
         ],
       ),
     );
 
-  Widget _buildSearchBar() => Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+  Widget _buildDesktopHeader() => Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 3,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                MdiIcons.clipboardTextMultiple,
+                size: 32,
+                color: AppConstants.primaryColor,
+              ),
+              const SizedBox(width: 16),
+              Text(
+                'Gerenciamento de Demandas',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: AppConstants.primaryColor,
+                ),
+              ),
+              const Spacer(),
+              ElevatedButton.icon(
+                onPressed: () => context.go('/demandas/nova'),
+                icon: const Icon(Icons.add),
+                label: const Text('Nova Demanda'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppConstants.primaryColor,
+                  foregroundColor: Colors.white,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _buildSearchBar(),
+          const SizedBox(height: 16),
+          _buildTabBar(),
+        ],
+      ),
+    );
+
+  Widget _buildSearchBar() => Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: TextField(
+        controller: _searchController,
+        onChanged: _onSearchChanged,
         decoration: InputDecoration(
-          hintText: 'Pesquisar por CPF, nome ou código...',
+          hintText: 'Buscar demandas por nome, CPF ou descrição...',
           prefixIcon: const Icon(Icons.search),
+          suffixIcon: _currentFilter.isNotEmpty
+              ? IconButton(
+                  onPressed: _clearSearch,
+                  icon: const Icon(Icons.clear),
+                )
+              : null,
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey.shade300),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey.shade300),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: AppConstants.primaryColor),
           ),
           filled: true,
-          fillColor: Colors.grey[100],
+          fillColor: Colors.grey.shade50,
         ),
-        onChanged: (value) {
-          setState(() {
-            _searchQuery = value;
-          });
-        },
       ),
     );
 
   Widget _buildTabBar() => Container(
-      margin: const EdgeInsets.all(16.0),
+      margin: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(8),
+        color: Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(12),
       ),
       child: TabBar(
         controller: _tabController,
         indicator: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          color: Theme.of(context).primaryColor,
+          color: AppConstants.primaryColor,
+          borderRadius: BorderRadius.circular(12),
         ),
         labelColor: Colors.white,
-        unselectedLabelColor: Colors.grey[600],
+        unselectedLabelColor: Colors.grey.shade700,
+        labelStyle: const TextStyle(fontWeight: FontWeight.bold),
         tabs: const [
-          Tab(text: 'Visão Geral'),
-          Tab(text: 'Saúde'),
-          Tab(text: 'Educação'),
-          Tab(text: 'Ambiente'),
+          Tab(
+            icon: Icon(Icons.local_hospital),
+            text: 'Saúde',
+          ),
+          Tab(
+            icon: Icon(Icons.school),
+            text: 'Educação',
+          ),
+          Tab(
+            icon: Icon(Icons.pets),
+            text: 'Ambiente',
+          ),
         ],
       ),
     );
 
-  Widget _buildOverviewTab(DemandaProvider provider) {
-    if (provider.isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
+  Widget _buildTabBarView() => TabBarView(
+      controller: _tabController,
+      children: [
+        _buildSaudeTab(),
+        _buildEducacaoTab(),
+        _buildAmbienteTab(),
+      ],
+    );
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Grupos Prioritários',
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          const SizedBox(height: 16),
-          
-          if (provider.gruposPrioritarios.isEmpty)
-            const Center(
-              child: Text('Nenhum grupo prioritário encontrado'),
-            )
-          else
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: provider.gruposPrioritarios.length,
-              itemBuilder: (context, index) {
-                final demanda = provider.gruposPrioritarios[index];
-                return _buildSaudeCard(demanda);
-              },
+  Widget _buildSaudeTab() => Consumer<DemandaProvider>(
+      builder: (context, provider, child) {
+        if (provider.isLoading) {
+          return const Center(
+            child: SpinKitFadingCircle(
+              color: AppConstants.primaryColor,
+              size: 50.0,
             ),
+          );
+        }
+
+        // Assumindo que existe uma lista demandasSaude no provider
+        final demandas = provider.demandasSaude ?? [];
+        final filteredDemandas = _filterDemandas(demandas);
+        
+        // Calcular prioritários baseado nos dados
+        final prioritarios = filteredDemandas.where(_isPrioritario
+        ).toList();
+
+        return Column(
+          children: [
+            if (prioritarios.isNotEmpty) ...[
+              _buildPriorityAlert(prioritarios.length),
+              const SizedBox(height: 16),
+            ],
+            _buildStatsCards([
+              _StatsCardData(
+                title: 'Total',
+                value: filteredDemandas.length.toString(),
+                icon: Icons.local_hospital,
+                color: Colors.blue,
+              ),
+              _StatsCardData(
+                title: 'Prioritários',
+                value: prioritarios.length.toString(),
+                icon: Icons.priority_high,
+                color: Colors.red,
+              ),
+              _StatsCardData(
+                title: 'Com CID',
+                value: filteredDemandas.where((d) => _getCid(d)?.isNotEmpty == true).length.toString(),
+                icon: Icons.medical_services,
+                color: Colors.orange,
+              ),
+            ]),
+            const SizedBox(height: 16),
+            Expanded(
+              child: filteredDemandas.isEmpty
+                  ? _buildEmptyState('Nenhuma demanda de saúde encontrada')
+                  : _buildDemandaList(filteredDemandas, _buildSaudeCard),
+            ),
+          ],
+        );
+      },
+    );
+
+  Widget _buildEducacaoTab() => Consumer<DemandaProvider>(
+      builder: (context, provider, child) {
+        if (provider.isLoading) {
+          return const Center(
+            child: SpinKitFadingCircle(
+              color: AppConstants.primaryColor,
+              size: 50.0,
+            ),
+          );
+        }
+
+        final demandas = provider.demandasEducacao ?? [];
+        final filteredDemandas = _filterDemandas(demandas);
+
+        return Column(
+          children: [
+            _buildStatsCards([
+              _StatsCardData(
+                title: 'Total',
+                value: filteredDemandas.length.toString(),
+                icon: Icons.school,
+                color: Colors.green,
+              ),
+              _StatsCardData(
+                title: 'Manhã',
+                value: filteredDemandas.where((d) => _getTurno(d) == 'M').length.toString(),
+                icon: Icons.wb_sunny,
+                color: Colors.amber,
+              ),
+              _StatsCardData(
+                title: 'Tarde',
+                value: filteredDemandas.where((d) => _getTurno(d) == 'T').length.toString(),
+                icon: Icons.wb_twilight,
+                color: Colors.deepOrange,
+              ),
+            ]),
+            const SizedBox(height: 16),
+            Expanded(
+              child: filteredDemandas.isEmpty
+                  ? _buildEmptyState('Nenhuma demanda de educação encontrada')
+                  : _buildDemandaList(filteredDemandas, _buildEducacaoCard),
+            ),
+          ],
+        );
+      },
+    );
+
+  Widget _buildAmbienteTab() => Consumer<DemandaProvider>(
+      builder: (context, provider, child) {
+        if (provider.isLoading) {
+          return const Center(
+            child: SpinKitFadingCircle(
+              color: AppConstants.primaryColor,
+              size: 50.0,
+            ),
+          );
+        }
+
+        final demandas = provider.demandasAmbiente ?? [];
+        final filteredDemandas = _filterDemandas(demandas);
+
+        return Column(
+          children: [
+            _buildStatsCards([
+              _StatsCardData(
+                title: 'Total',
+                value: filteredDemandas.length.toString(),
+                icon: Icons.pets,
+                color: Colors.teal,
+              ),
+              _StatsCardData(
+                title: 'Cães',
+                value: filteredDemandas.where((d) => _getEspecie(d)?.toLowerCase().contains('cão') == true).length.toString(),
+                icon: MdiIcons.dog,
+                color: Colors.brown,
+              ),
+              _StatsCardData(
+                title: 'Gatos',
+                value: filteredDemandas.where((d) => _getEspecie(d)?.toLowerCase().contains('gato') == true).length.toString(),
+                icon: MdiIcons.cat,
+                color: Colors.purple,
+              ),
+            ]),
+            const SizedBox(height: 16),
+            Expanded(
+              child: filteredDemandas.isEmpty
+                  ? _buildEmptyState('Nenhuma demanda de ambiente encontrada')
+                  : _buildDemandaList(filteredDemandas, _buildAmbienteCard),
+            ),
+          ],
+        );
+      },
+    );
+
+  Widget _buildPriorityAlert(int count) => Container(
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.red.shade50,
+        border: Border.all(color: Colors.red.shade200),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.priority_high, color: Colors.red.shade700),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Grupos Prioritários',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.red.shade700,
+                  ),
+                ),
+                Text(
+                  '$count pessoas em grupos prioritários precisam de atenção especial',
+                  style: TextStyle(color: Colors.red.shade600),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
-  }
 
-  Widget _buildSaudeTab(DemandaProvider provider) {
-    if (provider.isLoadingSaude) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    final filteredDemandas = provider.filterDemandasSaude(search: _searchQuery);
-
-    return Column(
-      children: [
-        // Filtros
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            children: [
-              Expanded(
-                child: DropdownButtonFormField<String>(
-                  decoration: const InputDecoration(
-                    labelText: 'Filtrar por Gênero',
-                    border: OutlineInputBorder(),
-                  ),
-                  items: const [
-                    DropdownMenuItem(value: '', child: Text('Todos')),
-                    DropdownMenuItem(value: 'M', child: Text('Masculino')),
-                    DropdownMenuItem(value: 'F', child: Text('Feminino')),
-                  ],
-                  onChanged: (value) {
-                    // Implementar filtro
-                  },
-                ),
-              ),
-            ],
+  Widget _buildStatsCards(List<_StatsCardData> stats) => Container(
+      height: 100,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        children: stats.map((stat) => Expanded(
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 4),
+            child: DashboardCard(
+              title: stat.title,
+              value: stat.value,
+              icon: stat.icon,
+              color: stat.color,
+              isCompact: true, subtitle: '',
+            ),
           ),
-        ),
-        
-        // Lista
-        Expanded(
-          child: filteredDemandas.isEmpty
-              ? const Center(child: Text('Nenhuma demanda de saúde encontrada'))
-              : ListView.builder(
-                  padding: const EdgeInsets.all(16.0),
-                  itemCount: filteredDemandas.length,
-                  itemBuilder: (context, index) {
-                    final demanda = filteredDemandas[index];
-                    return _buildSaudeCard(demanda);
-                  },
-                ),
-        ),
-      ],
+        )).toList(),
+      ),
     );
-  }
 
-  Widget _buildEducacaoTab(DemandaProvider provider) {
-    if (provider.isLoadingEducacao) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    final filteredDemandas = provider.filterDemandasEducacao(search: _searchQuery);
-
-    return Column(
-      children: [
-        // Filtros
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            children: [
-              Expanded(
-                child: DropdownButtonFormField<String>(
-                  decoration: const InputDecoration(
-                    labelText: 'Filtrar por Turno',
-                    border: OutlineInputBorder(),
-                  ),
-                  items: const [
-                    DropdownMenuItem(value: '', child: Text('Todos')),
-                    DropdownMenuItem(value: 'matutino', child: Text('Matutino')),
-                    DropdownMenuItem(value: 'vespertino', child: Text('Vespertino')),
-                    DropdownMenuItem(value: 'noturno', child: Text('Noturno')),
-                  ],
-                  onChanged: (value) {
-                    // Implementar filtro
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
-        
-        // Lista
-        Expanded(
-          child: filteredDemandas.isEmpty
-              ? const Center(child: Text('Nenhuma demanda de educação encontrada'))
-              : ListView.builder(
-                  padding: const EdgeInsets.all(16.0),
-                  itemCount: filteredDemandas.length,
-                  itemBuilder: (context, index) {
-                    final demanda = filteredDemandas[index];
-                    return _buildEducacaoCard(demanda);
-                  },
-                ),
-        ),
-      ],
+  Widget _buildDemandaList<T>(List<T> demandas, Widget Function(T) cardBuilder) => ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: demandas.length,
+      itemBuilder: (context, index) => cardBuilder(demandas[index]),
     );
-  }
 
-  Widget _buildAmbienteTab(DemandaProvider provider) {
-    if (provider.isLoadingAmbiente) {
-      return const Center(child: CircularProgressIndicator());
-    }
+  Widget _buildSaudeCard(dynamic demanda) {
+    final isPrioritario = _isPrioritario(demanda);
+    final cpf = _getCpf(demanda);
+    final cid = _getCid(demanda);
+    final genero = _getGenero(demanda);
+    final localRef = _getLocalRef(demanda);
 
-    final filteredDemandas = provider.filterDemandasAmbiente(search: _searchQuery);
-
-    return Column(
-      children: [
-        // Filtros
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            children: [
-              Expanded(
-                child: DropdownButtonFormField<String>(
-                  decoration: const InputDecoration(
-                    labelText: 'Filtrar por Espécie',
-                    border: OutlineInputBorder(),
-                  ),
-                  items: const [
-                    DropdownMenuItem(value: '', child: Text('Todas')),
-                    DropdownMenuItem(value: 'cao', child: Text('Cão')),
-                    DropdownMenuItem(value: 'gato', child: Text('Gato')),
-                    DropdownMenuItem(value: 'ave', child: Text('Ave')),
-                    DropdownMenuItem(value: 'outro', child: Text('Outro')),
-                  ],
-                  onChanged: (value) {
-                    // Implementar filtro
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
-        
-        // Lista
-        Expanded(
-          child: filteredDemandas.isEmpty
-              ? const Center(child: Text('Nenhuma demanda de ambiente encontrada'))
-              : ListView.builder(
-                  padding: const EdgeInsets.all(16.0),
-                  itemCount: filteredDemandas.length,
-                  itemBuilder: (context, index) {
-                    final demanda = filteredDemandas[index];
-                    return _buildAmbienteCard(demanda);
-                  },
-                ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSaudeCard(DemandaSaude demanda) => Card(
-      margin: const EdgeInsets.only(bottom: 8.0),
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: demanda.isPrioritario ? Colors.orange : Colors.red,
+          backgroundColor: isPrioritario
+              ? Colors.red.shade100
+              : Colors.blue.shade100,
           child: Icon(
-            demanda.isPrioritario ? Icons.priority_high : Icons.health_and_safety,
-            color: Colors.white,
+            Icons.local_hospital,
+            color: isPrioritario
+                ? Colors.red.shade700
+                : Colors.blue.shade700,
           ),
         ),
-        title: Text('CPF: ${demanda.cpf}'),
+        title: Text(
+          'CPF: $cpf',
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (demanda.saudeCid != null)
-              Text('CID: ${demanda.saudeCid}'),
-            Text('Gênero: ${demanda.genero ?? "Não informado"}'),
-            if (demanda.isPrioritario)
-              Text(
-                'Prioritário: ${demanda.statusPrioridade}',
-                style: const TextStyle(
-                  color: Colors.orange,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+            if (cid?.isNotEmpty == true)
+              Text('CID: $cid'),
+            if (genero?.isNotEmpty == true)
+              Text('Gênero: $genero'),
+            if (localRef?.isNotEmpty == true)
+              Text('Local Ref.: $localRef'),
           ],
         ),
-        trailing: demanda.isPrioritario
-            ? const Icon(Icons.star, color: Colors.orange)
+        trailing: isPrioritario
+            ? Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade100,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  'Prioritário',
+                  style: TextStyle(
+                    color: Colors.red.shade700,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              )
             : null,
-        onTap: () {
-          // Navegar para detalhes
-        },
+        onTap: () => _showDemandaDetails(demanda),
       ),
     );
+  }
 
-  Widget _buildEducacaoCard(DemandaEducacao demanda) => Card(
-      margin: const EdgeInsets.only(bottom: 8.0),
+  Widget _buildEducacaoCard(dynamic demanda) {
+    final nome = _getNome(demanda);
+    final cpf = _getCpf(demanda);
+    final turno = _getTurno(demanda);
+    final demandaTexto = _getDemandaTexto(demanda);
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
-        leading: const CircleAvatar(
-          backgroundColor: Colors.blue,
-          child: Icon(Icons.school, color: Colors.white),
+        leading: CircleAvatar(
+          backgroundColor: Colors.green.shade100,
+          child: Icon(Icons.school, color: Colors.green.shade700),
         ),
-        title: Text(demanda.nome),
+        title: Text(
+          nome ?? 'Nome não informado',
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('CPF: ${demanda.cpf}'),
-            Text('Idade: ${demanda.idade} anos'),
-            Text('Turno: ${demanda.turnoFormatado}'),
-            if (demanda.demanda != null)
-              Text('Demanda: ${demanda.demanda}'),
+            Text('CPF: $cpf'),
+            if (turno?.isNotEmpty == true)
+              Text('Turno: ${_getTurnoText(turno)}'),
+            if (demandaTexto?.isNotEmpty == true)
+              Text('Demanda: $demandaTexto'),
           ],
         ),
-        onTap: () {
-          // Navegar para detalhes
-        },
+        trailing: turno?.isNotEmpty == true
+            ? Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: _getTurnoColor(turno).withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  _getTurnoText(turno),
+                  style: TextStyle(
+                    color: _getTurnoColor(turno),
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              )
+            : null,
+        onTap: () => _showDemandaDetails(demanda),
       ),
     );
+  }
 
-  Widget _buildAmbienteCard(DemandaAmbiente demanda) => Card(
-      margin: const EdgeInsets.only(bottom: 8.0),
+  Widget _buildAmbienteCard(dynamic demanda) {
+    final cpf = _getCpf(demanda);
+    final especie = _getEspecie(demanda);
+    final quantidade = _getQuantidade(demanda);
+    final porte = _getPorte(demanda);
+    final vacinado = _getVacinado(demanda);
+    final castrado = _getCastrado(demanda);
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
-        leading: const CircleAvatar(
-          backgroundColor: Colors.green,
-          child: Icon(Icons.pets, color: Colors.white),
+        leading: CircleAvatar(
+          backgroundColor: Colors.teal.shade100,
+          child: Icon(Icons.pets, color: Colors.teal.shade700),
         ),
-        title: Text('CPF: ${demanda.cpf}'),
+        title: Text(
+          'CPF: $cpf',
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Espécie: ${demanda.especieFormatada}'),
-            if (demanda.quantidade != null)
-              Text('Quantidade: ${demanda.quantidade}'),
-            Text('Porte: ${demanda.porteFormatado}'),
-            Text('Status: ${demanda.statusSaude}'),
-            if (demanda.necessidades != 'Nenhuma')
-              Text(
-                'Necessidades: ${demanda.necessidades}',
-                style: const TextStyle(
-                  color: Colors.red,
-                  fontWeight: FontWeight.bold,
+            if (especie?.isNotEmpty == true)
+              Text('Espécie: $especie'),
+            if (quantidade != null)
+              Text('Quantidade: $quantidade'),
+            if (porte?.isNotEmpty == true)
+              Text('Porte: $porte'),
+          ],
+        ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (vacinado == 'S')
+              Container(
+                margin: const EdgeInsets.only(right: 4),
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: Colors.green.shade100,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.vaccines,
+                  size: 16,
+                  color: Colors.green.shade700,
+                ),
+              ),
+            if (castrado == 'S')
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade100,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.health_and_safety,
+                  size: 16,
+                  color: Colors.blue.shade700,
                 ),
               ),
           ],
         ),
-        trailing: demanda.necessidades != 'Nenhuma'
-            ? const Icon(Icons.warning, color: Colors.red)
-            : const Icon(Icons.check, color: Colors.green),
-        onTap: () {
-          // Navegar para detalhes
-        },
+        onTap: () => _showDemandaDetails(demanda),
       ),
     );
+  }
+
+  Widget _buildEmptyState(String message) => Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.inbox_outlined,
+            size: 64,
+            color: Colors.grey.shade400,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            message,
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey.shade600,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton.icon(
+            onPressed: _loadInitialData,
+            icon: const Icon(Icons.refresh),
+            label: const Text('Recarregar'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppConstants.primaryColor,
+              foregroundColor: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+
+  List<T> _filterDemandas<T>(List<T> demandas) {
+    if (_currentFilter.isEmpty) return demandas;
+    
+    return demandas.where((demanda) {
+      final searchLower = _currentFilter.toLowerCase();
+      
+      // Busca genérica usando toString
+      final demandaString = demanda.toString().toLowerCase();
+      if (demandaString.contains(searchLower)) {
+        return true;
+      }
+      
+      // Busca específica por campos comuns
+      try {
+        final cpf = _getCpf(demanda);
+        final nome = _getNome(demanda);
+        final demandaTexto = _getDemandaTexto(demanda);
+        final especie = _getEspecie(demanda);
+        final cid = _getCid(demanda);
+        
+        return (cpf?.contains(_currentFilter) == true) ||
+               (nome?.toLowerCase().contains(searchLower) == true) ||
+               (demandaTexto?.toLowerCase().contains(searchLower) == true) ||
+               (especie?.toLowerCase().contains(searchLower) == true) ||
+               (cid?.toLowerCase().contains(searchLower) == true);
+      } catch (e) {
+        return false;
+      }
+    }).toList();
+  }
+
+  // Métodos auxiliares para extrair dados dos objetos de forma segura
+  String? _getCpf(dynamic obj) {
+    try {
+      return obj?.cpf?.toString();
+    } catch (e) {
+      return null;
+    }
+  }
+
+  String? _getNome(dynamic obj) {
+    try {
+      return obj?.nome?.toString();
+    } catch (e) {
+      return null;
+    }
+  }
+
+  String? _getCid(dynamic obj) {
+    try {
+      return obj?.saudeCid?.toString();
+    } catch (e) {
+      return null;
+    }
+  }
+
+  String? _getGenero(dynamic obj) {
+    try {
+      return obj?.genero?.toString();
+    } catch (e) {
+      return null;
+    }
+  }
+
+  String? _getLocalRef(dynamic obj) {
+    try {
+      return obj?.localRef?.toString();
+    } catch (e) {
+      return null;
+    }
+  }
+
+  String? _getTurno(dynamic obj) {
+    try {
+      return obj?.turno?.toString();
+    } catch (e) {
+      return null;
+    }
+  }
+
+  String? _getDemandaTexto(dynamic obj) {
+    try {
+      return obj?.demanda?.toString();
+    } catch (e) {
+      return null;
+    }
+  }
+
+  String? _getEspecie(dynamic obj) {
+    try {
+      return obj?.especie?.toString();
+    } catch (e) {
+      return null;
+    }
+  }
+
+  int? _getQuantidade(dynamic obj) {
+    try {
+      return obj?.quantidade;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  String? _getPorte(dynamic obj) {
+    try {
+      return obj?.porte?.toString();
+    } catch (e) {
+      return null;
+    }
+  }
+
+  String? _getVacinado(dynamic obj) {
+    try {
+      return obj?.vacinado?.toString();
+    } catch (e) {
+      return null;
+    }
+  }
+
+  String? _getCastrado(dynamic obj) {
+    try {
+      return obj?.castrado?.toString();
+    } catch (e) {
+      return null;
+    }
+  }
+
+  bool _isPrioritario(dynamic obj) {
+    try {
+      return obj?.gestPuerNutriz == 'S' || 
+             obj?.mobReduzida == 'S' || 
+             obj?.pcdOuMental == 'S';
+    } catch (e) {
+      return false;
+    }
+  }
+
+  String _getTurnoText(String? turno) {
+    switch (turno) {
+      case 'M':
+        return 'Manhã';
+      case 'T':
+        return 'Tarde';
+      case 'N':
+        return 'Noite';
+      default:
+        return turno ?? '';
+    }
+  }
+
+  Color _getTurnoColor(String? turno) {
+    switch (turno) {
+      case 'M':
+        return Colors.amber;
+      case 'T':
+        return Colors.deepOrange;
+      case 'N':
+        return Colors.indigo;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  void _showDemandaDetails(dynamic demanda) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Detalhes da Demanda'),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildDetailRow('CPF', _getCpf(demanda)),
+              if (_getNome(demanda) != null)
+                _buildDetailRow('Nome', _getNome(demanda)),
+              if (_getGenero(demanda) != null)
+                _buildDetailRow('Gênero', _getGenero(demanda)),
+              if (_getCid(demanda) != null)
+                _buildDetailRow('CID', _getCid(demanda)),
+              if (_getEspecie(demanda) != null)
+                _buildDetailRow('Espécie', _getEspecie(demanda)),
+              if (_getQuantidade(demanda) != null)
+                _buildDetailRow('Quantidade', _getQuantidade(demanda).toString()),
+              // Adicione mais campos conforme necessário
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Fechar'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              // Implementar edição
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppConstants.primaryColor,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Editar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String? value) {
+    if (value == null || value.isEmpty) return const SizedBox.shrink();
+    
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 100,
+            child: Text(
+              '$label:',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          Expanded(child: Text(value)),
+        ],
+      ),
+    );
+  }
+}
+
+class _StatsCardData {
+  final String title;
+  final String value;
+  final IconData icon;
+  final Color color;
+
+  _StatsCardData({
+    required this.title,
+    required this.value,
+    required this.icon,
+    required this.color,
+  });
 }
