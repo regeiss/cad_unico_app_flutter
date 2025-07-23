@@ -3,45 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class User {
-  final int id;
-  final String username;
-  final String email;
-  final String? firstName;
-  final String? lastName;
-  final bool isStaff;
-  final bool isActive;
-  final DateTime dateJoined;
-
-  User({
-    required this.id,
-    required this.username,
-    required this.email,
-    this.firstName,
-    this.lastName,
-    required this.isStaff,
-    required this.isActive,
-    required this.dateJoined,
-  });
-
-  factory User.fromJson(Map<String, dynamic> json) => User(
-        id: json['id'],
-        username: json['username'],
-        email: json['email'],
-        firstName: json['first_name'],
-        lastName: json['last_name'],
-        isStaff: json['is_staff'] ?? false,
-        isActive: json['is_active'] ?? true,
-        dateJoined: DateTime.parse(json['date_joined']),
-      );
-
-  String get displayName {
-    if (firstName != null && lastName != null) {
-      return '$firstName $lastName';
-    }
-    return username;
-  }
-}
+import '../models/user_model.dart';
 
 class AuthProvider extends ChangeNotifier {
   String? _token;

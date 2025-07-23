@@ -90,9 +90,9 @@ class _ResponsaveisScreenState extends State<ResponsaveisScreen> {
         final width = constraints.maxWidth;
         
         // Usando sua classe Responsive
-        if (Responsive.isDesktop(width)) {
+        if (Responsive.isDesktop(context)) {
           return _buildDesktopLayout();
-        } else if (Responsive.isTablet(width)) {
+        } else if (Responsive.isTablet(context)) {
           return _buildTabletLayout();
         } else {
           return _buildMobileLayout();
