@@ -1,193 +1,145 @@
-class Membro {
-  final String cpf;
-  final String nome;
-  final String cpfResponsavel;
-  final DateTime? timestamp;
-  final String? status;
-  final String? cpfResponsavelNome; // Campo adicional do serializer
+import 'package:flutter/material.dart';
+import '../models/membro_model.dart';
 
-  const Membro({
-    required this.cpf,
-    required this.nome,
-    required this.cpfResponsavel,
-    this.timestamp,
-    this.status,
-    this.cpfResponsavelNome,
-  });
+class MembroProvider extends ChangeNotifier {
+  List<Membro> _membros = [];
+  bool _isLoading = false;
+  String? _error;
+  int _currentPage = 1;
+  bool _hasMore = true;
+  String _searchQuery = '';
 
-  // Factory constructor para criar instância a partir de JSON
-  factory Membro.fromJson(Map<String, dynamic> json) => Membro(
-      cpf: json['cpf'] ?? '',
-      nome: json['nome'] ?? '',
-      cpfResponsavel: json['cpf_responsavel'] ?? '',
-      timestamp: json['timestamp'] != null 
-          ? DateTime.tryParse(json['timestamp'])
-          : null,
-      status: json['status'],
-      cpfResponsavelNome: json['cpf_responsavel_nome'],
-    );
+  // Getters
+  List<Membro> get membros => _membros;
+  bool get isLoading => _isLoading;
+  String? get error => _error;
+  int get currentPage => _currentPage;
+  bool get hasMore => _hasMore;
+  String get searchQuery => _searchQuery;
+  int get totalMembros => _membros.length;
 
-  // Método para converter instância para JSON
-  Map<String, dynamic> toJson() => {
-      'cpf': cpf,
-      'nome': nome,
-      'cpf_responsavel': cpfResponsavel,
-      'timestamp': timestamp?.toIso8601String(),
-      'status': status,
-      // Não incluir cpf_responsavel_nome no toJson pois é read_only
-    };
+  // Filtros
+  List<Membro> get membrosAtivos =>
+      _membros.where((r) => r.status == 'A').toList();
 
-  // Método copyWith para criar nova instância com campos modificados
-  Membro copyWith({
-    String? cpf,
-    String? nome,
-    String? cpfResponsavel,
-    DateTime? timestamp,
-    String? status,
-    String? cpfResponsavelNome,
-  }) => Membro(
-      cpf: cpf ?? this.cpf,
-      nome: nome ?? this.nome,
-      cpfResponsavel: cpfResponsavel ?? this.cpfResponsavel,
-      timestamp: timestamp ?? this.timestamp,
-      status: status ?? this.status,
-      cpfResponsavelNome: cpfResponsavelNome ?? this.cpfResponsavelNome,
-    );
+  List<Membro> get membrosInativos =>
+      _membros.where((r) => r.status == 'I').toList();
 
-  // Getters para propriedades calculadas
-  bool get isAtivo => status == 'A';
-  bool get isInativo => status == 'I';
-  
-  String get statusDescricao {
-    switch (status) {
-      case 'A':
-        return 'Ativo';
-      case 'I':
-        return 'Inativo';
-      case 'P':
-        return 'Pendente';
-      case 'B':
-        return 'Bloqueado';
-      default:
-        return status ?? 'Não definido';
+  // Carregar responsáveis
+  Future<void> loadMembros({bool refresh = false}) async {
+    if (refresh) {
+      _currentPage = 1;
+      _membros.clear();
+      _hasMore = true;
+    }
+
+    if (_isLoading || !_hasMore) return;
+
+    _setLoading(true);
+    _setError(null);
+
+    try {
+      // TODO: Implementar chamada para API
+      // Por enquanto, simulando dados
+      await Future.delayed(const Duration(seconds: 1));
+
+      final mockData = _generateMockData();
+
+      if (refresh) {
+        _membros = mockData;
+      } else {
+        _membros.addAll(mockData);
+      }
+
+      _currentPage++;
+      _hasMore = mockData.length >= 20; // Simular fim dos dados
+    } catch (e) {
+      _setError('Erro ao carregar responsáveis: $e');
+    } finally {
+      _setLoading(false);
     }
   }
 
-  String get nomeResponsavel => cpfResponsavelNome ?? 'Nome não informado';
-
-  // Método para validar CPF básico (apenas formato)
-  bool get cpfValido => cpf.isNotEmpty && 
-           cpf.length == 11 && 
-           RegExp(r'^\d{11}$').hasMatch(cpf);
-
-  // Método para validar CPF do responsável
-  bool get cpfResponsavelValido => cpfResponsavel.isNotEmpty && 
-           cpfResponsavel.length == 11 && 
-           RegExp(r'^\d{11}$').hasMatch(cpfResponsavel);
-
-  // Método para formatar CPF para exibição
-  String get cpfFormatado {
-    if (cpf.length == 11) {
-      return '${cpf.substring(0, 3)}.${cpf.substring(3, 6)}.${cpf.substring(6, 9)}-${cpf.substring(9)}';
+  // Buscar responsável por CPF
+  Future<Membro?> buscarPorCpf(String cpf) async {
+    try {
+      // TODO: Implementar busca na API
+      return _membros.firstWhere(
+        (r) => r.cpf == cpf,
+        orElse: () => throw Exception('Responsável não encontrado'),
+      );
+    } catch (e) {
+      return null;
     }
-    return cpf;
   }
 
-  // Método para formatar CPF do responsável
-  String get cpfResponsavelFormatado {
-    if (cpfResponsavel.length == 11) {
-      return '${cpfResponsavel.substring(0, 3)}.${cpfResponsavel.substring(3, 6)}.${cpfResponsavel.substring(6, 9)}-${cpfResponsavel.substring(9)}';
+  // Adicionar responsável
+  Future<bool> adicionarMembro(Membro Membro) async {
+    try {
+      // TODO: Implementar POST na API
+      _membros.add(Membro);
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _setError('Erro ao adicionar responsável: $e');
+      return false;
     }
-    return cpfResponsavel;
   }
 
-  // Método para formatar data
-  String get timestampFormatado {
-    if (timestamp == null) return 'Data não informada';
-    
-    return '${timestamp!.day.toString().padLeft(2, '0')}/'
-           '${timestamp!.month.toString().padLeft(2, '0')}/'
-           '${timestamp!.year} '
-           '${timestamp!.hour.toString().padLeft(2, '0')}:'
-           '${timestamp!.minute.toString().padLeft(2, '0')}';
+  // Atualizar responsável
+  Future<bool> atualizarMembro(Membro Membro) async {
+    try {
+      // TODO: Implementar PUT na API
+      final index = _membros.indexWhere((r) => r.cpf == Membro.cpf);
+      if (index != -1) {
+        _membros[index] = Membro;
+        notifyListeners();
+        return true;
+      }
+      return false;
+    } catch (e) {
+      _setError('Erro ao atualizar responsável: $e');
+      return false;
+    }
   }
 
-  // Método toString para debug
-  @override
-  String toString() => 'Membro{cpf: $cpf, nome: $nome, cpfResponsavel: $cpfResponsavel, status: $status}';
-
-  // Operadores de igualdade
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    
-    return other is Membro && other.cpf == cpf;
+  // Pesquisar
+  void pesquisar(String query) {
+    _searchQuery = query;
+    notifyListeners();
   }
 
-  @override
-  int get hashCode => cpf.hashCode;
+  // Filtrar responsáveis por pesquisa
+  List<Membro> get MembrosFiltrados {
+    if (_searchQuery.isEmpty) return _membros;
 
-  // Método para verificar se os dados são válidos
-  bool get isValid => cpfValido && 
-           nome.isNotEmpty && 
-           nome.length >= 2 && 
-           nome.length <= 150 &&
-           cpfResponsavelValido;
-
-  // Lista de erros de validação
-  List<String> get validationErrors {
-    final errors = <String>[];
-    
-    if (!cpfValido) {
-      errors.add('CPF inválido');
-    }
-    
-    if (nome.isEmpty) {
-      errors.add('Nome é obrigatório');
-    } else if (nome.length < 2) {
-      errors.add('Nome deve ter pelo menos 2 caracteres');
-    } else if (nome.length > 150) {
-      errors.add('Nome deve ter no máximo 150 caracteres');
-    }
-    
-    if (!cpfResponsavelValido) {
-      errors.add('CPF do responsável inválido');
-    }
-    
-    return errors;
+    return _membros
+        .where((Membro) =>
+            Membro.nome.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+            Membro.cpf.contains(_searchQuery) ||
+            (Membro.nome?.toLowerCase().contains(_searchQuery.toLowerCase()) ??
+                false))
+        .toList();
   }
 
-  // Método estático para criar instância vazia/padrão
-  static Membro empty() => const Membro(
-      cpf: '',
-      nome: '',
-      cpfResponsavel: '',
-      status: 'A',
-    );
+  void _setLoading(bool loading) {
+    _isLoading = loading;
+    notifyListeners();
+  }
 
-  // Método estático para criar instância com dados mínimos
-  static Membro create({
-    required String cpf,
-    required String nome,
-    required String cpfResponsavel,
-    String status = 'A',
-  }) => Membro(
-      cpf: cpf,
-      nome: nome,
-      cpfResponsavel: cpfResponsavel,
-      status: status,
-      timestamp: DateTime.now(),
-    );
+  void _setError(String? error) {
+    _error = error;
+    notifyListeners();
+  }
 
-  // Método para converter para mapa simples (para debug/log)
-  Map<String, dynamic> toMap() => {
-      'cpf': cpf,
-      'nome': nome,
-      'cpfResponsavel': cpfResponsavel,
-      'timestamp': timestamp?.toIso8601String(),
-      'status': status,
-      'cpfResponsavelNome': cpfResponsavelNome,
-      'isValid': isValid,
-      'statusDescricao': statusDescricao,
-    };
+  // Gerar dados mock para teste
+  List<Membro> _generateMockData() => List.generate(
+      10,
+      (index) => Membro(
+            cpf: '123456789${index.toString().padLeft(2, '0')}',
+            nome: 'Responsável $index',
+            cpfResponsavel: '93000000',
+            status: index % 3 == 0 ? 'I' : 'A',
+            timestamp: DateTime.now().subtract(Duration(days: index)),
+          ));
 }

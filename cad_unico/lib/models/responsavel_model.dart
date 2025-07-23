@@ -49,6 +49,10 @@ class Responsavel {
         codRge: json['cod_rge'],
       );
 
+  bool get isAtivo => true;
+
+  String get enderecoCompleto => '';
+
   Map<String, dynamic> toJson() => {
         'cpf': cpf,
         'nome': nome,

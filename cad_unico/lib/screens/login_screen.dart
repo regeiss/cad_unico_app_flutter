@@ -19,10 +19,10 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
-  
+
   bool _obscurePassword = true;
   bool _rememberMe = false;
-  
+
   @override
   void dispose() {
     _usernameController.dispose();
@@ -34,7 +34,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    
+
     final success = await authProvider.login(
       _usernameController.text.trim(),
       _passwordController.text,
@@ -66,138 +66,143 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-      body: ResponsiveBreakpoints(
-        mobile: _buildMobileLayout(),
-        desktop: _buildDesktopLayout(),
-      ),
-    );
+        body: ResponsiveWidget(
+          mobile: _buildMobileLayout(),
+          desktop: _buildDesktopLayout(),
+        ),
+      );
 
   Widget _buildMobileLayout() => Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Theme.of(context).colorScheme.primary,
-            Theme.of(context).colorScheme.primary.withValues(alpha: (0.8)),
-          ],
-        ),
-      ),
-      child: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _buildLogo(),
-                const SizedBox(height: 32),
-                _buildLoginCard(),
-              ],
-            ),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Theme.of(context).colorScheme.primary,
+              Theme.of(context).colorScheme.primary.withValues(alpha: (0.8)),
+            ],
           ),
         ),
-      ),
-    );
-
-  Widget _buildDesktopLayout() => Row(
-      children: [
-        // Left side - Logo and branding
-        Expanded(
-          flex: 1,
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Theme.of(context).colorScheme.primary,
-                  Theme.of(context).colorScheme.primary.withValues(alpha: (0.8)),
-                ],
-              ),
-            ),
-            child: Center(
+        child: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _buildLogo(size: 120),
-                  const SizedBox(height: 24),
-                  Text(
-                    AppConstants.appName,
-                    style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 48),
-                    child: Text(
-                      AppConstants.appDescription,
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Colors.white.withValues(alpha: (0.9),
-                      ),
-                    ),
-                  ),
-              )],
+                  _buildLogo(),
+                  const SizedBox(height: 32),
+                  _buildLoginCard(),
+                ],
               ),
             ),
           ),
         ),
-        // Right side - Login form
-        Expanded(
-          flex: 1,
-          child: Container(
-            color: Theme.of(context).colorScheme.surface,
-            child: Center(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(48.0),
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 400),
-                  child: _buildLoginForm(),
+      );
+
+  Widget _buildDesktopLayout() => Row(
+        children: [
+          // Left side - Logo and branding
+          Expanded(
+            flex: 1,
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Theme.of(context).colorScheme.primary,
+                    Theme.of(context)
+                        .colorScheme
+                        .primary
+                        .withValues(alpha: (0.8)),
+                  ],
+                ),
+              ),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _buildLogo(size: 120),
+                    const SizedBox(height: 24),
+                    Text(
+                      AppConstants.appName,
+                      style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                    const SizedBox(height: 16),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 48),
+                      child: Text(
+                        AppConstants.appDescription,
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              color: Colors.white.withValues(
+                                alpha: (0.9),
+                              ),
+                            ),
+                      ),
+                    )
+                  ],
                 ),
               ),
             ),
           ),
-        ),
-      ],
-    );
-
-  Widget _buildLogo({double size = 80}) => Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(size / 4),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: (0.2)),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+          // Right side - Login form
+          Expanded(
+            flex: 1,
+            child: Container(
+              color: Theme.of(context).colorScheme.surface,
+              child: Center(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(48.0),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 400),
+                    child: _buildLoginForm(),
+                  ),
+                ),
+              ),
+            ),
           ),
         ],
-      ),
-      child: Icon(
-        Icons.admin_panel_settings,
-        size: size * 0.6,
-        color: Theme.of(context).colorScheme.primary,
-      ),
-    );
+      );
+
+  Widget _buildLogo({double size = 80}) => Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(size / 4),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: (0.2)),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Icon(
+          Icons.admin_panel_settings,
+          size: size * 0.6,
+          color: Theme.of(context).colorScheme.primary,
+        ),
+      );
 
   Widget _buildLoginCard() => Card(
-      elevation: 8,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: _buildLoginForm(),
-      ),
-    );
+        elevation: 8,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: _buildLoginForm(),
+        ),
+      );
 
   Widget _buildLoginForm() => Consumer<AuthProvider>(
-      builder: (context, authProvider, child) => Form(
+        builder: (context, authProvider, child) => Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -206,16 +211,16 @@ class _LoginScreenState extends State<LoginScreen> {
                 Text(
                   'Entrar',
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Acesse sua conta',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 32),
@@ -223,19 +228,19 @@ class _LoginScreenState extends State<LoginScreen> {
                 Text(
                   'Bem-vindo de volta!',
                   style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Entre com suas credenciais para acessar o sistema',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                 ),
                 const SizedBox(height: 32),
               ],
-              
+
               // Username field
               TextFormField(
                 controller: _usernameController,
@@ -253,9 +258,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   return null;
                 },
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Password field
               TextFormField(
                 controller: _passwordController,
@@ -265,7 +270,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   prefixIcon: const Icon(Icons.lock_outline),
                   suffixIcon: IconButton(
                     icon: Icon(
-                      _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                      _obscurePassword
+                          ? Icons.visibility
+                          : Icons.visibility_off,
                     ),
                     onPressed: () {
                       setState(() {
@@ -288,16 +295,16 @@ class _LoginScreenState extends State<LoginScreen> {
                   return null;
                 },
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Remember me checkbox
               Row(
                 children: [
                   Checkbox(
                     value: _rememberMe,
-                    onChanged: authProvider.isLoading 
-                        ? null 
+                    onChanged: authProvider.isLoading
+                        ? null
                         : (value) {
                             setState(() {
                               _rememberMe = value ?? false;
@@ -310,21 +317,23 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const Spacer(),
                   TextButton(
-                    onPressed: authProvider.isLoading ? null : () {
-                      // TODO: Implement forgot password
-                      Fluttertoast.showToast(
-                        msg: 'Funcionalidade em desenvolvimento',
-                        toastLength: Toast.LENGTH_SHORT,
-                        gravity: ToastGravity.BOTTOM,
-                      );
-                    },
+                    onPressed: authProvider.isLoading
+                        ? null
+                        : () {
+                            // TODO: Implement forgot password
+                            Fluttertoast.showToast(
+                              msg: 'Funcionalidade em desenvolvimento',
+                              toastLength: Toast.LENGTH_SHORT,
+                              gravity: ToastGravity.BOTTOM,
+                            );
+                          },
                     child: const Text('Esqueci a senha'),
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: 24),
-              
+
               // Login button
               SizedBox(
                 height: 48,
@@ -344,9 +353,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                 ),
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Error message
               if (authProvider.errorMessage != null)
                 Container(
@@ -367,7 +376,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: Text(
                           authProvider.errorMessage!,
                           style: TextStyle(
-                            color: Theme.of(context).colorScheme.onErrorContainer,
+                            color:
+                                Theme.of(context).colorScheme.onErrorContainer,
                             fontSize: 14,
                           ),
                         ),
@@ -388,9 +398,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     ],
                   ),
                 ),
-              
+
               const SizedBox(height: 24),
-              
+
               // Footer
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -398,13 +408,13 @@ class _LoginScreenState extends State<LoginScreen> {
                   Text(
                     '${AppConstants.appName} v${AppConstants.appVersion}',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                   ),
                 ],
               ),
             ],
           ),
         ),
-    );
+      );
 }

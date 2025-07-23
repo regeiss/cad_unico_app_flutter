@@ -242,7 +242,7 @@ class AppConstants {
     'B': Icons.block,
   };
 
-   // ===== ÍCONES =====
+   // Icones
   static const IconData dashboardIcon = Icons.dashboard;
   static const IconData responsaveisIcon = Icons.people;
   static const IconData membrosIcon = Icons.family_restroom;
@@ -269,7 +269,27 @@ class AppConstants {
   static const IconData exportarIcon = Icons.file_download;
   static const IconData atualizarIcon = Icons.refresh;
   
-  // ===== BREAKPOINTS RESPONSIVOS =====
+  // Valores em double para usar com BorderRadius.circular()
+  static const double none = 0.0;
+  static const double small = 4.0;
+  static const double medium = 8.0;
+  static const double large = 12.0;
+  static const double xlarge = 16.0;
+  static const double xxlarge = 20.0;
+  static const double xxxlarge = 24.0;
+  static const double circular = 50.0; // Para elementos completamente circulares
+
+  // BorderRadius pré-definidos para uso direto
+  static const BorderRadius noneRadius = BorderRadius.all(Radius.circular(none));
+  static const BorderRadius smallRadius = BorderRadius.all(Radius.circular(small));
+  static const BorderRadius mediumRadius = BorderRadius.all(Radius.circular(medium));
+  static const BorderRadius largeRadius = BorderRadius.all(Radius.circular(large));
+  static const BorderRadius xlargeRadius = BorderRadius.all(Radius.circular(xlarge));
+  static const BorderRadius xxlargeRadius = BorderRadius.all(Radius.circular(xxlarge));
+  static const BorderRadius xxxlargeRadius = BorderRadius.all(Radius.circular(xxxlarge));
+  static const BorderRadius circularRadius = BorderRadius.all(Radius.circular(circular));
+
+
   // Configurações de cache
   static const Duration cacheExpiration = Duration(minutes: 30);
   static const int maxCacheSize = 100; // MB

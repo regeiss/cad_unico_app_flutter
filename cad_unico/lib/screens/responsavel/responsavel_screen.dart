@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
@@ -92,7 +94,7 @@ class _ResponsavelFormScreenState extends State<ResponsavelFormScreen> {
     });
   }
 
-  void _fillForm(ResponsavelModel responsavel) {
+  void _fillForm(Responsavel responsavel) {
     _cpfController.text = AppUtils.formatCpf(responsavel.cpf);
     _nomeController.text = responsavel.nome;
     _nomeMaeController.text = responsavel.nomeMae ?? '';
@@ -143,7 +145,7 @@ class _ResponsavelFormScreenState extends State<ResponsavelFormScreen> {
     });
     
     try {
-      final responsavel = ResponsavelModel(
+      final responsavel = Responsavel(
         cpf: AppUtils.cleanCpf(_cpfController.text),
         nome: _nomeController.text.trim(),
         cep: AppUtils.cleanCep(_cepController.text),
@@ -195,7 +197,7 @@ class _ResponsavelFormScreenState extends State<ResponsavelFormScreen> {
           textColor: Colors.white,
         );
       }
-    } on Exception   {
+    } on Exception catch (e) {
       Fluttertoast.showToast(
         msg: 'Erro ao salvar: $e',
         backgroundColor: Colors.red,
@@ -213,12 +215,12 @@ class _ResponsavelFormScreenState extends State<ResponsavelFormScreen> {
    @override
   Widget build(BuildContext context) => LayoutBuilder(
       builder: (context, constraints) {
-        final width = constraints.maxWidth;
+        // final width = constraints.maxWidth;
         
         // Usando sua classe Responsive
-        if (Responsive.isDesktop(width)) {
+        if (Responsive.isDesktop(context)) {
           return _buildDesktopLayout();
-        } else if (Responsive.isTablet(width)) {
+        } else if (Responsive.isTablet(context)) {
           return _buildTabletLayout();
         } else {
           return _buildMobileLayout();
@@ -635,3 +637,11 @@ class _ResponsavelFormScreenState extends State<ResponsavelFormScreen> {
       ],
     );
 }
+
+extension on List<String> {
+  get entries => null;
+}
+
+// extension on List<String> {
+//   get entries => null;
+// }

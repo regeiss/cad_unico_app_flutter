@@ -25,6 +25,10 @@ class AuthProvider extends ChangeNotifier {
     _loadTokenFromStorage();
   }
 
+  // TODO Implementar
+  get errorMessage => null;
+  get clearError => null;
+
   // Carregar token do storage
   Future<void> _loadTokenFromStorage() async {
     try {

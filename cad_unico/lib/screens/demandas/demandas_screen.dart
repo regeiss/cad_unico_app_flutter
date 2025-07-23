@@ -5,7 +5,10 @@ import 'package:material_design_icons_flutter/material_design_icons_flutter.dart
 import 'package:provider/provider.dart';
 
 import '../../constants/constants.dart';
+import '../../providers/demanda_ambiente_provider.dart';
+import '../../providers/demanda_educacao_provider.dart';
 import '../../providers/demanda_provider.dart';
+import '../../providers/demanda_saude_provider.dart';
 import '../../utils/responsive.dart';
 import '../../widgets/dashboard_card.dart';
 import '../../widgets/sidebar.dart';
@@ -41,6 +44,22 @@ class _DemandasScreenState extends State<DemandasScreen>
     super.dispose();
   }
 
+  // Lista de itens de navegação para o SideBar
+  final List<Map<String, dynamic>> _navigationItems = [
+    {'title': 'Dashboard', 'icon': Icons.dashboard, 'route': '/home'},
+    {'title': 'Responsáveis', 'icon': Icons.people, 'route': '/responsaveis'},
+    {'title': 'Membros', 'icon': Icons.family_restroom, 'route': '/membros'},
+    {'title': 'Demandas', 'icon': Icons.assignment, 'route': '/demandas'},
+    {'title': 'Configurações', 'icon': Icons.settings, 'route': '/configuracoes'},
+  ];
+  final int _selectedSidebarIndex = 3; // Index para demandas na sidebar
+
+  void _onSidebarItemTapped(int index) {
+  if (index != _selectedSidebarIndex) {
+    final route = _navigationItems[index]['route'] as String;
+    context.go(route);
+  }
+}
   void _loadInitialData() {
     final demandaProvider = Provider.of<DemandaProvider>(context, listen: false);
     // Assumindo que existem estes métodos no provider
@@ -63,12 +82,9 @@ class _DemandasScreenState extends State<DemandasScreen>
   }
 
   @override
-  Widget build(BuildContext context) {
-    // Usar o widget Responsive existente
-    return Responsive.isMobile(context) 
+  Widget build(BuildContext context) => Responsive.isMobile(context) 
         ? _buildMobileLayout() 
         : _buildDesktopLayout();
-  }
 
   Widget _buildMobileLayout() => Scaffold(
       appBar: AppBar(
@@ -98,7 +114,11 @@ class _DemandasScreenState extends State<DemandasScreen>
       body: Row(
         children: [
           // Usar o SideBar existente
-          const SideBar(),
+          SideBar(
+  selectedIndex: _selectedSidebarIndex,
+  onItemTapped: _onSidebarItemTapped,
+  navigationItems: _navigationItems,
+),
           Expanded(
             child: Column(
               children: [
@@ -235,7 +255,7 @@ class _DemandasScreenState extends State<DemandasScreen>
       ],
     );
 
-  Widget _buildSaudeTab() => Consumer<DemandaProvider>(
+  Widget _buildSaudeTab() => Consumer<DemandaSaudeProvider>(
       builder: (context, provider, child) {
         if (provider.isLoading) {
           return const Center(
@@ -247,7 +267,7 @@ class _DemandasScreenState extends State<DemandasScreen>
         }
 
         // Assumindo que existe uma lista demandasSaude no provider
-        final demandas = provider.demandasSaude ?? [];
+        final demandas = provider.demandas ?? [];
         final filteredDemandas = _filterDemandas(demandas);
         
         // Calcular prioritários baseado nos dados
@@ -291,7 +311,7 @@ class _DemandasScreenState extends State<DemandasScreen>
       },
     );
 
-  Widget _buildEducacaoTab() => Consumer<DemandaProvider>(
+  Widget _buildEducacaoTab() => Consumer<DemandaEducacaoProvider>(
       builder: (context, provider, child) {
         if (provider.isLoading) {
           return const Center(
@@ -302,7 +322,7 @@ class _DemandasScreenState extends State<DemandasScreen>
           );
         }
 
-        final demandas = provider.demandasEducacao ?? [];
+        final demandas = provider.demandas ?? [];
         final filteredDemandas = _filterDemandas(demandas);
 
         return Column(
@@ -338,7 +358,7 @@ class _DemandasScreenState extends State<DemandasScreen>
       },
     );
 
-  Widget _buildAmbienteTab() => Consumer<DemandaProvider>(
+  Widget _buildAmbienteTab() => Consumer<DemandaAmbienteProvider>(
       builder: (context, provider, child) {
         if (provider.isLoading) {
           return const Center(
@@ -349,7 +369,7 @@ class _DemandasScreenState extends State<DemandasScreen>
           );
         }
 
-        final demandas = provider.demandasAmbiente ?? [];
+        final demandas = provider.demandas ?? [];
         final filteredDemandas = _filterDemandas(demandas);
 
         return Column(

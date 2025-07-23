@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../models/membro_model.dart';
+import '../../providers/membro_provider.dart';
 import '../../utils/app_utils.dart';
 
 import '../../utils/responsive.dart';
@@ -43,7 +45,7 @@ class _MembrosScreenState extends State<MembrosScreen> {
   void _onScroll() {
     if (_scrollController.position.pixels >= 
         _scrollController.position.maxScrollExtent - 200) {
-      Provider.of<MembroProvider>(context, listen: false).loadMembros();
+      Provider.of<MembroProvider>(context, listen: false).loadMembros(refresh: true);
     }
   }
 
@@ -162,7 +164,7 @@ class _MembrosScreenState extends State<MembrosScreen> {
               }
               
               if (provider.error != null && provider.membros.isEmpty) {
-                return CustomErrorWidget(
+                return ErrorDisplayWidget(
                   message: provider.error!,
                   onRetry: _loadMembros,
                 );
@@ -198,7 +200,7 @@ class _MembrosScreenState extends State<MembrosScreen> {
       ),
     );
 
-  Widget _buildMembroCard(MembroModel membro) => Card(
+  Widget _buildMembroCard(Membro membro) => Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
         leading: CircleAvatar(
@@ -257,7 +259,7 @@ class _MembrosScreenState extends State<MembrosScreen> {
     );
   }
 
-  void _showMemberDetails(MembroModel membro) {
+  void _showMemberDetails(Membro membro) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(

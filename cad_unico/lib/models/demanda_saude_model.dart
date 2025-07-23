@@ -13,6 +13,8 @@ class DemandaSaude {
   final String? localRef;
   final String? evolucao;
 
+  static var totalDemandasSaude;
+
   DemandaSaude({
     required this.cpf,
     this.genero,

@@ -1,7 +1,4 @@
-// lib/providers/responsavel_provider.dart
-
 import 'package:flutter/material.dart';
-
 import '../models/responsavel_model.dart';
 
 class ResponsavelProvider extends ChangeNotifier {
@@ -122,6 +119,10 @@ class ResponsavelProvider extends ChangeNotifier {
              (responsavel.nomeMae?.toLowerCase().contains(_searchQuery.toLowerCase()) ?? false)).toList();
   }
 
+  get selectedResponsavel => null;
+
+  bool get hasNextPage => false;
+
   void _setLoading(bool loading) {
     _isLoading = loading;
     notifyListeners();
@@ -143,4 +144,14 @@ class ResponsavelProvider extends ChangeNotifier {
         status: index % 3 == 0 ? 'I' : 'A',
         timestamp: DateTime.now().subtract(Duration(days: index)),
       ));
+
+  getResponsavel(String s) {}
+
+  updateResponsavel(Responsavel responsavel) {}
+
+  createResponsavel(Responsavel responsavel) {}
+
+  void setFilters(Map<String, dynamic> filters) {}
+
+  void clearFilters() {}
 }
