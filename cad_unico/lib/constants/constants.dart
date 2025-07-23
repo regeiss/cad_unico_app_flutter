@@ -29,7 +29,7 @@ class AppConstants {
 
   // ===== ROTAS =====
   static const String homeRoute = '/';
-  static const String loginRoute = '/login';
+  static const String loginRoute = 'api/v1/auth/login//login';
   static const String responsaveisRoute = '/responsaveis';
   static const String responsavelDetalhesRoute = '/responsaveis/detalhes';
   static const String responsavelFormRoute = '/responsaveis/form';
@@ -45,7 +45,7 @@ class AppConstants {
   static const String perfilRoute = '/perfil';
   static const String configuracoesRoute = '/configuracoes';
   static const String sobreRoute = '/sobre';
-  
+
   // ===== CONFIGURAÇÕES DE DEBUG =====
   static const bool enableDebugMode = false;
   static const bool enableLogging = true;
@@ -61,7 +61,13 @@ class AppConstants {
   static const int maxFileSize = 10 * 1024 * 1024; // 10MB
   static const int maxImageSize = 5 * 1024 * 1024; // 5MB
   static const List<String> allowedImageTypes = ['jpg', 'jpeg', 'png', 'gif'];
-  static const List<String> allowedDocumentTypes = ['pdf', 'doc', 'docx', 'xls', 'xlsx'];
+  static const List<String> allowedDocumentTypes = [
+    'pdf',
+    'doc',
+    'docx',
+    'xls',
+    'xlsx'
+  ];
 
   // Durações de animação
   static const Duration shortAnimationDuration = Duration(milliseconds: 200);
@@ -242,7 +248,7 @@ class AppConstants {
     'B': Icons.block,
   };
 
-   // Icones
+  // Icones
   static const IconData dashboardIcon = Icons.dashboard;
   static const IconData responsaveisIcon = Icons.people;
   static const IconData membrosIcon = Icons.family_restroom;
@@ -268,7 +274,7 @@ class AppConstants {
   static const IconData imprimirIcon = Icons.print;
   static const IconData exportarIcon = Icons.file_download;
   static const IconData atualizarIcon = Icons.refresh;
-  
+
   // Valores em double para usar com BorderRadius.circular()
   static const double none = 0.0;
   static const double small = 4.0;
@@ -277,18 +283,26 @@ class AppConstants {
   static const double xlarge = 16.0;
   static const double xxlarge = 20.0;
   static const double xxxlarge = 24.0;
-  static const double circular = 50.0; // Para elementos completamente circulares
+  static const double circular =
+      50.0; // Para elementos completamente circulares
 
   // BorderRadius pré-definidos para uso direto
-  static const BorderRadius noneRadius = BorderRadius.all(Radius.circular(none));
-  static const BorderRadius smallRadius = BorderRadius.all(Radius.circular(small));
-  static const BorderRadius mediumRadius = BorderRadius.all(Radius.circular(medium));
-  static const BorderRadius largeRadius = BorderRadius.all(Radius.circular(large));
-  static const BorderRadius xlargeRadius = BorderRadius.all(Radius.circular(xlarge));
-  static const BorderRadius xxlargeRadius = BorderRadius.all(Radius.circular(xxlarge));
-  static const BorderRadius xxxlargeRadius = BorderRadius.all(Radius.circular(xxxlarge));
-  static const BorderRadius circularRadius = BorderRadius.all(Radius.circular(circular));
-
+  static const BorderRadius noneRadius =
+      BorderRadius.all(Radius.circular(none));
+  static const BorderRadius smallRadius =
+      BorderRadius.all(Radius.circular(small));
+  static const BorderRadius mediumRadius =
+      BorderRadius.all(Radius.circular(medium));
+  static const BorderRadius largeRadius =
+      BorderRadius.all(Radius.circular(large));
+  static const BorderRadius xlargeRadius =
+      BorderRadius.all(Radius.circular(xlarge));
+  static const BorderRadius xxlargeRadius =
+      BorderRadius.all(Radius.circular(xxlarge));
+  static const BorderRadius xxxlargeRadius =
+      BorderRadius.all(Radius.circular(xxxlarge));
+  static const BorderRadius circularRadius =
+      BorderRadius.all(Radius.circular(circular));
 
   // Configurações de cache
   static const Duration cacheExpiration = Duration(minutes: 30);
@@ -307,7 +321,7 @@ class AppConstants {
   static const Duration defaultAnimationDuration = Duration(milliseconds: 300);
   static const Duration fastAnimationDuration = Duration(milliseconds: 150);
   static const Duration slowAnimationDuration = Duration(milliseconds: 500);
-  
+
   // Formatos de data
   static const String dateFormat = 'dd/MM/yyyy';
   static const String dateTimeFormat = 'dd/MM/yyyy HH:mm';
@@ -420,13 +434,13 @@ class AppConstants {
   static const IconData infoIcon = Icons.info_outline;
   static const IconData warningIcon = Icons.warning_amber_outlined;
   static const IconData uploadIcon = Icons.upload_file;
-  static const IconData downloadIcon = Icons.download;    
+  static const IconData downloadIcon = Icons.download;
   static const IconData filterIcon = Icons.filter_list;
   static const IconData sortIcon = Icons.sort;
   static const IconData visibilityIcon = Icons.visibility;
   static const IconData visibilityOffIcon = Icons.visibility_off;
   static const IconData calendarIcon = Icons.calendar_today;
-  static const IconData locationIcon = Icons.location_on; 
+  static const IconData locationIcon = Icons.location_on;
   static const IconData phoneIcon = Icons.phone;
   static const IconData emailIcon = Icons.email;
   static const IconData lockIcon = Icons.lock;
@@ -436,7 +450,7 @@ class AppConstants {
   static const IconData attachmentIcon = Icons.attach_file;
   static const IconData membroIcon = Icons.group;
   static const IconData demandaIcon = Icons.chat_bubble_outline;
-  static const IconData responsavelIcon = Icons.feedback; 
+  static const IconData responsavelIcon = Icons.feedback;
 
   // Display
   static const String displayName = 'Cadastro Unificado';

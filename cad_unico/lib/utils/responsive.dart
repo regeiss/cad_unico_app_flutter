@@ -4,9 +4,69 @@ import 'package:flutter/material.dart';
 import '../constants/constants.dart';
 
 class Responsive {
+  // Variáveis estáticas para armazenar informações da tela
+  static late MediaQueryData _mediaQueryData;
+  static late double _screenWidth;
+  static late double _screenHeight;
+  static late double _pixelRatio;
+  static late bool _isInitialized;
+
+  // Método init para inicializar as configurações responsivas
+  static void init(BuildContext context) {
+    _mediaQueryData = MediaQuery.of(context);
+    _screenWidth = _mediaQueryData.size.width;
+    _screenHeight = _mediaQueryData.size.height;
+    _pixelRatio = _mediaQueryData.devicePixelRatio;
+    _isInitialized = true;
+  }
+
+  // Getter para verificar se foi inicializado
+  static bool get isInitialized => _isInitialized;
+
+  // Getters para acessar as informações da tela sem contexto
+  static double get screenWidth {
+    _ensureInitialized();
+    return _screenWidth;
+  }
+
+  static double get screenHeight {
+    _ensureInitialized();
+    return _screenHeight;
+  }
+
+  static double get pixelRatio {
+    _ensureInitialized();
+    return _pixelRatio;
+  }
+
+  static MediaQueryData get mediaQueryData {
+    _ensureInitialized();
+    return _mediaQueryData;
+  }
+
+  // Método privado para verificar inicialização
+  static void _ensureInitialized() {
+    if (!_isInitialized) {
+      throw Exception(
+        'Responsive not initialized. Call Responsive.init(context) first.',
+      );
+    }
+  }
+
+  // Métodos responsivos que podem funcionar sem contexto após init
+  static bool get isMobileScreen => screenWidth < AppConstants.mobileBreakpoint;
+  static bool get isTabletScreen => 
+      screenWidth >= AppConstants.mobileBreakpoint && 
+      screenWidth < AppConstants.tabletBreakpoint;
+  static bool get isDesktopScreen => screenWidth >= AppConstants.tabletBreakpoint;
+
+  // Restante dos métodos existentes...
+  // (manter todos os métodos que já existem na classe)
+  
   // Verifica se a tela é mobile
   static bool isMobile(BuildContext context) =>
       MediaQuery.of(context).size.width < AppConstants.mobileBreakpoint;
+  // Verifica se a tela é mobile
 
   // Verifica se a tela é tablet
   static bool isTablet(BuildContext context) {

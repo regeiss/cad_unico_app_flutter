@@ -147,4 +147,10 @@ class AuthProvider extends ChangeNotifier {
     _isLoading = loading;
     notifyListeners();
   }
+
+  void refreshUser() {}
+
+  void saveUserData() {}
+
+  void cleanup() {}
 }

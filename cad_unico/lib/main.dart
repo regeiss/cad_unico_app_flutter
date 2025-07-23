@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-// Import your providers
 import 'constants/constants.dart';
 import 'providers/auth_provider.dart';
 import 'providers/demanda_provider.dart';
@@ -11,12 +10,12 @@ import 'providers/membro_provider.dart';
 import 'providers/responsavel_provider.dart';
 import 'screens/demandas/demandas_screen.dart';
 import 'screens/home_screen.dart';
-// Import your screens
+
 import 'screens/login_screen.dart';
 import 'screens/membros/membros_screen.dart';
 
+import 'screens/responsavel/responsaveis_screen.dart';
 import 'utils/app_theme.dart';
-// Import utils
 
 import 'utils/responsive.dart';
 
