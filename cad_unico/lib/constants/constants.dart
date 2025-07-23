@@ -87,9 +87,9 @@ class AppConstants {
 
   // URLs externas
   static const String viaCepBaseUrl = 'https://viacep.com.br/ws';
-  static const String privacyPolicyUrl = 'https://example.com/privacy';
-  static const String termsOfServiceUrl = 'https://example.com/terms';
-  static const String supportUrl = 'https://example.com/support';
+  // static const String privacyPolicyUrl = 'https://example.com/privacy';
+  // static const String termsOfServiceUrl = 'https://example.com/terms';
+  // static const String supportUrl = 'https://example.com/support';
 
   // Mensagens padrão
   static const String defaultErrorMessage =

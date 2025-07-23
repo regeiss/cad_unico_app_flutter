@@ -22,7 +22,7 @@ class _LoginScreenState extends State<LoginScreen> {
   
   bool _obscurePassword = true;
   bool _rememberMe = false;
-
+  
   @override
   void dispose() {
     _usernameController.dispose();
@@ -54,7 +54,7 @@ class _LoginScreenState extends State<LoginScreen> {
     } else {
       if (mounted) {
         Fluttertoast.showToast(
-          msg: authProvider.errorMessage ?? AppConstants.loginError,
+          msg: authProvider.errorMessage,
           toastLength: Toast.LENGTH_LONG,
           gravity: ToastGravity.BOTTOM,
           backgroundColor: Colors.red,

@@ -25,15 +25,15 @@ class User {
   });
 
   factory User.fromJson(Map<String, dynamic> json) => User(
-      id: json['id'],
-      username: json['username'],
-      email: json['email'],
-      firstName: json['first_name'],
-      lastName: json['last_name'],
-      isStaff: json['is_staff'] ?? false,
-      isActive: json['is_active'] ?? true,
-      dateJoined: DateTime.parse(json['date_joined']),
-    );
+        id: json['id'],
+        username: json['username'],
+        email: json['email'],
+        firstName: json['first_name'],
+        lastName: json['last_name'],
+        isStaff: json['is_staff'] ?? false,
+        isActive: json['is_active'] ?? true,
+        dateJoined: DateTime.parse(json['date_joined']),
+      );
 
   String get displayName {
     if (firstName != null && lastName != null) {
@@ -46,6 +46,7 @@ class User {
 class AuthProvider extends ChangeNotifier {
   String? _token;
   String? _refreshToken;
+
   User? _user;
   bool _isLoading = false;
   bool _isAuthenticated = false;
@@ -53,6 +54,7 @@ class AuthProvider extends ChangeNotifier {
   // Getters
   String? get token => _token;
   String? get refreshToken => _refreshToken;
+
   User? get user => _user;
   bool get isLoading => _isLoading;
   bool get isAuthenticated => _isAuthenticated;
@@ -67,7 +69,7 @@ class AuthProvider extends ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       _token = prefs.getString('access_token');
       _refreshToken = prefs.getString('refresh_token');
-      
+
       if (_token != null) {
         _isAuthenticated = true;
         // TODO: Buscar dados do usuário da API
@@ -96,12 +98,12 @@ class AuthProvider extends ChangeNotifier {
   // Login
   Future<bool> login(String username, String password) async {
     _setLoading(true);
-    
+
     try {
       // TODO: Implementar chamada para API
       // Por enquanto, simulando login
       await Future.delayed(const Duration(seconds: 1));
-      
+
       _token = 'fake_token_123';
       _refreshToken = 'fake_refresh_token_123';
       _user = User(
@@ -115,7 +117,7 @@ class AuthProvider extends ChangeNotifier {
         dateJoined: DateTime.now(),
       );
       _isAuthenticated = true;
-      
+
       await _saveTokenToStorage();
       notifyListeners();
       return true;
@@ -130,17 +132,17 @@ class AuthProvider extends ChangeNotifier {
   // Logout
   Future<void> logout() async {
     _setLoading(true);
-    
+
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('access_token');
       await prefs.remove('refresh_token');
-      
+
       _token = null;
       _refreshToken = null;
       _user = null;
       _isAuthenticated = false;
-      
+
       notifyListeners();
     } catch (e) {
       debugPrint('Erro no logout: $e');
@@ -152,7 +154,7 @@ class AuthProvider extends ChangeNotifier {
   // Verificar se o token é válido
   Future<bool> isTokenValid() async {
     if (_token == null) return false;
-    
+
     try {
       // TODO: Implementar verificação de token na API
       return true;
@@ -165,7 +167,7 @@ class AuthProvider extends ChangeNotifier {
   // Refresh token
   Future<bool> refreshAccessToken() async {
     if (_refreshToken == null) return false;
-    
+
     try {
       // TODO: Implementar refresh token na API
       return true;
