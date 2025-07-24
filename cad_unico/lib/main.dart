@@ -306,4 +306,3 @@ class _AppLifecycleHandlerState extends State<AppLifecycleHandler>
   @override
   Widget build(BuildContext context) => widget.child;
 }
-

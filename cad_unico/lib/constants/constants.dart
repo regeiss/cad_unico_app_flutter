@@ -27,9 +27,9 @@ class AppConstants {
   static const double tabletBreakpoint = 900;
   static const double desktopBreakpoint = 1200;
 
-  // ===== ROTAS =====
+  // ROTAS 
   static const String homeRoute = '/';
-  static const String loginRoute = 'api/v1/auth/login//login';
+  static const String loginRoute = '/api/v1/auth/login';
   static const String responsaveisRoute = '/responsaveis';
   static const String responsavelDetalhesRoute = '/responsaveis/detalhes';
   static const String responsavelFormRoute = '/responsaveis/form';
@@ -46,7 +46,7 @@ class AppConstants {
   static const String configuracoesRoute = '/configuracoes';
   static const String sobreRoute = '/sobre';
 
-  // ===== CONFIGURAÇÕES DE DEBUG =====
+  // CONFIGURAÇÕES DE DEBUG  
   static const bool enableDebugMode = false;
   static const bool enableLogging = true;
   static const bool enableAnalytics = false;
@@ -57,7 +57,7 @@ class AppConstants {
   static const String privacyPolicyUrl = 'https://example.com/privacy';
   static const String termsOfServiceUrl = 'https://example.com/terms';
 
-  // ===== LIMITES =====
+  //   LIMITES  
   static const int maxFileSize = 10 * 1024 * 1024; // 10MB
   static const int maxImageSize = 5 * 1024 * 1024; // 5MB
   static const List<String> allowedImageTypes = ['jpg', 'jpeg', 'png', 'gif'];
